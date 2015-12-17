@@ -15,4 +15,4 @@ logs/
 output/
 .Rproj.user/
 .project
-.pydevproject/
+.pydevproject
