@@ -13,3 +13,6 @@ archive/
 bam/
 logs/
 output/
+.Rproj.user/
+.project
+.pydevproject/
