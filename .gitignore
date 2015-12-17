@@ -1,0 +1,15 @@
+*~
+*.pyc
+
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+.snakemake*
+
+Genomes/
+archive/
+bam/
+logs/
+output/
