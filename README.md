@@ -5,4 +5,4 @@ htseqClIP is a Python programmed pipeline for the analysis of iCLIP datasets whi
 
 Homepage:
 
-Copyright (c) 2016 Marko Fritz <<marko.fritz@embl.de>>, 2016 Thomas Schwarzl schwarzl@embl.de (see LICENSE)
+Copyright (c) 2016 Marko Fritz <[marko.fritz@embl.de](@emailaddress)>, 2016 Thomas Schwarzl schwarzl@embl.de (see LICENSE)
