@@ -1,29 +1,7 @@
-# README #
+htseqCLIP - a pipeline for the analysis of iCLIP datasets
 
-This README would normally document whatever steps are necessary to get your application up and running.
+htseqClIP is a Python programmed pipeline for the analysis of iCLIP datasets which offers various functions, parameter settings and methods for a deep and customized analysis for your iCLIP datasets.
 
-### What is this repository for? ###
+Homepage:
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+Copyright (c) 2016 Marko Fritz <marko.fritz@embl.de>, 2016 Thomas Schwarzl <schwarzl@embl.de> (see LICENSE)
