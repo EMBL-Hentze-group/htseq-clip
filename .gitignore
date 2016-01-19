@@ -9,6 +9,7 @@ dist/
 .snakemake*
 
 Genomes/
+tests/
 archive/
 bam/
 logs/
