@@ -7,6 +7,7 @@ dist/
 *.egg
 .eggs/
 .snakemake*
+.DS_Store
 
 Genomes/
 tests/
@@ -18,3 +19,4 @@ hnRNPC-ULE/
 .Rproj.user/
 .project
 .pydevproject
+
