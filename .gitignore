@@ -13,6 +13,7 @@ Genomes/
 tests/
 archive/
 bam/
+fasta/
 logs/
 output/
 hnRNPC-ULE/
