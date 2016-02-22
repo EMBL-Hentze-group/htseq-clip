@@ -1,0 +1,17 @@
+Metadata-Version: 1.0
+Name: htseq-clip
+Version: 0.1.0
+Summary: htseqCLIP is a Python programmed pipeline for the analysis of iCLIP datasets which offers various functions, parameter settings and methods for a deep and customized analysis for your iCLIP datasets.
+Home-page: https://bitbucket.org/htseq-clip/htseq-clip
+Author: Marko Fritz
+Author-email: marko.fritz@embl.de
+License: EMBL
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: EMBL License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 2.7.10
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics

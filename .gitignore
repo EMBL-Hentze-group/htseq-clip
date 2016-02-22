@@ -1,5 +1,6 @@
 *~
 *.pyc
+RemoteSystemsTempFiles/
 
 build/
 dist/
