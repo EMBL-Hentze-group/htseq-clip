@@ -8,6 +8,7 @@ __license__ = "EMBL"
 from setuptools import setup, find_packages
 from codecs import open
 from os import path
+import sys, os
 
 if sys.version_info < (2, 7):
     print "At least Python 2.7 is required."
