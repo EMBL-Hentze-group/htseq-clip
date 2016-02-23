@@ -39,11 +39,7 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 2.7',
     ],
-    packages=['htseq-clip', 'htseq-clip/lib'],
+    packages=['htseqclip'],
+	scripts = ['scripts/htseq-clip']
     install_requires=['biopython', 'bokeh', 'HTSeq'],
-    entry_points={
-        'console_scripts': [
-            'htseq-clip=htseqclip:main',
-        ],
-    },
 )
