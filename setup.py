@@ -1,8 +1,8 @@
 """
-__author__ = "Marko Fritz"
-__copyright__ = "Copyright 2016, Marko Fritz"
-__email__ = "marko.fritz@embl.de"
-__license__ = "EMBL"
+__author__ = "Marko Fritz, Thomas Schwarzl"
+__copyright__ = "Copyright 2016, Marko Fritz, Thomas Schwarzl"
+__email__ = "marko.fritz@embl.de, schwarzl@embl.de"
+__license__ = "MIT"
 """
 
 from setuptools import setup
@@ -22,12 +22,12 @@ with open(path.join(here, 'README'), encoding='utf-8') as f:
 
 setup(
     name='htseq-clip',
-    version='0.1.0',
+    version='0.1.3',
     description='htseqCLIP - a pipeline for the analysis of iCLIP datasets',
 	long_description=long_description,
     url='https://bitbucket.org/htseq-clip/htseq-clip',
-    author='Marko Fritz',
-    author_email='marko.fritz@embl.de',
+    author='Marko Fritz, Thomas Schwarzl',
+    author_email='marko.fritz@embl.de, schwarzl@embl.de',
 	zip_safe=False,
     license='MIT',
     classifiers=[
@@ -39,7 +39,7 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 2.7',
     ],
-    packages=['htseqclip'],
-	scripts = ['scripts/htseq-clip']
+    packages=['clip'],
+	scripts = ['scripts/htseq-clip'],
     install_requires=['biopython', 'bokeh', 'HTSeq'],
 )
