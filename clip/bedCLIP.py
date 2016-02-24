@@ -6,9 +6,7 @@
 # Date: October 2015
 # --------------------------------------------------
 
-import os, math, gzip
-from decimal import *
-from operator import pos
+import os, gzip
 
 try:
     import HTSeq
@@ -320,9 +318,6 @@ class bedCLIP:
                                     
                                     length = b_Curr[1] - b_Curr[0] 
                                     
-                                    name = b_Curr[2].split("-")
-                                    posi = name[3].split("/")
-                                    
                                     self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output)
                             
                                     if not b_Curr == b_Last:
@@ -468,8 +463,6 @@ class bedCLIP:
         
         if len(A) > 0 and len(B) > 0:
                
-            #terminate if cross-links are out of regions
-            terminate = False
             #first window
             b_First = B[0]
             #last window
@@ -555,7 +548,7 @@ class bedCLIP:
         for line in almnt_file:
             line = line.split('\t')
             
-            id = line[3]
+            idx = line[3]
             feature = line[6]
             featureNr = line[7].zfill(3)
             windowNr = line[9].zfill(4)
@@ -570,7 +563,7 @@ class bedCLIP:
             else:
                 raise ValueError("Wrong feature detected! Check your data!")
                    
-            seq = (id+":"+letter+featureNr+"W"+windowNr, counts)
+            seq = (idx+":"+letter+featureNr+"W"+windowNr, counts)
             output.write(str("\t").join(seq) + "\n")
             
         

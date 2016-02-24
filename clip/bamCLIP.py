@@ -27,6 +27,7 @@ class bamCLIP:
     maxReadIntervalLength = 10000
     minAlignmentQuality = 10
     primary = False
+    choice = ''
     
     def __init__(self, options):
         
@@ -50,6 +51,9 @@ class bamCLIP:
             
         if hasattr(options, 'primary'):
             self.primary = options.primary
+            
+        if hasattr(options, 'choice'):
+            self.choice = options.choice
            
         self.data = {'maxReadLength' : self.maxReadLength,
                      'minReadLength' : self.minReadLength,
