@@ -9,7 +9,7 @@
 '''
     SYNOPSIS
 
-        htseqClip.py execution [options]
+        clip.py execution [options]
 
     DESCRIPTION
     
@@ -84,13 +84,13 @@
 
     EXAMPLES
 
-        python htseqClip.py extract -i input.bam -o output.bed -c s
+        python clip.py extract -i input.bam -o output.bed -c s
 
-        python htseqClip.py --help
+        python clip.py --help
 
 '''
     
-import optparse, traceback, os, time, sys 
+import optparse, traceback, os
 from bamCLIP import bamCLIP
 from bedCLIP import bedCLIP
 from gtfCLIP import gtfCLIP
@@ -100,8 +100,7 @@ from fastaCLIP import fastaCLIP
 VERSION = "0.1.0"
 
 #=====================================================================================
-def extract():
-    global options, args
+def extract(parser, options ,args):
     
     bamC = bamCLIP(options)
     
@@ -121,14 +120,12 @@ def extract():
     else:
         parser.error('You need -c option for the correct extraction of your data!')
     
-def countSlidingWindow():
-    global options, args
+def countSlidingWindow(options, args):
     
     bedC = bedCLIP(options)
     bedC.countSlidingWindow()
     
-def count(program):
-    global options, args
+def count(program, parser, options, args):
     
     bedC = bedCLIP(options)
     
@@ -142,20 +139,17 @@ def count(program):
     else:
         parser.error('You need -c option for the correct counting of your data!')
         
-def junction(program):
-    global options, args
+def junction(program, options, args):
     
     bedC = bedCLIP(options)
     bedC.junction()
        
-def process():
-    global options, args
+def process(options, args):
     
     gtfC = gtfCLIP(options)
     gtfC.processGTF()
         
-def plot():
-    global options, args
+def plot(parser, options, args):
     
     bokehC = bokehCLIP(options)
     
@@ -174,30 +168,26 @@ def plot():
     else:
         parser.error('You need -c option for the correct plotting of your data!')
     
-def slidingWindow():
-    global options, args
+def slidingWindow(options, args):
     
     gtfC = gtfCLIP(options)
     gtfC.slidingWindow()
     
-def toDEXSeq():
-    global options, args
+def toDEXSeq(options, args):
     
     bedC = bedCLIP(options)
     
     
     bedC.toDEXSeq()
     
-def genomeToReads():
-    
-    global options, args
+def genomeToReads(options, args):
     
     fastaC = fastaCLIP(options)   
     fastaC.genomeToReads()
 
 #======================================================================================
 #-------------------------------------------------------------
-def checkFileExists(filename):
+def checkFileExists(filename, parser):
     if (notEmpty(filename)):
         parser.error ('%s is not a valid filename' % filename)
     if (os.path.isfile(filename) == False):
@@ -207,10 +197,7 @@ def checkFileExists(filename):
 def notEmpty(filename):
     return filename == False or filename == ''
 
-#=====================================================================================
-
-# program can be used as stand-alone or as module
-if __name__ == '__main__':
+def main():
     
     try:
         # get parser and add arguments
@@ -242,35 +229,35 @@ if __name__ == '__main__':
             program = args[0]
 
             if program == "extract":
-                checkFileExists(options.input)
-                extract()
+                checkFileExists(options.input, parser)
+                extract(parser, options, args)
             elif program == 'countSW':
-                checkFileExists(options.input)
-                checkFileExists(options.compare)
-                countSlidingWindow()
+                checkFileExists(options.input, parser)
+                checkFileExists(options.compare, parser)
+                countSlidingWindow(options, args)
             elif program == 'junction':
-                checkFileExists(options.input)
-                checkFileExists(options.compare)
-                junction(program)
+                checkFileExists(options.input, parser)
+                checkFileExists(options.compare, parser)
+                junction(program, options, args)
             elif program == 'count':
-                checkFileExists(options.input)
-                checkFileExists(options.compare)
-                count(program)
+                checkFileExists(options.input, parser)
+                checkFileExists(options.compare, parser)
+                count(program, parser, options, args)
             elif program == 'process':
-                checkFileExists(options.gtf)
-                process()
+                checkFileExists(options.gtf, parser)
+                process(options, args)
             elif program == 'bokeh':
-                checkFileExists(options.input)
-                plot()
+                checkFileExists(options.input, parser)
+                plot(parser, options, args)
             elif program =='slidingWindow':
-                checkFileExists(options.input)
-                slidingWindow()
+                checkFileExists(options.input, parser)
+                slidingWindow(options, args)
             elif program =='toDexSeq':
-                checkFileExists(options.input)
-                toDEXSeq()
+                checkFileExists(options.input, parser)
+                toDEXSeq(options, args)
             elif program =='genomeToReads':
-                checkFileExists(options.input)
-                genomeToReads()
+                checkFileExists(options.input, parser)
+                genomeToReads(options, args)
             else:
                 parser.error ('Incorrect argument for execution') 
 
@@ -286,5 +273,12 @@ if __name__ == '__main__':
         traceback.print_exc()
 
         os._exit(1)
+
+#=====================================================================================
+
+# program can be used as stand-alone or as module
+if __name__ == '__main__':
+    main()
+    
 
 

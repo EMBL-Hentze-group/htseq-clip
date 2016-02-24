@@ -101,7 +101,7 @@ rule process_fasta:
 	log:
 		expand("../logs/{fastan}.log", fastan=FASTAN, outdir=OUTDIR)
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py genomeToReads -i {input.fasta} -o {output} -x 42 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py genomeToReads -i {input.fasta} -o {output} -x 42 2> {log}"
 		
 				
 # ----------------------------------------------------------------------------------------	
@@ -116,7 +116,7 @@ rule process:
 	log:
 		expand("../logs/{gtfn}.log", gtfn=GTFN, outdir=OUTDIR)
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py process -g {input.gtf} -t gene_biotype -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py process -g {input.gtf} -t gene_biotype -o {output} 2> {log}"
 		
 rule sort_gtf:
 	input:
@@ -137,7 +137,7 @@ rule sliding_window:
 	log:
 		expand("../logs/{gtfn}.sw.log", gtfn=GTFN, outdir=OUTDIR)
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py slidingWindow -i {input} -o {output} -w 50 -s 20 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py slidingWindow -i {input} -o {output} -w 50 -s 20 2> {log}"
 		
 rule sort_sliding_window:
 	input:
@@ -167,7 +167,7 @@ rule do_extract_SS:
 	log:
 		"../logs/{sample}_SS.extract.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py extract -i {input} -o {output} -c s 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py extract -i {input} -o {output} -c s 2> {log}"
 
 #MIDDLE SITES
 rule extract_MS:
@@ -182,7 +182,7 @@ rule do_extract_MS:
 	log:
 		"../logs/{sample}_MS.extract.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py extract -i {input} -o {output} -c m 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py extract -i {input} -o {output} -c m 2> {log}"
 
 #END SITES
 rule extract_ES:
@@ -197,7 +197,7 @@ rule do_extract_ES:
 	log:
 		"../logs/{sample}_ES.extract.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py extract -i {input} -o {output} -c e 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py extract -i {input} -o {output} -c e 2> {log}"
 
 #DELETION SITES
 rule extract_DEL:
@@ -212,7 +212,7 @@ rule do_extract_DEL:
 	log:
 		"../logs/{sample}_DEL.extract.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py extract -i {input} -o {output} -c d 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py extract -i {input} -o {output} -c d 2> {log}"
 
 #INSERTION SITES
 rule extract_INS:
@@ -228,7 +228,7 @@ rule do_extract_INS:
 	log:
 		"../logs/{sample}_INS.extract.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py extract -i {input} -o {output} -c i 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py extract -i {input} -o {output} -c i 2> {log}"
 		
 		
 		
@@ -266,7 +266,7 @@ rule do_junction:
 	log:
 		"../logs/{sample}_{site}.junction.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py junction -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py junction -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
 		
 		
 # ----------------------------------------------------------------------------------------
@@ -286,7 +286,7 @@ rule do_count:
 	log:
 		"../logs/{sample}_{site}.count.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py count -i {input.bed} -f {input.gtf} -o {output} -c o 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py count -i {input.bed} -f {input.gtf} -o {output} -c o 2> {log}"
 		
 		
 # ----------------------------------------------------------------------------------------
@@ -306,7 +306,7 @@ rule do_sw:
 	log:
 		"../logs/{sample}_{site}.sw.count.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py countSW -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py countSW -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
 		
 		
 		
@@ -326,7 +326,7 @@ rule do_dexseq:
 	log:
 		"../logs/{sample}_{site}.dex.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py toDexSeq -i {input} -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py toDexSeq -i {input} -o {output} 2> {log}"
 		
 		
 # ----------------------------------------------------------------------------------------	
@@ -345,7 +345,7 @@ rule do_rplot:
 	log:
 		"../logs/{sample}_{site}.rplot.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py bokeh -i {input} -o {output} -c r 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py bokeh -i {input} -o {output} -c r 2> {log}"
 		
 # ----------------------------------------------------------------------------------------	
 # BOKEH COUNT PLOTS
@@ -363,7 +363,7 @@ rule do_cplot:
 	log:
 		"../logs/{sample}_{site}.cplot.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py bokeh -i {input} -o {output} -c c 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py bokeh -i {input} -o {output} -c c 2> {log}"
 		
 # ----------------------------------------------------------------------------------------	
 # BOKEH JUNCTION PLOTS
@@ -381,5 +381,5 @@ rule do_jplot:
 	log:
 		"../logs/{sample}_{site}.jplot.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/htseqclip/__init__.py bokeh -i {input} -o {output} -c j 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py bokeh -i {input} -o {output} -c j 2> {log}"
 		
