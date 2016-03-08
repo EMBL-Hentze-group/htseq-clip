@@ -17,7 +17,7 @@
                     Functionality you want to execute; Available functions:
                           bokeh
                           count
-                          countSW
+                          countSlidingWindow
                           extract
                           genomeToReads
                           junction    
@@ -29,7 +29,7 @@
                           Input file
 
         [-o, --output=FILE]
-                          BED file for output
+                          Output file
                           
         [-f, --compare=FILE]
                           File which you want to compare with your input file
@@ -100,6 +100,34 @@ from fastaCLIP import fastaCLIP
 VERSION = "0.1.0"
 
 #=====================================================================================
+'''
+Counting the cross-link sites per feature
+'''    
+def count(program, parser, options, args):
+    
+    bedC = bedCLIP(options)
+    
+    if hasattr(options, 'choice') and options.choice != None:
+        if options.choice == 'a':
+            bedC.count_all() 
+        elif options.choice == 'o':      
+            bedC.count_only()
+        else:
+            parser.error('Invalid option for count')
+    else:
+        parser.error('You need -c option for the correct counting of your data!')
+        
+'''
+Sliding window counts
+'''            
+def countSlidingWindow(options, args):
+    
+    bedC = bedCLIP(options)
+    bedC.countSlidingWindow()
+
+'''
+Extract cross-link sites
+'''
 def extract(parser, options ,args):
     
     bamC = bamCLIP(options)
@@ -119,36 +147,26 @@ def extract(parser, options ,args):
             parser.error('Invalid option for extraction')
     else:
         parser.error('You need -c option for the correct extraction of your data!')
-    
-def countSlidingWindow(options, args):
-    
-    bedC = bedCLIP(options)
-    bedC.countSlidingWindow()
-    
-def count(program, parser, options, args):
-    
-    bedC = bedCLIP(options)
-    
-    if hasattr(options, 'choice') and options.choice != None:
-        if options.choice == 'a':
-            bedC.count_all() 
-        elif options.choice == 'o':      
-            bedC.count_only()
-        else:
-            parser.error('Invalid option for count')
-    else:
-        parser.error('You need -c option for the correct counting of your data!')
         
+'''
+Processing genome.fa file into fasta format 
+'''    
+def genomeToReads(options, args):
+    
+    fastaC = fastaCLIP(options)   
+    fastaC.genomeToReads()
+
+'''
+Calculate distance from cross-link site to exon/intron junction site
+'''        
 def junction(program, options, args):
     
     bedC = bedCLIP(options)
     bedC.junction()
-       
-def process(options, args):
-    
-    gtfC = gtfCLIP(options)
-    gtfC.processGTF()
-        
+
+'''
+Plotting function
+'''        
 def plot(parser, options, args):
     
     bokehC = bokehCLIP(options)
@@ -167,23 +185,32 @@ def plot(parser, options, args):
             parser.error('Invalid option for plotting')
     else:
         parser.error('You need -c option for the correct plotting of your data!')
+        
+'''
+Processing the annotation file
+'''       
+def process(options, args):
     
+    gtfC = gtfCLIP(options)
+    gtfC.processGTF()
+
+'''
+Processing the annotation file into sliding windows
+'''    
 def slidingWindow(options, args):
     
     gtfC = gtfCLIP(options)
     gtfC.slidingWindow()
-    
+
+'''
+Converting the sliding window counts into DEXSeq format
+'''    
 def toDEXSeq(options, args):
     
     bedC = bedCLIP(options)
     
     
     bedC.toDEXSeq()
-    
-def genomeToReads(options, args):
-    
-    fastaC = fastaCLIP(options)   
-    fastaC.genomeToReads()
 
 #======================================================================================
 #-------------------------------------------------------------
@@ -231,7 +258,7 @@ def main():
             if program == "extract":
                 checkFileExists(options.input, parser)
                 extract(parser, options, args)
-            elif program == 'countSW':
+            elif program == 'countSlidingWindow':
                 checkFileExists(options.input, parser)
                 checkFileExists(options.compare, parser)
                 countSlidingWindow(options, args)

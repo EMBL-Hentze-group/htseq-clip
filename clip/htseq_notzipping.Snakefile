@@ -23,7 +23,7 @@ GTFN = "Homo_sapiens.GRCh37.82"
 
 #dir for output
 OUTDIR = "output"
-BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam"
+BAMDIR = "/g/hentze/projects/Software/htseq-clip/GRCh37_bam"
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam"
 
 # Automatically read in all samples
 
-SAMPLES, = glob_wildcards("/g/hentze/projects/Software/htseq-clip/bam/{samples}.bam")
+SAMPLES, = glob_wildcards("/g/hentze/projects/Software/htseq-clip/GRCh37_bam/{samples}.bam")
 # ----------------------------------------------------------------------------------------
 
 SITES = "MS SS ES DEL INS".split()

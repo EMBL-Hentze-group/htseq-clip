@@ -19,7 +19,7 @@ except Exception:
 class bedCLIP:
     
     data = {}
-    bedfile = ""
+    fInput = ""
     fOutput = ""
     fCompare = ""
     choice = ""
@@ -28,7 +28,7 @@ class bedCLIP:
     def __init__(self, options):
         
         if hasattr(options, 'input'):
-            self.bedfile = options.input
+            self.fInput = options.input
         
         if hasattr(options, 'output'):
             self.fOutput = options.output
@@ -73,44 +73,9 @@ class bedCLIP:
                     else:
                         d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)])        
                         
-        return d
-        
+        return d       
     #===================================================================================
-    
-    
-    #===================================================================================
-    '''
-    This method is used counting the sliding window counts
-    '''
-    def countSlidingWindow(self):
-        
-        almnt_file1 = HTSeq.BED_Reader(self.bedfile)
-        almnt_file2 = HTSeq.BED_Reader(self.fCompare)
-        
-        d1 = self.buildDictForComparison(almnt_file1)
-        d2 = self.buildDictForComparison(almnt_file2)      
-        
-        if self.fOutput.endswith(".gz"):
-            output = gzip.open(self.fOutput, 'w') 
-        else:        
-            output = open(self.fOutput, 'w')  
-        
-        for chrom in d1:
-            if not d2.has_key(chrom):
-                continue
-            for strand in d1[chrom]:
-                if not d2[chrom].has_key(strand):
-                    continue
-                
-                A = d1[chrom][strand]
-                B = d2[chrom][strand]  
-                
-                self.countSW(A, B, chrom, strand, output)
-                                   
-        output.close() 
-    #===================================================================================
-    
-    
+            
     #===================================================================================
     '''
     This method calculates all the counts of cross-link sites in the 
@@ -135,7 +100,7 @@ class bedCLIP:
                 
         f.close()
         
-        almnt_file1 = HTSeq.BED_Reader(self.bedfile)
+        almnt_file1 = HTSeq.BED_Reader(self.fInput)
         almnt_file2 = HTSeq.BED_Reader(self.fCompare)
         
         d1 = self.buildDictForComparison(almnt_file1)
@@ -157,13 +122,14 @@ class bedCLIP:
                         
                         length = b[1] - b[0]
                         
-                        name = b[2].split("-")
+                        name = b[2].split("@")
                         posi = name[3].split("/")  
                         
                         seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(1), strand, name[2], posi[0], posi[1], name[1], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
                         output.write(str("\t").join(seq) + "\n")
                     
                     continue
+                
                 #if the input file contains reads on the current chromosome but not on the same
                 #strand, the write out all positons with zero
                 elif not d1[chrom].has_key(strand):          
@@ -171,7 +137,7 @@ class bedCLIP:
                         
                         length = b[1] - b[0]
                         
-                        name = b[2].split("-")
+                        name = b[2].split("@")
                         posi = name[3].split("/")  
                         
                         seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(1), strand, name[2], posi[0], posi[1], name[1], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
@@ -182,8 +148,7 @@ class bedCLIP:
       
                 self.calculateCount(A, B, chrom, strand, output)
                                    
-        output.close()
-        
+        output.close()     
     #===================================================================================
     #===================================================================================
     '''
@@ -209,7 +174,7 @@ class bedCLIP:
                 
         f.close()
         
-        almnt_file1 = HTSeq.BED_Reader(self.bedfile)
+        almnt_file1 = HTSeq.BED_Reader(self.fInput)
         almnt_file2 = HTSeq.BED_Reader(self.fCompare)
              
         d1 = self.buildDictForComparison(almnt_file1)
@@ -229,8 +194,7 @@ class bedCLIP:
       
                 self.calculateCount(A, B, chrom, strand, output)
                                    
-        output.close()
-        
+        output.close()     
     #===================================================================================
     #===================================================================================
     '''
@@ -258,8 +222,6 @@ class bedCLIP:
             #data structure for analysis
             d_count = {}
             d_dup = {}
-            
-            finished = False
                  
             for a in A:
                 
@@ -350,27 +312,13 @@ class bedCLIP:
             output = gzip.open(self.fOutput, 'w') 
         else:        
             output = open(self.fOutput, 'w')
-        
-        #Get the information for normalisation of the plots   
-        if self.fCompare.endswith(".gz"):
-            f = gzip.open(self.fCompare, 'r') 
-        else:        
-            f = open(self.fCompare, 'r') 
-        
-        #Adding the information of all the features
-        #for normalization of the plots    
-        for line in f:
-            if line.startswith("track"):
-                output.write(line)
                 
-        f.close()
-                
-        almnt_file1 = HTSeq.BED_Reader(self.bedfile)
+        almnt_file1 = HTSeq.BED_Reader(self.fInput)
         almnt_file2 = HTSeq.BED_Reader(self.fCompare)
         
         d1 = self.buildDictForComparison(almnt_file1)
         d2 = self.buildDictForComparison(almnt_file2)
-        
+         
         for chrom in d1:
             if not d2.has_key(chrom):
                 continue
@@ -399,7 +347,7 @@ class bedCLIP:
             b_Last  = B[-1]
               
             bi = 0
-              
+                
             #foreach cl       
             for a in A:
                   
@@ -423,7 +371,7 @@ class bedCLIP:
                         #current exon/intron position
                         b_Curr = B[bi]
                         #name of current position
-                        bn = b_Curr[2].split('-')
+                        bn = b_Curr[2].split('@')
                         
                         flag = b_Curr[3]
       
@@ -437,7 +385,7 @@ class bedCLIP:
                                 
                                 d1 = a[0] - b_Curr[0]
                                 d2 = a[1] - b_Curr[1]
-                                  
+                                    
                                 if strand == '-':
                                     d1 = d1 * -1
                                     d2 = d2 * -1
@@ -454,6 +402,38 @@ class bedCLIP:
                                 check = False                              
     #===================================================================================
     
+    
+    #===================================================================================
+    '''
+    This method is used counting the sliding window counts
+    '''
+    def countSlidingWindow(self):
+        
+        almnt_file1 = HTSeq.BED_Reader(self.fInput)
+        almnt_file2 = HTSeq.BED_Reader(self.fCompare)
+        
+        d1 = self.buildDictForComparison(almnt_file1)
+        d2 = self.buildDictForComparison(almnt_file2)      
+        
+        if self.fOutput.endswith(".gz"):
+            output = gzip.open(self.fOutput, 'w') 
+        else:        
+            output = open(self.fOutput, 'w')  
+        
+        for chrom in d1:
+            if not d2.has_key(chrom):
+                continue
+            for strand in d1[chrom]:
+                if not d2[chrom].has_key(strand):
+                    continue
+                
+                A = d1[chrom][strand]
+                B = d2[chrom][strand]  
+                
+                self.countSW(A, B, chrom, strand, output)
+                                   
+        output.close() 
+    #===================================================================================
     #===================================================================================
     '''
     This method calculates the counts and density of cross-link sites
@@ -535,10 +515,10 @@ class bedCLIP:
     '''
     def toDEXSeq(self):
         
-        if self.bedfile.endswith(".gz"):
-            almnt_file = gzip.open(self.bedfile, 'r') 
+        if self.fInput.endswith(".gz"):
+            almnt_file = gzip.open(self.fInput, 'r') 
         else:        
-            almnt_file = open(self.bedfile, 'r')
+            almnt_file = open(self.fInput, 'r')
         
         if self.fOutput.endswith(".gz"):
             output = gzip.open(self.fOutput, 'w') 
@@ -576,7 +556,7 @@ class bedCLIP:
     '''
     def writeOut(self, chrom, strand, b, d_count, d_dup, length, output):
         
-        name = b[2].split("-")
+        name = b[2].split("@")
         posi = name[3].split("/")
                             
         if len(d_count) > 0:
@@ -594,6 +574,8 @@ class bedCLIP:
             m_dup = max(d_dup.keys(), key=(lambda k: d_dup[k]))
             
             density = float(counts) / float(length)
+            
+            print b, name
                                 
             seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(b[3]), strand, name[2], posi[0], posi[1], name[1], str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]), str(density), str(dup_counts), str(d_dup[m_dup]))
             output.write(str("\t").join(seq) + "\n")
@@ -730,7 +712,7 @@ class bedCLIP:
     '''
     def calcDistancesFromSite(self):
         
-        almnt_file = HTSeq.BED_Reader(self.bedfile)
+        almnt_file = HTSeq.BED_Reader(self.fInput)
           
         if self.fOutput.endswith(".gz"):
             output = gzip.open(self.fOutput, 'w') 

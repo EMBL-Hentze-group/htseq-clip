@@ -20,8 +20,8 @@ except Exception:
 class bamCLIP:
     
     data = {}
-    fBamInput = ""
-    fBedOutput = ""
+    fInput = ""
+    fOutput = ""
     maxReadLength = 0
     minReadLength = 0
     maxReadIntervalLength = 10000
@@ -32,10 +32,10 @@ class bamCLIP:
     def __init__(self, options):
         
         if hasattr(options, 'input'):
-            self.fBamInput = options.input
+            self.fInput = options.input
         
         if hasattr(options, 'output'):
-            self.fBedOutput = options.output
+            self.fOutput = options.output
             
         if hasattr(options, 'minAlignmentQuality'):
             self.minAlignmentQuality = options.minAlignmentQuality
@@ -109,7 +109,7 @@ class bamCLIP:
     
     #================================================================================
     '''
-    Returns a list of Genomic intervals for the positions of deletions
+    Returns a list of Genomic intervals for the positions of deletions/insertions/mutations
     '''
     def parseCigar(self, almnt):
         variations = {'deletions': list(),
@@ -263,7 +263,7 @@ class bamCLIP:
     '''
     Returns GenomicPosition for deletion site
     '''
-    def getDeletionSiteAsBed(self, almnt, fBedOutput):
+    def getDeletionSiteAsBed(self, almnt, fOutput):
            
         seq = ()
         deletion = []
@@ -287,14 +287,13 @@ class bamCLIP:
                     y = b
                 seq = (almnt.iv.chrom, str(x), str(y), almnt.read.name+"|"+str(len(almnt.read.seq)), str(deletion[i].query_from), almnt.iv.strand)
                 seq = (str("\t").join(seq)) 
-                fBedOutput.write(seq + "\n")
-         
+                fOutput.write(seq + "\n")       
     #=================================================================================
     #=================================================================================
     '''
     Returns GenomicPosition for insertion site
     '''
-    def getInsertionSiteAsBed(self, almnt, fBedOutput):
+    def getInsertionSiteAsBed(self, almnt, fOutput):
            
         seq = ()
         insertion = []
@@ -317,8 +316,7 @@ class bamCLIP:
                     y = b
                 seq = (almnt.iv.chrom, str(x), str(y), almnt.read.name+"|"+str(len(almnt.read.seq)), str(insertion[i].query_from), almnt.iv.strand)
                 seq = (str("\t").join(seq)) 
-                fBedOutput.write(seq + "\n")
-         
+                fOutput.write(seq + "\n")      
     #=================================================================================
 
     #=================================================================================
@@ -327,11 +325,11 @@ class bamCLIP:
     '''
     def extract_StartSites(self):
     
-        almnt_file = HTSeq.BAM_Reader(self.fBamInput)
-        if self.fBedOutput.endswith(".gz"):
-            fBedOutput = gzip.open(self.fBedOutput, 'w')
+        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        if self.fOutput.endswith(".gz"):
+            fOutput = gzip.open(self.fOutput, 'w')
         else:
-            fBedOutput = open(self.fBedOutput, 'w')
+            fOutput = open(self.fOutput, 'w')
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
@@ -339,75 +337,74 @@ class bamCLIP:
                 out = self.getStartSiteAsBed(almnt)
         
                 if not out == None:
-                    fBedOutput.write(out + "\n")
+                    fOutput.write(out + "\n")
        
-        fBedOutput.close()
+        fOutput.close()
 
     '''
     Extract middle sites
     '''   
     def extract_MiddleSites(self):
     
-        almnt_file = HTSeq.BAM_Reader(self.fBamInput)
-        if self.fBedOutput.endswith(".gz"):
-            fBedOutput = gzip.open(self.fBedOutput, 'w')
+        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        if self.fOutput.endswith(".gz"):
+            fOutput = gzip.open(self.fOutput, 'w')
         else:
-            fBedOutput = open(self.fBedOutput, 'w')
+            fOutput = open(self.fOutput, 'w')
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                fBedOutput.write(self.getMiddleSiteAsBed(almnt) + "\n")
+                fOutput.write(self.getMiddleSiteAsBed(almnt) + "\n")
        
-        fBedOutput.close() 
+        fOutput.close() 
            
     '''
     Extract end sites
     '''   
     def extract_EndSites(self):
-        almnt_file = HTSeq.BAM_Reader(self.fBamInput)
-        if self.fBedOutput.endswith(".gz"):
-            fBedOutput = gzip.open(self.fBedOutput, 'w')
+        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        if self.fOutput.endswith(".gz"):
+            fOutput = gzip.open(self.fOutput, 'w')
         else:
-            fBedOutput = open(self.fBedOutput, 'w')
+            fOutput = open(self.fOutput, 'w')
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                fBedOutput.write(self.getEndSiteAsBed(almnt) + "\n")
+                fOutput.write(self.getEndSiteAsBed(almnt) + "\n")
        
-        fBedOutput.close()
+        fOutput.close()
         
     '''
     Extract deletion sites:
     ''' 
     def extract_DeletionSites(self):
-        almnt_file = HTSeq.BAM_Reader(self.fBamInput)
-        if self.fBedOutput.endswith(".gz"):
-            fBedOutput = gzip.open(self.fBedOutput, 'w')
+        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        if self.fOutput.endswith(".gz"):
+            fOutput = gzip.open(self.fOutput, 'w')
         else:
-            fBedOutput = open(self.fBedOutput, 'w')
+            fOutput = open(self.fOutput, 'w')
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                self.getDeletionSiteAsBed(almnt, fBedOutput)
+                self.getDeletionSiteAsBed(almnt, fOutput)
        
-        fBedOutput.close()
+        fOutput.close()
         
     '''
     Extract insertion sites:
     ''' 
     def extract_InsertionSites(self):
-        almnt_file = HTSeq.BAM_Reader(self.fBamInput)
-        if self.fBedOutput.endswith(".gz"):
-            fBedOutput = gzip.open(self.fBedOutput, 'w')
+        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        if self.fOutput.endswith(".gz"):
+            fOutput = gzip.open(self.fOutput, 'w')
         else:
-            fBedOutput = open(self.fBedOutput, 'w')
+            fOutput = open(self.fOutput, 'w')
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                self.getInsertionSiteAsBed(almnt, fBedOutput)
+                self.getInsertionSiteAsBed(almnt, fOutput)
        
-        fBedOutput.close()
-       
+        fOutput.close()      
     #==================================================================================
     
     

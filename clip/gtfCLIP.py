@@ -8,8 +8,6 @@
 
 
 import os, gzip
-from decimal import *
-from numpy.core.defchararray import startswith
 from collections import OrderedDict
 
 
@@ -56,19 +54,17 @@ class gtfCLIP:
             
             
     '''
-    This method process through the gtf file and determinates the positions of exons and introns
+    This method processes through the gtf file and determinates the positions of exons and introns
     '''        
     def processGTF(self):
         
         gtf = HTSeq.GFF_Reader(self.gtfFile)
-                   
-        wGas = HTSeq.GenomicArrayOfSets( 'auto', stranded=True )
+                
         gas = None
         
         name = ''
         chrom = ''
         strand = ''
-        type = ''
         t = ''
         start = 0
         end = 0
@@ -86,7 +82,7 @@ class gtfCLIP:
         chromFooter = {}
         typeFooter = {}
         
-        #foreach feature in gtf file                    
+        #for each feature in gtf file                    
         for feature in gtf:
             
             #if gene a new region is found
@@ -105,12 +101,10 @@ class gtfCLIP:
                     #Sort the list where all exons are in
                     ps.sort(key=lambda tup: tup[0])
                     
-                    length = len(l)
                     iLength = int(len(l)/2)
                     eLength = int(len(l)/2) + 1
                     
                     exon = True
-                    intron = False
                          
                     #Depending on if current feature is exon or intron calculate the correct position
                     #and flag the exons
@@ -129,18 +123,18 @@ class gtfCLIP:
                                 del ps[0]
                             
                             #Calculate the values which are need for the normalization of the plots    
-                            if type == "protein_coding":
+                            if t == "protein_coding":
                                 if not typeFooter.has_key("protein_coding_exon"):
                                     typeFooter["protein_coding_exon"] = (e[0].end - e[0].start)
                                 else:
                                     typeFooter["protein_coding_exon"] += (e[0].end - e[0].start)
                             else:    
-                                if not typeFooter.has_key(type):
-                                    typeFooter[type] = (e[0].end - e[0].start)
+                                if not typeFooter.has_key(t):
+                                    typeFooter[t] = (e[0].end - e[0].start)
                                 else:
-                                    typeFooter[type] += (e[0].end - e[0].start)
+                                    typeFooter[t] += (e[0].end - e[0].start)
                                                    
-                            seq = [e[0].chrom, str(e[0].start), str(e[0].end), name+'-exon-'+str(ec)+'/'+str(eLength), eFlag, e[0].strand, "e"]
+                            seq = [e[0].chrom, str(e[0].start), str(e[0].end), name+'@exon@'+str(ec)+'/'+str(eLength), eFlag, e[0].strand, "e"]
                             fs.append(seq)
                             ec += 1
                             exon = False
@@ -148,18 +142,18 @@ class gtfCLIP:
                         else:
                             
                             #Calculate the values which are need for the normalization of the plots   
-                            if type == "protein_coding":
+                            if t == "protein_coding":
                                 if not typeFooter.has_key("protein_coding_intron"):
                                     typeFooter["protein_coding_intron"] = (e[0].end - e[0].start)
                                 else:
                                     typeFooter["protein_coding_intron"] += (e[0].end - e[0].start)
                             else:    
-                                if not typeFooter.has_key(type):
-                                    typeFooter[type] = (e[0].end - e[0].start)
+                                if not typeFooter.has_key(t):
+                                    typeFooter[t] = (e[0].end - e[0].start)
                                 else:
-                                    typeFooter[type] += (e[0].end - e[0].start)
+                                    typeFooter[t] += (e[0].end - e[0].start)
                                 
-                            seq = [e[0].chrom, str(e[0].start), str(e[0].end), name+'-intron-'+str(ic)+'/'+str(iLength), 1, e[0].strand, "i"]
+                            seq = [e[0].chrom, str(e[0].start), str(e[0].end), name+'@intron@'+str(ic)+'/'+str(iLength), 1, e[0].strand, "i"]
                             fs.append(seq)
                             ic +=1
                             exon = True
@@ -208,7 +202,7 @@ class gtfCLIP:
                 
                 #Calculate the values which are need for the normalization of the plots   
                 if not chromFooter.has_key(chrom):
-                     chromFooter[chrom] = (feature.iv.end - feature.iv.start)
+                    chromFooter[chrom] = (feature.iv.end - feature.iv.start)
                 else:
                     chromFooter[chrom] += (feature.iv.end - feature.iv.start)
                     
@@ -220,8 +214,8 @@ class gtfCLIP:
                     error = "Wrong gene type: "+self.geneType+". Check your annotation file!!"
                     raise KeyError(error)
                          
-                name = name + '-' + attribute
-                type = attribute
+                name = name + '@' + attribute
+                t = attribute
                 start = feature.iv.start
                 end = feature.iv.end
                 ec = 1
@@ -246,13 +240,12 @@ class gtfCLIP:
         for k in typeFooter:
             output.write("track type "+str(k)+" "+str(typeFooter[k])+"\n")
         
-        output.close()   
-                  
+        output.close()                 
     #================================================================================= 
        
     #=================================================================================
     '''
-    This functions calculates the sliding window
+    This functions calculates the sliding window positions
     '''
     def slidingWindow(self):
           
@@ -275,7 +268,7 @@ class gtfCLIP:
             line = line.split('\n')
             line = line[0].split('\t')
             
-            name = line[3].split('-')
+            name = line[3].split('@')
             
             if currentName == None or currentName != name[0]:
                 currentName = name[0]
@@ -288,20 +281,18 @@ class gtfCLIP:
             
             pos1 = start
             pos2 = start + self.windowSize
-            
-            
-            
+                  
             #if length shorter than given windowsize then the whole feature is one window
             #else split the current feature up by the given options
             if pos2 >= end:
-                seq = (line[0], str(start), str(end), name[0]+"-"+str(windowCount)+"-"+name[2]+"-"+name[3], line[4], strand)     
+                seq = (line[0], str(start), str(end), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)     
                 output.write(str('\t').join(seq) + "\n")
                 
                 windowCount = windowCount + 1
             else:
                 while pos2 < end:
 
-                    seq = (line[0], str(pos1), str(pos2), name[0]+"-"+str(windowCount)+"-"+name[2]+"-"+name[3], line[4], strand)
+                    seq = (line[0], str(pos1), str(pos2), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)
                     output.write(str('\t').join(seq) + "\n")
                     
                     pos1 = pos1 + self.windowStep
@@ -311,11 +302,10 @@ class gtfCLIP:
                           
                     if pos2 > end:
                         pos2 = end
-                        seq = (line[0], str(pos1), str(pos2), name[0]+"-"+str(windowCount)+"-"+name[2]+"-"+name[3], line[4], strand)
+                        seq = (line[0], str(pos1), str(pos2), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)
                         output.write(str('\t').join(seq) + "\n")
                         
                         windowCount = windowCount + 1
                 
-        output.close()
-            
+        output.close()          
     #==================================================================================

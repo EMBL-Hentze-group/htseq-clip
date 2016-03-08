@@ -11,7 +11,7 @@ from snakemake.utils import report
 """
 htseq-CLIP workflow
 
-This workflow does standard htSeq-CLIP processing for single-read or paired-end. 
+This workflow does standard htSeq-CLIP processing for single-read. 
 """
 
 # ----------------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ FASTAN = "GRCh38.p3.genome"
 
 #dir for output
 OUTDIR = "output"
-BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam"
+BAMDIR = "/g/hentze/projects/Software/htseq-clip/p62_bam"
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam"
 
 # Automatically read in all samples
 
-SAMPLES, = glob_wildcards("/g/hentze/projects/Software/htseq-clip/bam/{samples}.bam")
+SAMPLES, = glob_wildcards("/g/hentze/projects/Software/htseq-clip/p62_bam/{samples}.bam")
 # ----------------------------------------------------------------------------------------
 
 SITES = "MS SS ES DEL INS".split()
@@ -50,7 +50,7 @@ rule all:
 	input:
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		# ::::::: PROCESS FASTA :::::::::
-		expand("../{outdir}/fastq/{fastan}.fastq.gz", fastan=FASTAN, outdir=OUTDIR),
+		#expand("../{outdir}/fastq/{fastan}.fastq.gz", fastan=FASTAN, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		# ::::::: PROCESS GTF :::::::::
 		expand("../{outdir}/gtf/{gtfn}.bed.gz", gtfn=GTFN, outdir=OUTDIR),
@@ -116,7 +116,7 @@ rule process:
 	log:
 		expand("../logs/{gtfn}.log", gtfn=GTFN, outdir=OUTDIR)
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py process -g {input.gtf} -t gene_biotype -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py process -g {input.gtf} -t gene_type -o {output} 2> {log}"
 		
 rule sort_gtf:
 	input:
@@ -306,10 +306,8 @@ rule do_sw:
 	log:
 		"../logs/{sample}_{site}.sw.count.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py countSW -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
-		
-		
-		
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py countSlidingWindow -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
+				
 # ----------------------------------------------------------------------------------------
 # DO CONVERTION TO DEXSEQ
 # ----------------------------------------------------------------------------------------

@@ -15,28 +15,20 @@ except Exception:
     print "pip install biopython"
     print "pip install biopython --user"
     os._exit(1)
-
-try:
-    import HTSeq
-except Exception:
-    print "Please install the HTSeq framework e.g. like this"
-    print "pip install HTSeq"
-    print "pip install HTSeq --user"
-    os._exit(1)
        
 class fastaCLIP:
     
-    input = ""
-    output = ""
+    fInput = ""
+    fOutput = ""
     readLength = 0
 
     def __init__(self, options):
         
-        if hasattr(options, 'input'):
-            self.input = options.input
+        if hasattr(options, 'fInput'):
+            self.fInput = options.fInput
         
-        if hasattr(options, 'output'):
-            self.output = options.output
+        if hasattr(options, 'fOutput'):
+            self.fOutput = options.fOutput
             
         if hasattr(options, 'maxReadLength'):
             self.readLength = options.maxReadLength
@@ -56,7 +48,7 @@ class fastaCLIP:
         genome = {}
         
         #get Sequences by Chromosomes    
-        handle = open(self.input, "rU")
+        handle = open(self.fInput, "rU")
         for record in SeqIO.parse(handle, "fasta") :
             if not genome.has_key(record.id):
                 genome[record.id] = record.seq
@@ -65,10 +57,10 @@ class fastaCLIP:
         print "Data preprocessing done!"
         
         #Write out in fastq format   
-        if self.output.endswith(".gz"):
-            fqOutput = gzip.open(self.output, 'w') 
+        if self.fOutput.endswith(".gz"):
+            fqOutput = gzip.open(self.fOutput, 'w') 
         else:        
-            fqOutput = open(self.output, 'w') 
+            fqOutput = open(self.fOutput, 'w') 
         
         #foreach chromosome in the genome
         for chrom in genome:
@@ -95,7 +87,6 @@ class fastaCLIP:
                         fqOutput.write(qcString+"\n")
                                 
                         seq = seq[1:]
-                        rlCount = 0
                         count += 1
                         
                     if count % 2000000 == 0:
