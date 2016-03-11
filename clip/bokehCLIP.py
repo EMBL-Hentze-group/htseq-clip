@@ -17,7 +17,7 @@ try:
     from bokeh.charts import Scatter, Histogram, output_file, save, vplot, hplot, Bar
     from bokeh.models.widgets import DataTable, TableColumn, Panel, Tabs
     from bokeh.models import ColumnDataSource
-    from bokeh.charts.attributes import CatAttr
+    from bokeh.charts.attributes import CatAttr 
     
 except Exception:
     print "Please install the bokeh framework e.g. like this"

@@ -10,17 +10,21 @@
     SYNOPSIS
 
         clip.py execution [options]
+        
+        or if you want to execute per console
+        
+        htseq-clip execution [options]
 
     DESCRIPTION
     
         --execution
                     Functionality you want to execute; Available functions:
-                          bokeh
                           count
                           countSlidingWindow
                           extract
                           genomeToReads
-                          junction    
+                          junction
+                          plot    
                           process
                           slidingWindow
                           toDexSeq      
@@ -87,6 +91,12 @@
         python clip.py extract -i input.bam -o output.bed -c s
 
         python clip.py --help
+        
+        or if you want to execute per console
+        
+        htseq-clip extract -i input.bam -o output.bed -c s
+        
+        htseq-clip --help
 
 '''
     
@@ -273,7 +283,7 @@ def main():
             elif program == 'process':
                 checkFileExists(options.gtf, parser)
                 process(options, args)
-            elif program == 'bokeh':
+            elif program == 'plot':
                 checkFileExists(options.input, parser)
                 plot(parser, options, args)
             elif program =='slidingWindow':
