@@ -14,9 +14,7 @@ dist/
 Genomes/
 tests/
 archive/
-fpr1_bam/
-p62_bam/
-GRCh37_bam/
+bam/
 fasta/
 logs/
 output/
