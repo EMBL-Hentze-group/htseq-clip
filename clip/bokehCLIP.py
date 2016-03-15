@@ -6,24 +6,18 @@
 # Date: December 2015
 # --------------------------------------------------
 
-import os, gzip
+import gzip
 from math import log10
 from collections import OrderedDict
 from random import randint
 from scipy import log2
 
-try:
-    from bokeh.plotting import figure
-    from bokeh.charts import Scatter, Histogram, output_file, save, vplot, hplot, Bar
-    from bokeh.models.widgets import DataTable, TableColumn, Panel, Tabs
-    from bokeh.models import ColumnDataSource
-    from bokeh.charts.attributes import CatAttr 
+from bokeh.plotting import figure
+from bokeh.charts import Scatter, Histogram, output_file, save, vplot, hplot, Bar
+from bokeh.models.widgets import DataTable, TableColumn, Panel, Tabs
+from bokeh.models import ColumnDataSource
+from bokeh.charts.attributes import CatAttr 
     
-except Exception:
-    print "Please install the bokeh framework e.g. like this"
-    print "pip install bokeh"
-    print "pip install bokeh --user"
-    os._exit(1)
 
 class bokehCLIP:
     
@@ -210,7 +204,7 @@ class bokehCLIP:
             rlDataOutput.close()
              
             #Duplicates         
-            dpData_table = DataTable(source=ColumnDataSource(dpData), columns=[TableColumn(field="dpKeys", title="Duplicates"),TableColumn(field="dpCounts", title="Number of duplicates")], width=600, height=600)
+            dpData_table = DataTable(source=ColumnDataSource(dpData), columns=[TableColumn(field="dpKeys", title="Duplicates"),TableColumn(field="dpCounts", title="Number of reads")], width=600, height=600)
             
             tab2 = Panel(child=dpData_table, title="Duplicates")
             
@@ -456,7 +450,8 @@ class bokehCLIP:
                     cn[k] = (countsPerType[k]/ float(featureNorm[k]))
                 
             for k in dupPerType:
-                dn[k] = (dupPerType[k] / float(featureNorm[k]))
+                if not k == "intergenic":
+                    dn[k] = (dupPerType[k] / float(featureNorm[k]))
                 
             #Order the dicts for plotting by highest value of key
             counts      = OrderedDict(sorted(counts.items(), key=lambda x: (-x[1], x[0])))
@@ -651,7 +646,7 @@ class bokehCLIP:
             cptNDataOutput.close()
             
             dptP = Bar(dptData, title=heading+"_Duplicates_per_Type", values='dptCount', label=CatAttr(columns=['dptKeys'], sort=False),tools=TOOLS, xlabel="Types", ylabel="Count")
-            dptData_table = DataTable(source=ColumnDataSource(dptData), columns=[TableColumn(field="dptKeys", title="Types"),TableColumn(field="dptCount", title="Number of duplicates")], width=600, height=600)
+            dptData_table = DataTable(source=ColumnDataSource(dptData), columns=[TableColumn(field="dptKeys", title="Types"),TableColumn(field="dptCount", title="Number of types")], width=600, height=600)
             
             dptPlot = vplot(
                     hplot(dptP, dptData_table)
@@ -803,7 +798,7 @@ class bokehCLIP:
             countDataOutput.close()
                
             #Duplicates         
-            dpData_table = DataTable(source=ColumnDataSource(dpData), columns=[TableColumn(field="dpKeys", title="Duplicates"),TableColumn(field="dpCounts", title="Number of duplicates")], width=600, height=600)
+            dpData_table = DataTable(source=ColumnDataSource(dpData), columns=[TableColumn(field="dpKeys", title="Duplicates"),TableColumn(field="dpCounts", title="Number of types")], width=600, height=600)
              
             tab11 = Panel(child=dpData_table, title="Duplicates")
             
@@ -1114,7 +1109,7 @@ class bokehCLIP:
                         efl[l] = unique_word_count
                     else:
                         ifl[l] = unique_word_count
-                                   
+
             #Adding information to the arrays for the plots
             for line in almnt_file:
                  
@@ -1587,7 +1582,7 @@ class bokehCLIP:
                 ieDataOutput.write(str(ieJuncDist[i]) + "\t" + str(ieJuncCount[i]) + "\n")
                  
             ieDataOutput.close()
-            #---------------------------------------------------------------------------------------------------------
+            #--------------------------------------------------------VM-------------------------------------------------
                  
             #Exon-Intron Junction
             #---------------------------------------------------------------------------------------------------------
@@ -1699,7 +1694,7 @@ class bokehCLIP:
                     hplot(es11P, es11Data_table)
             )
             
-            tab7 = Panel(child=es11Plot, title="Exon-1/1 Start Junction") 
+            tab7 = Panel(child=es11Plot, title="Exon-1/1 Start") 
             
                  
             es11DataOutput = open(path+"_es11Data.txt", "w")
@@ -1720,7 +1715,7 @@ class bokehCLIP:
                     hplot(ee11P, ee11Data_table)
             )
             
-            tab8 = Panel(child=ee11Plot, title="Exon-1/1 End Junction")
+            tab8 = Panel(child=ee11Plot, title="Exon-1/1 End")
                  
             ee11DataOutput = open(path+"_ee11Data.txt", "w")
             ee11DataOutput.write("Distances\tCount\n")
@@ -1864,7 +1859,7 @@ class bokehCLIP:
             es11PlotF = vplot(
                     hplot(es11PF, es11Data_tableF)
             )
-            tab15 = Panel(child=es11PlotF, title="Exon-1/1 Start Junction")
+            tab15 = Panel(child=es11PlotF, title="Exon-1/1 Start")
                  
             es11FDataOutput = open(path+"_es11Data.txt", "w")
             es11FDataOutput.write("Distances\tCount\n")
@@ -1884,7 +1879,7 @@ class bokehCLIP:
                     hplot(ee11PF, ee11Data_tableF)
             )
             
-            tab16 = Panel(child=ee11PlotF, title="Exon-1/1 End Junction")
+            tab16 = Panel(child=ee11PlotF, title="Exon-1/1 End")
                  
             ee11FDataOutput = open(path+"_ee11Data.txt", "w")
             ee11FDataOutput.write("Distances\tCount\n")

@@ -573,9 +573,7 @@ class bedCLIP:
                     dup_counts += d_dup[dup] 
             m_dup = max(d_dup.keys(), key=(lambda k: d_dup[k]))
             
-            density = float(counts) / float(length)
-            
-            print b, name
+            density = float(counts) / float(length) 
                                 
             seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(b[3]), strand, name[2], posi[0], posi[1], name[1], str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]), str(density), str(dup_counts), str(d_dup[m_dup]))
             output.write(str("\t").join(seq) + "\n")

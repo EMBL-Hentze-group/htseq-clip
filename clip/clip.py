@@ -9,7 +9,7 @@
 '''
     SYNOPSIS
 
-        clip.py execution [options]
+        python clip.py execution [options]
         
         or if you want to execute per console
         

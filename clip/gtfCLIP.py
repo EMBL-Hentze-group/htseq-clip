@@ -10,7 +10,6 @@
 import os, gzip
 from collections import OrderedDict
 
-
 try:
     import HTSeq
 except Exception:
