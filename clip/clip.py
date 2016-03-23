@@ -7,10 +7,10 @@
 # --------------------------------------------------
 
 '''
-A flexible toolset for the analysis of iCLIP sequencing data
+htseq-clip:  A flexible toolset for the analysis of iCLIP sequencing data
+usage:       htseq-clip <function> [options]
 
-htseq-clip <function> [options]
-
+The functions include:
 
 [annotation]
   annotation              flattens an annotation gtf file
@@ -36,8 +36,8 @@ htseq-clip <function> [options]
   genomeToReads           splits up an genome fasta to reads for mappability tests 
 
 [General help]
- -v, --version            Version
- -h, --help               Help
+ -h, --help               help
+ --version                version
 
 '''
 
