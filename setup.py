@@ -4,21 +4,21 @@ import sys, os
 from codecs import open
 
 if sys.version_info < (2, 7):
-    print "At least Python 2.7 is required! Please install Python 2.7 on your OS \n"
+    print "At least Python 2.7 is required. Please install Python 2.7. \n"
     exit(1)
 
 try:
 	from setuptools import setup
-except ImportError:
-	sys.stderr.write("Could not import setuptools! Please install it and try again to install htseq-clip. \n")
+except ImportError as e:
+    sys.stderr.write("Could not import setuptools. Please install setuptools and try again to install htseq-clip. \n Error: %s" % e)
 	sys.exit(1)
 	
 try:
 	import numpy
-except ImportError:
-	sys.stderr.write("Could not import numpy! Please install it with pip install numpy and then try again to install htseq-clip. \n")
+except ImportError as e:
+    sys.stderr.write("Could not import numpy. Please install it with pip install numpy and then try again to install htseq-clip. \n Exception: %s" % e)
 	sys.exit(1)
-	   
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 # Get the long description from the README file
@@ -27,8 +27,8 @@ with open(os.path.join(here, 'README'), encoding='utf-8') as f:
 
 setup(
     name='htseq-clip',
-    version='0.1.27',
-    description='htseq-clip: a pipeline for the analysis of iCLIP datasets',
+    version='0.1.28',
+    description='htseq-clip: a toolset for the analysis of iCLIP datasets',
 	long_description=long_description,
     url='https://bitbucket.org/htseq-clip/htseq-clip',
     author='Marko Fritz, Thomas Schwarzl',
@@ -48,5 +48,5 @@ setup(
     packages=['clip'],
 	entry_points = {
         'console_scripts': ['htseq-clip=clip.command_line:main'],
-    } 
+    }
 )
