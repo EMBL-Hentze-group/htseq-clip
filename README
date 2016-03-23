@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 htseq-clip is a Python programmed pipeline for the analysis of iCLIP datasets which offers various functions, parameter settings and methods for a deep and customized analysis for your iCLIP datasets.
 
 htseq-clip: a flexible toolset for the analysis of iCLIP data sets
+=======
+htseq-clip is a Python programmed pipeline for the analysis of iCLIP datasets which offers various functions, parameter settings and methods for a deep and customized analysis for your iCLIP datasets.
+
+htseq-clip: a flexible toolset for the analysis of iCLIP data sets
+>>>>>>> 6d8aedc8753d1f69a2587e9e2b9598a706fb882b
 
 Homepage: https://bitbucket.org/htseq-clip/htseq-clip
 
