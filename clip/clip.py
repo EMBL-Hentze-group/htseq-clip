@@ -15,41 +15,6 @@ from fastaCLIP import fastaCLIP
 
 VERSION = "0.1.0"
 
-'''
-htseq-clip:  A flexible toolset for the analysis of iCLIP sequencing data
-usage:       htseq-clip <function> [options]
-
-The functions include:
-
-[annotation]
-  annotation              flattens an annotation gtf file
-  slidingWindow           creates sliding windows based on given annotation file
-
-[iCLIP]
-  extract                 extracts crosslink, insertion or deletion sites
-
-[Counting]
-  count                   count sites in annotation
-  countSlidingWindows     count sites in sliding windows
-
-[Distances]
-  junction                calculates distances to junctions
-
-[Visualisation] 
-  plot                    visualisation 
-
-[Transformation]
-  slidingWindowToDEXSeq  transform sliding window counts to DEXSeq format
-
-[In development]
-  genomeToReads           splits up an genome fasta to reads for mappability tests 
-
-[General help]
- -h, --help               help
- --version                version
-
-'''
-
 #======================================================================================
 def usage():
     print '''
