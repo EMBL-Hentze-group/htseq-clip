@@ -13,7 +13,63 @@ from gtfCLIP import gtfCLIP
 from bokehCLIP import bokehCLIP
 from fastaCLIP import fastaCLIP
 
+<<<<<<< HEAD
 VERSION = "0.1.0"
+=======
+'''
+htseq-clip:  A flexible toolset for the analysis of iCLIP sequencing data
+usage:       htseq-clip <function> [options]
+
+The functions include:
+
+[annotation]
+  annotation              flattens an annotation gtf file
+  slidingWindow           creates sliding windows based on given annotation file
+
+[iCLIP]
+  extract                 extracts crosslink, insertion or deletion sites
+
+[Counting]
+  count                   count sites in annotation
+  countSlidingWindows     count sites in sliding windows
+
+[Distances]
+  junction                calculates distances to junctions
+
+[Visualisation] 
+  plot                    visualisation 
+
+[Transformation]
+  slidingWindowToDEXSeq  transform sliding window counts to DEXSeq format
+
+[In development]
+  genomeToReads           splits up an genome fasta to reads for mappability tests 
+
+[General help]
+ -h, --help               help
+ --version                version
+
+'''
+
+
+DEVNULL = '''                 
+        [-i, --input=FILE]
+                          Input file
+
+        [-o, --output=FILE]
+                          Output file
+                          
+        [-f, --compare=FILE]
+                          File which you want to compare with your input file
+        
+        [-c, --choice]
+                          Option for different functions
+                          default: s for start sites extraction (can vary in function and option of course)
+        
+        [-q, --minAlignmentQuality]
+                          Minimum alignment quality
+                          default: 10
+>>>>>>> 9647be1d3dff90d50d5183c372bf7b9ca7c19842
 
 #======================================================================================
 def usage():
@@ -223,6 +279,7 @@ usage:            htseq-clip plot [options]
 
 Options:
 
+<<<<<<< HEAD
  -i, --input         input file (.bed, .txt)
  
  -o, --output        output file (.html)
@@ -239,6 +296,11 @@ Options:
  -h, --help          help
  --version           version
 '''  
+=======
+        htseq-clip extract -i input.bam -o output.bed -c s
+        
+        htseq-clip --help
+>>>>>>> 9647be1d3dff90d50d5183c372bf7b9ca7c19842
 
 
 

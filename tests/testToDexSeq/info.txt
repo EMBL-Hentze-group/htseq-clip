@@ -1,0 +1,7 @@
+test01.txt:
+
+	should look like /checkToDexSeq/test01_check.dex.txt
+	
+test02.txt:
+
+	should look like /checkToDexSeq/test02_check.dex.txt (empty file)

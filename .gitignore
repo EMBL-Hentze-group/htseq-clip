@@ -20,4 +20,4 @@ output/
 .Rproj.user/
 .project
 .pydevproject
-
+.pypirc

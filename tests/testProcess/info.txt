@@ -1,0 +1,8 @@
+test_gtf:
+
+	should look like checkTestProcess/test_check.bed
+	
+test_empty.gtf:
+
+	should look like checkTestProcess/test_empty_check.bed (empty file)
+	
