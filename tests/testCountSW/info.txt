@@ -1,0 +1,15 @@
+test01:
+
+	should look like checkTestCountSW/test01_check.sw.txt
+
+test02:
+
+	should look like checkTestCountSW/test02_check.sw.txt
+
+test03:
+
+	should look like checkTestCountSW/test03_check.sw.txt (empty file)
+
+test04:
+
+	should look like checkTestCountSW/test04_check.sw.txt (empty file)

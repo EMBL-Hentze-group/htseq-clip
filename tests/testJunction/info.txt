@@ -1,0 +1,66 @@
+test01:
+	Outcome should look like this:
+
+	1	11167505	11167506	ENSG00000198793	50	-915	1	-	protein_coding	exon	1/58
+	1	11167606	11167607	ENSG00000198793	629	-50	3	-	protein_coding	intron	1/57
+	1	11168291	11168292	ENSG00000198793	50	-55	3	-	protein_coding	exon	2/58
+	1	11168391	11168392	ENSG00000198793	953	-49	2	-	protein_coding	intron	2/57
+	1	11169375	11169376	ENSG00000198793	50	-30	1	-	protein_coding	exon	3/58
+	1	11169465	11169466	ENSG00000198793	238	-39	3	-	protein_coding	intron	3/57
+	1	11169724	11169725	ENSG00000198793	60	-20	3	-	protein_coding	exon	4/58
+	1	11169834	11169835	ENSG00000198793	1734	-49	3	-	protein_coding	intron	4/57
+	1	11171758	11171759	ENSG00000198793	50	-189	3	-	protein_coding	exon	5/58
+	1	11171858	11171859	ENSG00000198793	1048	-49	3	-	protein_coding	intron	5/57
+	1	11172922	11172923	ENSG00000198793	50	-15	3	-	protein_coding	exon	6/58
+	1	11173022	11173023	ENSG00000198793	1350	-49	3	-	protein_coding	intron	6/57
+	1	11174634	11174635	ENSG00000198793	50	-261	2	-	protein_coding	exon	7/58
+	1	11174734	11174735	ENSG00000198793	133	-49	1	-	protein_coding	intron	7/57
+	1	11174892	11174893	ENSG00000198793	50	-24	3	-	protein_coding	exon	8/58
+	
+test02:
+	Outcome should look like this:
+	
+	1	11166641	11166642	ENSG00000198793	50	-915	1	+	protein_coding	exon	1/58
+	1	11168186	11168187	ENSG00000198793	629	-50	3	+	protein_coding	intron	1/57
+	1	11168287	11168288	ENSG00000198793	50	-55	3	+	protein_coding	exon	2/58
+	1	11169296	11169297	ENSG00000198793	953	-49	2	+	protein_coding	intron	2/57
+	1	11169396	11169397	ENSG00000198793	50	-30	1	+	protein_coding	exon	3/58
+	1	11169665	11169666	ENSG00000198793	238	-39	3	+	protein_coding	intron	3/57
+	1	11169765	11169766	ENSG00000198793	60	-20	3	+	protein_coding	exon	4/58
+	1	11171520	11171521	ENSG00000198793	1734	-49	3	+	protein_coding	intron	4/57
+	1	11171620	11171621	ENSG00000198793	50	-189	3	+	protein_coding	exon	5/58
+	1	11172858	11172859	ENSG00000198793	1048	-49	3	+	protein_coding	intron	5/57
+	1	11172958	11172959	ENSG00000198793	50	-15	3	+	protein_coding	exon	6/58
+	1	11174324	11174325	ENSG00000198793	1350	-49	3	+	protein_coding	intron	6/57
+	1	11174424	11174425	ENSG00000198793	50	-261	2	+	protein_coding	exon	7/58
+	1	11174819	11174820	ENSG00000198793	133	-49	1	+	protein_coding	intron	7/57
+	1	11174919	11174920	ENSG00000198793	50	-24	3	+	protein_coding	exon	8/58
+	
+test03:
+	Outcome should look like this:
+	
+	Empty file
+	
+test04:
+
+	Outcome should look like this:
+	
+	1	1166641	1166642	~	~	~	~	+	intergenic	intergenic	1
+	1	1168186	1168187	~	~	~	~	+	intergenic	intergenic	1
+	1	1168287	1168288	~	~	~	~	+	intergenic	intergenic	1
+	1	1169296	1169297	~	~	~	~	+	intergenic	intergenic	1
+	1	1169396	1169397	~	~	~	~	+	intergenic	intergenic	1
+	1	1169665	1169666	~	~	~	~	+	intergenic	intergenic	1
+	1	1169765	1169766	~	~	~	~	+	intergenic	intergenic	1
+	1	1171520	1171521	~	~	~	~	+	intergenic	intergenic	1
+	1	31171620	31171621	~	~	~	~	+	intergenic	intergenic	3
+	1	31172858	31172859	~	~	~	~	+	intergenic	intergenic	3
+	1	31172958	31172959	~	~	~	~	+	intergenic	intergenic	3
+	1	31174324	31174325	~	~	~	~	+	intergenic	intergenic	3
+	1	31174424	31174425	~	~	~	~	+	intergenic	intergenic	3
+	1	31174819	31174820	~	~	~	~	+	intergenic	intergenic	3
+	1	31174919	31174920	~	~	~	~	+	intergenic	intergenic	3
+
+
+
+

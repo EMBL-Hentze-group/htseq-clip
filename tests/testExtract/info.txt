@@ -1,0 +1,5 @@
+Files in ../output/testExtract must match to their corresponding _check.bed files
+in the checkTestExtract folder
+
+test01:
+	no files, but ValueError Exception thrown (cause no BAM formatted file)
