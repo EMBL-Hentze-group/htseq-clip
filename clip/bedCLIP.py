@@ -6,15 +6,7 @@
 # Date: October 2015
 # --------------------------------------------------
 
-import os, gzip
-
-try:
-    import HTSeq
-except Exception:
-    print "Please install the HTSeq framework e.g. like this"
-    print "pip install HTSeq"
-    print "pip install HTSeq --user"
-    os._exit(1)
+import gzip, HTSeq
     
 class bedCLIP:
     

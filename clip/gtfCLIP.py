@@ -1,5 +1,5 @@
 # --------------------------------------------------
-# bedCLIP class
+# gtfCLIP class
 # Authors: Marko Fritz, marko.fritz@embl.de
 #          Thomas Schwarzl, schwarzl@embl.de
 # Institution: EMBL Heidelberg
@@ -7,16 +7,9 @@
 # --------------------------------------------------
 
 
-import os, gzip
+import gzip, HTSeq
 from collections import OrderedDict
 
-try:
-    import HTSeq
-except Exception:
-    print "Please install the HTSeq framework e.g. like this"
-    print "pip install HTSeq"
-    print "pip install HTSeq --user"
-    os._exit(1)
     
 class gtfCLIP:
     
@@ -154,7 +147,7 @@ class gtfCLIP:
                                 
                             seq = [e[0].chrom, str(e[0].start), str(e[0].end), name+'@intron@'+str(ic)+'/'+str(iLength), 1, e[0].strand, "i"]
                             fs.append(seq)
-                            ic +=1
+                            ic += 1
                             exon = True
                             
                     #Flagging of introns and writing out in output file

@@ -1,5 +1,5 @@
 # --------------------------------------------------
-# bedCLIP class
+# bokehCLIP class
 # Authors: Marko Fritz, marko.fritz@embl.de
 #          Thomas Schwarzl, schwarzl@embl.de
 # Institution: EMBL Heidelberg
@@ -10,7 +10,7 @@ import gzip
 from math import log10
 from collections import OrderedDict
 from random import randint
-from scipy import log2
+from numpy import log2
 
 from bokeh.plotting import figure
 from bokeh.charts import Scatter, Histogram, output_file, save, vplot, hplot, Bar
@@ -18,7 +18,6 @@ from bokeh.models.widgets import DataTable, TableColumn, Panel, Tabs
 from bokeh.models import ColumnDataSource
 from bokeh.charts.attributes import CatAttr 
     
-
 class bokehCLIP:
     
     fInput = ''
@@ -204,7 +203,7 @@ class bokehCLIP:
             rlDataOutput.close()
              
             #Duplicates         
-            dpData_table = DataTable(source=ColumnDataSource(dpData), columns=[TableColumn(field="dpKeys", title="Duplicates"),TableColumn(field="dpCounts", title="Number of reads")], width=600, height=600)
+            dpData_table = DataTable(source=ColumnDataSource(dpData), columns=[TableColumn(field="dpKeys", title="Duplication ratio"),TableColumn(field="dpCounts", title="Number of reads")], width=600, height=600)
             
             tab2 = Panel(child=dpData_table, title="Duplicates")
             
@@ -447,7 +446,7 @@ class bokehCLIP:
                 
             for k in countsPerType:
                 if not k == "intergenic":
-                    cn[k] = (countsPerType[k]/ float(featureNorm[k]))
+                    cn[k] = (countsPerType[k] / float(featureNorm[k]))
                 
             for k in dupPerType:
                 if not k == "intergenic":
@@ -786,7 +785,7 @@ class bokehCLIP:
             #--------------------------------------------------
             
             #Counts
-            cData_table = DataTable(source=ColumnDataSource(countData), columns=[TableColumn(field="cKeys", title="Counts"),TableColumn(field="cCounts", title="Number of counts")], width=600, height=600)
+            cData_table = DataTable(source=ColumnDataSource(countData), columns=[TableColumn(field="cKeys", title="Counts"),TableColumn(field="cCounts", title="Number of types")], width=600, height=600)
              
             tab10 = Panel(child=cData_table, title="Counts")
             
@@ -798,7 +797,7 @@ class bokehCLIP:
             countDataOutput.close()
                
             #Duplicates         
-            dpData_table = DataTable(source=ColumnDataSource(dpData), columns=[TableColumn(field="dpKeys", title="Duplicates"),TableColumn(field="dpCounts", title="Number of types")], width=600, height=600)
+            dpData_table = DataTable(source=ColumnDataSource(dpData), columns=[TableColumn(field="dpKeys", title="Duplication ratio"),TableColumn(field="dpCounts", title="Number of types")], width=600, height=600)
              
             tab11 = Panel(child=dpData_table, title="Duplicates")
             
@@ -926,8 +925,9 @@ class bokehCLIP:
         r1SD = []
         r2SD = []
                 
-        if len(r1ScatterCount) > 50000:    
-            sd = [randint(0,len(r1ScatterCount)-1) for p in range(0,50000)]
+        if len(r1ScatterCount) > 50000:
+            
+            sd = [randint(0,len(r1ScatterCount)-1) for p in range(0,50000)] # @UnusedVariable
         
             for i in sd:
                 r1SC.append(r1ScatterCount[i])

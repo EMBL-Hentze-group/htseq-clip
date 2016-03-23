@@ -6,16 +6,7 @@
 # Date: October 2015
 # --------------------------------------------------
 
-import os, gzip, warnings
-import decimal
-
-try:
-    import HTSeq
-except Exception:
-    print "Please install the HTSeq framework e.g. like this"
-    print "pip install HTSeq"
-    print "pip install HTSeq --user"
-    os._exit(1)
+import gzip, warnings, decimal, HTSeq
 
 class bamCLIP:
     
@@ -226,7 +217,7 @@ class bamCLIP:
     def getMiddleSiteAsBed(self, almnt):
         pos = self.determineMiddleSite(almnt)
         x = pos.start_d
-        y = x+1
+        y = x + 1
 
         try:
             yb = almnt.optional_field('YB')
@@ -247,7 +238,7 @@ class bamCLIP:
 
     def getEndSiteAsBed(self, almnt):
         x = almnt.iv.end_d
-        y = x+1
+        y = x + 1
         
         try:
             yb = almnt.optional_field('YB')

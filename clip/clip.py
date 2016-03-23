@@ -218,8 +218,6 @@ Converting the sliding window counts into DEXSeq format
 def toDEXSeq(options, args):
     
     bedC = bedCLIP(options)
-    
-    
     bedC.toDEXSeq()
 
 #======================================================================================
