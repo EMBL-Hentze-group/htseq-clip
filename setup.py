@@ -11,13 +11,13 @@ try:
 	from setuptools import setup
 except ImportError as e:
     sys.stderr.write("Could not import setuptools. Please install setuptools and try again to install htseq-clip. \n Error: %s" % e)
-	sys.exit(1)
+    sys.exit(1)
 	
 try:
 	import numpy
 except ImportError as e:
     sys.stderr.write("Could not import numpy. Please install it with pip install numpy and then try again to install htseq-clip. \n Exception: %s" % e)
-	sys.exit(1)
+    sys.exit(1)
 
 here = os.path.abspath(os.path.dirname(__file__))
 

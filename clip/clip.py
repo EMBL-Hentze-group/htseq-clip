@@ -7,28 +7,42 @@
 # --------------------------------------------------
 
 '''
-    SYNOPSIS
+A flexible toolset for the analysis of iCLIP sequencing data
 
-        python clip.py execution [options]
-        
-        or if you want to execute per console
-        
-        htseq-clip execution [options]
+htseq-clip <function> [options]
 
-    DESCRIPTION
-    
-        --execution
-                    Functionality you want to execute; Available functions:
-                          count
-                          countSlidingWindow
-                          extract
-                          genomeToReads
-                          junction
-                          plot    
-                          process
-                          slidingWindow
-                          toDexSeq      
-                    
+
+[annotation]
+  annotation              flattens an annotation gtf file
+  slidingWindow           creates sliding windows based on given annotation file
+
+[iCLIP]
+  extract                 extracts crosslink, insertion or deletion sites
+
+[Counting]
+  count                   count sites in annotation
+  countSlidingWindows     count sites in sliding windows
+
+[Distances]
+  junction                calculates distances to junctions
+
+[Visualisation] 
+  plot                    visualisation 
+
+[Transformation]
+  slidingWindowsToDEXSeq  transform sliding window counts to DEXSeq format
+
+[In development]
+  genomeToReads           splits up an genome fasta to reads for mappability tests 
+
+[General help]
+ -v, --version            Version
+ -h, --help               Help
+
+'''
+
+
+DEVNULL = '''                 
         [-i, --input=FILE]
                           Input file
 
@@ -88,12 +102,6 @@
 
     EXAMPLES
 
-        python clip.py extract -i input.bam -o output.bed -c s
-
-        python clip.py --help
-        
-        or if you want to execute per console
-        
         htseq-clip extract -i input.bam -o output.bed -c s
         
         htseq-clip --help
