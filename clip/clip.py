@@ -13,9 +13,8 @@ from gtfCLIP import gtfCLIP
 from bokehCLIP import bokehCLIP
 from fastaCLIP import fastaCLIP
 
-<<<<<<< HEAD
 VERSION = "0.1.0"
-=======
+
 '''
 htseq-clip:  A flexible toolset for the analysis of iCLIP sequencing data
 usage:       htseq-clip <function> [options]
@@ -50,26 +49,6 @@ The functions include:
  --version                version
 
 '''
-
-
-DEVNULL = '''                 
-        [-i, --input=FILE]
-                          Input file
-
-        [-o, --output=FILE]
-                          Output file
-                          
-        [-f, --compare=FILE]
-                          File which you want to compare with your input file
-        
-        [-c, --choice]
-                          Option for different functions
-                          default: s for start sites extraction (can vary in function and option of course)
-        
-        [-q, --minAlignmentQuality]
-                          Minimum alignment quality
-                          default: 10
->>>>>>> 9647be1d3dff90d50d5183c372bf7b9ca7c19842
 
 #======================================================================================
 def usage():
@@ -296,12 +275,6 @@ Options:
  -h, --help          help
  --version           version
 '''  
-=======
-        htseq-clip extract -i input.bam -o output.bed -c s
-        
-        htseq-clip --help
->>>>>>> 9647be1d3dff90d50d5183c372bf7b9ca7c19842
-
 
 
 #======================================================================================
