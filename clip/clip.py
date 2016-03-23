@@ -30,7 +30,7 @@ The functions include:
   plot                    visualisation 
 
 [Transformation]
-  slidingWindowsToDEXSeq  transform sliding window counts to DEXSeq format
+  slidingWindowToDEXSeq  transform sliding window counts to DEXSeq format
 
 [In development]
   genomeToReads           splits up an genome fasta to reads for mappability tests 
