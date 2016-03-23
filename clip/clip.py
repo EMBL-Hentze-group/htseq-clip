@@ -5,100 +5,6 @@
 # Institution: EMBL Heidelberg
 # Date: October 2015
 # --------------------------------------------------
-
-'''
-    SYNOPSIS
-
-        python clip.py execution [options]
-        
-        or if you want to execute per console
-        
-        htseq-clip execution [options]
-
-    DESCRIPTION
-    
-        --execution
-                    Functionality you want to execute; Available functions:
-                          count
-                          countSlidingWindow
-                          extract
-                          genomeToReads
-                          junction
-                          plot    
-                          process
-                          slidingWindow
-                          toDexSeq      
-                    
-        [-i, --input=FILE]
-                          Input file
-
-        [-o, --output=FILE]
-                          Output file
-                          
-        [-f, --compare=FILE]
-                          File which you want to compare with your input file
-        
-        [-c, --choice]
-                          Option for different functions
-                          default: s for start sites extraction (can vary in function and option of course)
-        
-        [-q, --minAlignmentQuality]
-                          Minimum alignment quality
-                          default: 10
-
-        [-m, --minReadLength]
-                          Minimum read length
-                          default: 0
-        
-        [-x, --maxReadLength]
-                          Maximum read length
-                          default: 0
-                          
-        [-l, --maxReadIntervalLength]
-                          Maximum read interval length
-                          default: 100000
-
-        [-p, --primary]
-                          Set if you want to use only primary positions of multimapping reads
-                          default: False
-                          
-        [-d, --dist]
-                          Distance between two sites of a read e.g if its higher than this value
-                          it will be count as this value; you can use this variable for different
-                          distances matters
-                          default: 4000
-                          
-        [-g, --gtf]
-                          GTF or GFF file for annotation processing
-                          
-        [-t, --type]
-                          Gene type for annotation
-                          
-        [-w, --windowSize]
-                          window size for sliding window
-                          
-        [-s, --windowStep]
-                          window step for sliding window
-        
-        [-h, --help]      display help message with all parameters and options
-
-
-        [--verbose]       display verbose output for debugging
-
-
-    EXAMPLES
-
-        python clip.py extract -i input.bam -o output.bed -c s
-
-        python clip.py --help
-        
-        or if you want to execute per console
-        
-        htseq-clip extract -i input.bam -o output.bed -c s
-        
-        htseq-clip --help
-
-'''
     
 import optparse, traceback, os
 from bamCLIP import bamCLIP
@@ -109,7 +15,235 @@ from fastaCLIP import fastaCLIP
 
 VERSION = "0.1.0"
 
-#=====================================================================================
+#======================================================================================
+def usage():
+    print '''
+htseq-clip:  A flexible toolset for the analysis of iCLIP sequencing data
+usage:       htseq-clip <function> [options]
+    
+The functions include:
+    
+[annotation]
+    annotation              flattens an annotation gtf file
+    slidingWindow           creates sliding windows based on given annotation file
+    
+[iCLIP]
+    extract                 extracts crosslink, insertion or deletion sites
+    
+[Counting]
+    count                   count sites in annotation
+    countSlidingWindows     count sites in sliding windows
+    
+[Distances]
+    junction                calculates distances to junctions
+    
+[Visualisation] 
+    plot                    visualisation 
+    
+[Transformation]
+    slidingWindowToDEXSeq  transform sliding window counts to DEXSeq format
+    
+[In development]
+    genomeToReads           splits up an genome fasta to reads for mappability tests 
+    
+[General help]
+    -h, --help               help
+    --version                version
+    
+'''
+    
+def usage_extract():
+    print '''
+htseq-clip extract:  extracts crosslink, insertion or deletion sites
+usage:               htseq-clip extract [options]
+
+Options:
+
+ -i, --input                      input file (.bam)
+ 
+ -o, --output                     output file (.bed)
+ 
+ -c, --choice                     parameter for the choice of the cross-link sites:
+
+                                  s for start sites. 
+                                  In addition you can write e.g 
+                                  s-1 then you will get the position 1 before the 
+                                  start site, this is only available for the extraction 
+                                  of the start sites. You can also write s-1i that means 
+                                  if a postion should be below 0 it ignores it to write 
+                                  out otherwise you will get an exception.
+                                  
+                                  m for middle sites
+                                  
+                                  e for end sites
+                                  
+                                  i for insertion sites
+                                  
+                                  d for deletion sites
+
+ -q, --minAlignmentQuality        minimum alignment quality (default: 10)
+ 
+ -m, --maxReadLength              minimum read length (default: 0)
+ 
+ -x, --maxReadLength              maximum read length (default: 0)
+ 
+ -l, --maxReadIntervalLength      maximum read interval length (default: 100000)
+ 
+ -p, --primary                    set if you want only primary positions of 
+                                  multimapping reads (default: False)
+  
+                               
+ -h, --help                       help
+ --version                        version
+'''    
+    
+def usage_annotation():
+    print '''
+htseq-clip annotation:  flattens the given annotation file
+usage:                  htseq-clip annotation [options]
+
+Options:
+
+ -g, --gtf         GTF or GFF file for annotation processing (.gtf)
+ 
+ -o, --output      output file (.bed)
+ 
+ -t, --type        Gene type for annotation
+  
+                               
+ -h, --help        help
+ --version         version
+'''
+    
+def usage_count():
+    print '''
+htseq-clip count:  counts the number of crosslink/deletion/insertion sites 
+usage:             htseq-clip count [options]
+
+Options:
+
+ -i, --input         extracted crosslink, insertion or deletion sites (.bed)
+ 
+ -o, --output        output file (.txt)
+ 
+ -f, --compare       flattened annotation file (.bed)
+ 
+ -c, --choice        parameter for the choice of included counts:
+ 
+                     a if you want to have all counts included
+                     even if a chromosome or strand does not
+                     contain any crosslink sites
+                     
+                     o if you want have only the counts included
+                     of exons/introns which possess crosslink
+                     sites
+
+                              
+ -h, --help          help
+ --version           version
+'''  
+
+def usage_junction():
+    print '''
+htseq-clip junction:  calculates the distance from crosslink/deletion/insertion sites to the junction
+usage:                htseq-clip junction [options]
+
+Options:
+
+ -i, --input         extracted crosslink, insertion or deletion sites (.bed)
+ 
+ -o, --output        output file (.txt)
+ 
+ -f, --compare       flattened annotation file (.bed)
+
+                             
+ -h, --help          help
+ --version           version
+''' 
+    
+def usage_createSlidingWindows():
+    print '''
+htseq-clip createSlidingWindows:     creates sliding windows out of the flattened annotation file 
+usage:                               htseq-clip createSlidingWindows [options]
+
+Options:
+
+ -i, --input           flattened annotation file (.bed)
+ 
+ -o, --output          output file (.bed)
+ 
+ -w, --windowSize      window size for sliding window
+ 
+ -s, --windowStep      window step for sliding window
+
+                             
+ -h, --help            help
+ --version             version
+''' 
+    
+def usage_countSlidingWindows():
+    print '''
+htseq-clip countSlidingWindows:    counts the number of crosslink/deletion/insertion sites in a certain sliding window
+usage:                             htseq-clip countSlidingWindows [options]
+
+Options:
+
+ -i, --input         extracted crosslink, insertion or deletion sites (.bed)
+ 
+ -o, --output        output file (.txt)
+ 
+ -f, --compare       created sliding windows out of the flattened annotation file (.bed)
+
+                              
+ -h, --help          help
+ --version           version
+'''  
+    
+def usage_slidingWindowsToDEXSeq():
+    print '''
+htseq-clip slidingWindowsToDEXSeq:    transforms the sliding window counts into DEXSeq format
+usage:                                htseq-clip slidingWindowsToDEXSeq [options]
+
+Options:
+
+ -i, --input         counted number of crosslink/deletion/insertion sites in a certain sliding window (.txt)
+ 
+ -o, --output        output file (.txt)
+
+                             
+ -h, --help          help
+ --version           version
+'''      
+    
+    
+def usage_plot():
+    print '''
+htseq-clip plot:  plots the results
+usage:            htseq-clip plot [options]
+
+Options:
+
+ -i, --input         input file (.bed, .txt)
+ 
+ -o, --output        output file (.html)
+ 
+ -c, --choice        parameter for the choice of the desired plot:
+ 
+                     c for count information plots
+                     
+                     j for junction information plots
+                     
+                     r read information plots
+
+                              
+ -h, --help          help
+ --version           version
+'''  
+
+
+
+#======================================================================================
+#======================================================================================
 '''
 Counting the cross-link sites per feature
 '''    
@@ -258,38 +392,71 @@ def main():
 
         # check if there are all arguments
         if len(args) != 1:
-            parser.error ('Incorrect number of user-specified arguments') 
+            usage()
+            os._exit(1)
         else:
 
             program = args[0]
 
             if program == "extract":
-                checkFileExists(options.input, parser)
-                extract(parser, options, args)
-            elif program == 'countSlidingWindow':
-                checkFileExists(options.input, parser)
-                checkFileExists(options.compare, parser)
-                countSlidingWindow(options, args)
+                if len(args) < 3:
+                    usage_extract()
+                    os._exit(1)
+                else:   
+                    checkFileExists(options.input, parser)
+                    extract(parser, options, args)
+            elif program == 'countSlidingWindows':
+                if len(args) < 3:
+                    usage_countSlidingWindows()
+                    os._exit(1)
+                else:
+                    checkFileExists(options.input, parser)
+                    checkFileExists(options.compare, parser)
+                    countSlidingWindow(options, args)
             elif program == 'junction':
-                checkFileExists(options.input, parser)
-                checkFileExists(options.compare, parser)
-                junction(program, options, args)
+                if len(args) < 3:
+                    usage_junction()
+                    os._exit(1)
+                else: 
+                    checkFileExists(options.input, parser)
+                    checkFileExists(options.compare, parser)
+                    junction(program, options, args)
             elif program == 'count':
-                checkFileExists(options.input, parser)
-                checkFileExists(options.compare, parser)
-                count(program, parser, options, args)
-            elif program == 'process':
-                checkFileExists(options.gtf, parser)
-                process(options, args)
+                if len(args) < 3:
+                    usage_count()
+                    os._exit(1)
+                else: 
+                    checkFileExists(options.input, parser)
+                    checkFileExists(options.compare, parser)
+                    count(program, parser, options, args)
+            elif program == 'annotation':
+                if len(args) < 3:
+                    usage_annotation()
+                    os._exit(1)
+                else: 
+                    checkFileExists(options.gtf, parser)
+                    process(options, args)
             elif program == 'plot':
-                checkFileExists(options.input, parser)
-                plot(parser, options, args)
-            elif program =='slidingWindow':
-                checkFileExists(options.input, parser)
-                slidingWindow(options, args)
-            elif program =='toDexSeq':
-                checkFileExists(options.input, parser)
-                toDEXSeq(options, args)
+                if len(args) < 2:
+                    usage_plot()
+                    os._exit(1)
+                else: 
+                    checkFileExists(options.input, parser)
+                    plot(parser, options, args)
+            elif program =='createSlidingWindows':
+                if len(args) < 3:
+                    usage_createSlidingWindows()
+                    os._exit(1)
+                else: 
+                    checkFileExists(options.input, parser)
+                    slidingWindow(options, args)
+            elif program =='slidingWindowsToDEXSeq':
+                if len(args) < 3:
+                    usage_slidingWindowsToDEXSeq()
+                    os._exit(1)
+                else:
+                    checkFileExists(options.input, parser)
+                    toDEXSeq(options, args)
             elif program =='genomeToReads':
                 checkFileExists(options.input, parser)
                 genomeToReads(options, args)
