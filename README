@@ -4,8 +4,8 @@ htseq-clip is a toolset for the analysis of iCLIP datasets which offers various 
 
 Homepage: https://bitbucket.org/htseq-clip/htseq-clip
 
-For instructions, see:
-https://bitbucket.org/htseq-clip/htseq-clip/wiki/Installation
+Installing instruction and documentation:
+https://bitbucket.org/htseq-clip/htseq-clip/wiki/Home
 
 Copyright (c) 2016 Marko Fritz <marko.fritz@embl.de> and Thomas Schwarzl <schwarzl@embl.de> (see LICENSE)
 
