@@ -30,7 +30,11 @@ class gtfCLIP:
             self.fInput = options.input
         
         if hasattr(options, 'output'):
+<<<<<<< HEAD
             self.fOutput = options.output  
+=======
+            self.fOutput = options.output   
+>>>>>>> b1fbc1dde60f3c475e7c8d5afcb0a3c6d16eb6df
             
         if hasattr(options, 'windowSize'):
             self.windowSize = options.windowSize  
@@ -90,6 +94,7 @@ class gtfCLIP:
                     #Sort the list where all exons are in
                     ps.sort(key=lambda tup: tup[0])
                     
+                    #calculate number of introns and exons
                     iLength = int(len(l)/2)
                     eLength = int(len(l)/2) + 1
                     
