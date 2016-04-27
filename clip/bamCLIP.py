@@ -6,7 +6,7 @@
 # Date: October 2015
 # --------------------------------------------------
 
-import gzip, warnings, decimal, HTSeq
+import gzip, decimal, HTSeq
 
 class bamCLIP:
     
@@ -19,6 +19,8 @@ class bamCLIP:
     minAlignmentQuality = 10
     primary = False
     choice = ''
+    
+    count = 0
     
     def __init__(self, options):
         
@@ -58,6 +60,7 @@ class bamCLIP:
     '''
     def readFullfillsQualityCriteria(self, almnt):
         if almnt.paired_end and almnt.pe_which == "second":
+            self.count += 1
             return False
         else:
             return(almnt.aligned and
@@ -184,8 +187,8 @@ class bamCLIP:
             try:
                 yb = almnt.optional_field('YB')
             except Exception:
-                warnings.warn("Warning: SAM flag YB not set, have you done the random barcode removal?")
                 yb = 1
+                pass
             
             seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
     
@@ -222,8 +225,8 @@ class bamCLIP:
         try:
             yb = almnt.optional_field('YB')
         except Exception:
-            warnings.warn("Warning: SAM flag YB not set, have you done the random barcode removal?")
             yb = 1
+            pass
         
         seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
         
@@ -243,8 +246,8 @@ class bamCLIP:
         try:
             yb = almnt.optional_field('YB')
         except Exception:
-            warnings.warn("Warning: SAM flag YB not set, have you done the random barcode removal?")
             yb = 1
+            pass
         
         seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
 
@@ -331,6 +334,8 @@ class bamCLIP:
                     fOutput.write(out + "\n")
        
         fOutput.close()
+        
+        print self.count
 
     '''
     Extract middle sites

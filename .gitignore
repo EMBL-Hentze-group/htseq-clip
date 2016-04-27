@@ -17,6 +17,8 @@ bam/
 fasta/
 logs/
 output/
+marko_thesis/
+.idea/
 .Rproj.user/
 .project
 .pydevproject

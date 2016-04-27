@@ -24,31 +24,32 @@ usage:       htseq-clip <function> [options]
 The functions include:
     
 [annotation]
-    annotation              flattens an annotation gtf file
-    slidingWindow           creates sliding windows based on given annotation file
+    annotation                           flattens an annotation gtf file
+    slidingWindow                        creates sliding windows based on given annotation file
     
 [iCLIP]
-    extract                 extracts crosslink, insertion or deletion sites
+    extract                              extracts crosslink, insertion or deletion sites
     
 [Counting]
-    count                   count sites in annotation
-    countSlidingWindows     count sites in sliding windows
+    count                                count sites in annotation
+    countSlidingWindows                  count sites in sliding windows
     
 [Distances]
-    junction                calculates distances to junctions
+    junction                             calculates distances to junctions
     
 [Visualisation] 
-    plot                    visualisation 
+    plot                                 visualisation 
     
 [Transformation]
-    slidingWindowToDEXSeq  transform sliding window counts to DEXSeq format
+    slidingWindowsToDEXSeq                transform sliding window counts to DEXSeq format
     
 [In development]
-    genomeToReads           splits up an genome fasta to reads for mappability tests 
+    genomeToReads                        splits up an genome fasta to reads for mappability tests
+    removeRandomBarcodeDuplicates        removes random barcode duplicates from a fastq file
     
 [General help]
-    -h, --help               help
-    --version                version
+    -h, --help                           help
+    --version                            version
     
 '''
     
@@ -223,7 +224,6 @@ usage:            htseq-clip plot [options]
 
 Options:
 
-<<<<<<< HEAD
  -i, --input         input file (.bed, .txt)
  
  -o, --output        output file (.html)
@@ -240,6 +240,44 @@ Options:
  -h, --help          help
  --version           version
 '''  
+    
+def usage_genomeToReads():
+    print '''
+htseq-clip genomeToReads:  splits up an genome fasta to reads for mappability tests  
+usage:                     htseq-clip genomeToReads [options]
+
+Options:
+
+ -i, --input             input file (.fa)
+ 
+ -o, --output            output file (.fasta)
+ 
+ -x, --maxReadLength     maximum read length (default: 0)
+
+                              
+ -h, --help              help
+ --version               version
+''' 
+    
+def usage_removeRandomBarcodeDuplicates():  
+    print '''
+htseq-clip removeRandomBarcodeDuplicates:  removes random barcode duplicates from a fastq file 
+usage:                                     htseq-clip removeRandomBarcodeDuplicates [options]
+
+Options:
+
+ -i, --input        input file (.fastq)
+ 
+ -o, --output       output file (.fasta)
+ 
+ -b, --barcode      postion of barcode (integer with length 4)
+ 
+ -n --mismatches    number of allowed mismatches
+
+                              
+ -h, --help              help
+ --version               version
+''' 
 
 
 #======================================================================================
@@ -307,6 +345,15 @@ def junction(program, options, args):
     
     bedC = bedCLIP(options)
     bedC.junction()
+    
+'''
+Removes random barcode duplicates
+'''        
+def removeBD(options, args):
+    
+    fastaC = fastaCLIP(options)
+    fastaC.remove()
+
 
 '''
 Plotting function
@@ -373,9 +420,11 @@ def main():
         parser = optparse.OptionParser(formatter=optparse.TitledHelpFormatter(), usage=globals()['__doc__'], version="%prog 1.0")
 
         parser.add_option('-v', '--verbose', action='store_true', default=False, help='verbose output')
-        parser.add_option('-i', '--input', action='store', type='string',  default="../test/dummy_test/test.bam", dest='input', help='input file ')
-        parser.add_option('-o', '--output', action='store', type='string',  default="../test/dummy_test/output.bed", dest='output', help='output file name')
-        parser.add_option('-f', '--compare', action='store', type='string',  default="../test/dummy_test/output_130000SS.bed", dest='compare', help='file which you want to compare with your input file')
+        parser.add_option('-b', '--barcode', action='store', type='string',  default=None, dest='barcode', help='barcode')
+        parser.add_option('-n', '--mismatches', action='store', type='int',  default=2, dest='mismatches', help='number of mismatches')
+        parser.add_option('-i', '--input', action='store', type='string',  default=None, dest='input', help='input file ')
+        parser.add_option('-o', '--output', action='store', type='string',  default=None, dest='output', help='output file name')
+        parser.add_option('-f', '--compare', action='store', type='string',  default=None, dest='compare', help='file which you want to compare with your input file')
         parser.add_option('-c', '--choice', action='store', type='string',  default=None, dest='choice', help='option')
         parser.add_option('-q', '--minAlignmentQuality',   action='store', type='int', default=10,   dest='minAlignmentQuality', help='minimum alignment quality')
         parser.add_option('-m', '--minReadLength', action='store', type='int', default=0, dest='minReadLength', help='minimum read length')
@@ -383,7 +432,7 @@ def main():
         parser.add_option('-l', '--maxReadIntervalLength', action='store', type='int', default=10000, dest='maxReadIntervalLength', help='maximum read interval length')
         parser.add_option('-p', '--primary',   action='store_true', default=False,  dest='primary', help='set if you want to use only primary positions of multimapping reads')
         parser.add_option('-d', '--dist', action='store', type='int', default=4000, dest='dist', help='Maximum distance between two sites of a read if its higher than this value it will be count as this value')
-        parser.add_option('-g', '--gtf', action='store', type='string', default='../test/gff_gtf/human.gtf', dest='gtf', help='gtf file for annotation')
+        parser.add_option('-g', '--gtf', action='store', type='string', default=None, dest='gtf', help='gtf file for annotation')
         parser.add_option('-t', '--type', action='store', type='string', default='gene_biotype', dest='type', help='gene type for annotation')
         parser.add_option('-w', '--windowSize', action='store', type='int', default=50, dest='windowSize', help='window size for sliding window')
         parser.add_option('-s', '--windowStep', action='store', type='int', default=20, dest='windowStep', help='window step for sliding window')
@@ -399,14 +448,14 @@ def main():
             program = args[0]
 
             if program == "extract":
-                if len(args) < 3:
+                if options.input == None:
                     usage_extract()
                     os._exit(1)
                 else:   
                     checkFileExists(options.input, parser)
                     extract(parser, options, args)
             elif program == 'countSlidingWindows':
-                if len(args) < 3:
+                if options.input == None:
                     usage_countSlidingWindows()
                     os._exit(1)
                 else:
@@ -414,7 +463,7 @@ def main():
                     checkFileExists(options.compare, parser)
                     countSlidingWindow(options, args)
             elif program == 'junction':
-                if len(args) < 3:
+                if options.input == None:
                     usage_junction()
                     os._exit(1)
                 else: 
@@ -422,7 +471,7 @@ def main():
                     checkFileExists(options.compare, parser)
                     junction(program, options, args)
             elif program == 'count':
-                if len(args) < 3:
+                if options.input == None:
                     usage_count()
                     os._exit(1)
                 else: 
@@ -430,36 +479,47 @@ def main():
                     checkFileExists(options.compare, parser)
                     count(program, parser, options, args)
             elif program == 'annotation':
-                if len(args) < 3:
+                if options.gtf == None:
                     usage_annotation()
                     os._exit(1)
                 else: 
                     checkFileExists(options.gtf, parser)
                     process(options, args)
             elif program == 'plot':
-                if len(args) < 2:
+                if options.input == None:
                     usage_plot()
                     os._exit(1)
                 else: 
                     checkFileExists(options.input, parser)
                     plot(parser, options, args)
             elif program =='createSlidingWindows':
-                if len(args) < 3:
+                if options.input == None:
                     usage_createSlidingWindows()
                     os._exit(1)
                 else: 
                     checkFileExists(options.input, parser)
                     slidingWindow(options, args)
             elif program =='slidingWindowsToDEXSeq':
-                if len(args) < 3:
+                if options.input == None:
                     usage_slidingWindowsToDEXSeq()
                     os._exit(1)
                 else:
                     checkFileExists(options.input, parser)
                     toDEXSeq(options, args)
             elif program =='genomeToReads':
-                checkFileExists(options.input, parser)
-                genomeToReads(options, args)
+                if options.input == None:
+                    usage_genomeToReads()
+                    os._exit(1)
+                else:
+                    checkFileExists(options.input, parser)
+                    genomeToReads(options, args)
+            elif program == 'removeRandomBarcodeDuplicates':
+                if options.input == None:
+                    usage_removeRandomBarcodeDuplicates()
+                    os._exit(1)
+                else:
+                    checkFileExists(options.input, parser)
+                    removeBD(options, args)
             else:
                 parser.error ('Incorrect argument for execution') 
 

@@ -25,8 +25,8 @@ FASTA = "/g/hentze/projects/Software/htseq-clip/fasta/GRCh38.p3.genome.fa"
 FASTAN = "GRCh38.p3.genome"
 
 #dir for output
-OUTDIR = "output"
-BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam/hnRNPC"
+OUTDIR = "marko_thesis"
+BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam/hnRNPC_ULE"
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam/hnRNPC"
 
 # Automatically read in all samples
 
-SAMPLES, = glob_wildcards("/g/hentze/projects/Software/htseq-clip/bam/hnRNPC/{samples}.bam")
+SAMPLES, = glob_wildcards("/g/hentze/projects/Software/htseq-clip/bam/hnRNPC_ULE/{samples}.bam")
 # ----------------------------------------------------------------------------------------
 
 SITES = "MS SS ES DEL INS".split()
@@ -116,7 +116,7 @@ rule process:
 	log:
 		expand("../logs/{gtfn}.log", gtfn=GTFN, outdir=OUTDIR)
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py process -g {input.gtf} -t gene_type -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py annotation -g {input.gtf} -t gene_type -o {output} 2> {log}"
 		
 rule sort_gtf:
 	input:
@@ -137,7 +137,7 @@ rule sliding_window:
 	log:
 		expand("../logs/{gtfn}.sw.log", gtfn=GTFN, outdir=OUTDIR)
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py slidingWindow -i {input} -o {output} -w 50 -s 20 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py createSlidingWindows -i {input} -o {output} -w 100 -s 40 2> {log}"
 		
 rule sort_sliding_window:
 	input:
@@ -306,7 +306,7 @@ rule do_sw:
 	log:
 		"../logs/{sample}_{site}.sw.count.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py countSlidingWindow -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py countSlidingWindows -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
 				
 # ----------------------------------------------------------------------------------------
 # DO CONVERTION TO DEXSEQ
@@ -324,7 +324,7 @@ rule do_dexseq:
 	log:
 		"../logs/{sample}_{site}.dex.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py toDexSeq -i {input} -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py slidingWindowsToDEXSeq -i {input} -o {output} 2> {log}"
 		
 		
 # ----------------------------------------------------------------------------------------	

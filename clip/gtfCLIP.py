@@ -32,9 +32,6 @@ class gtfCLIP:
         if hasattr(options, 'output'):
             self.fOutput = options.output  
             
-        if hasattr(options, 'output'):
-            self.fOutput = options.output  
-            
         if hasattr(options, 'windowSize'):
             self.windowSize = options.windowSize  
             
