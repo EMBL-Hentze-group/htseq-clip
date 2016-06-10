@@ -2,6 +2,7 @@
 # bokehCLIP class
 # Authors: Marko Fritz, marko.fritz@embl.de
 #          Thomas Schwarzl, schwarzl@embl.de
+#          Nadia Ashraf, nadia.ashraf@embl.de
 # Institution: EMBL Heidelberg
 # Date: December 2015
 # --------------------------------------------------
@@ -195,7 +196,7 @@ class bokehCLIP:
             )
             tab1 = Panel(child=rlPlot, title="Read length")
             
-            rlDataOutput = open(path+"_readLength.txt", "w")
+            rlDataOutput = open(path+"_rlData.txt", "w")
             rlDataOutput.write("Read Length\tNumber of Reads\n")
             for i in range(0, len(rlKeys)):
                 rlDataOutput.write(str(rlKeys[i]) + "\t" + str(rlCounts[i]) + "\n")
@@ -207,7 +208,7 @@ class bokehCLIP:
             
             tab2 = Panel(child=dpData_table, title="Duplicates")
             
-            dpDataOutput = open(path+"_duplicationRatio.txt", "w")
+            dpDataOutput = open(path+"_dpData.txt", "w")
             dpDataOutput.write("Duplicates\tNumber of duplicates\n")
             for i in range(0, len(dpKeys)):
                 dpDataOutput.write(str(dpKeys[i]) + "\t" + str(dpCounts[i]) + "\n")
@@ -224,7 +225,7 @@ class bokehCLIP:
             
             tab3 = Panel(child=chromPlot, title="Chromosomes")
             
-            chromDataOutput = open(path+"_chromosomes.txt", "w")
+            chromDataOutput = open(path+"_chromData.txt", "w")
             chromDataOutput.write("Chromosomes\tCounts\n")
             for i in range(0, len(chromKeys)):
                 chromDataOutput.write(str(chromKeys[i]) + "\t" + str(chromCounts[i]) + "\n")
@@ -241,7 +242,7 @@ class bokehCLIP:
             
             tab4 = Panel(child=strandPlot, title="Strands")
             
-            strandDataOutput = open(path+"_strands.txt", "w")
+            strandDataOutput = open(path+"_strandData.txt", "w")
             strandDataOutput.write("Strands\tCounts\n")
             for i in range(0, len(strandKeys)):
                 strandDataOutput.write(str(strandKeys[i]) + "\t" + str(strandCounts[i]) + "\n")
@@ -350,19 +351,17 @@ class bokehCLIP:
                     else:
                         error = "Unknown track annotation: "+line[1]+". Check your data!!"
                         raise ValueError(error)
+
+                elif line.startswith('Chromosome'):
+                    continue
                 elif "intergenic" in line:
                     line = line.split("\n")
                     line = line[0].split("\t")
                     
                     if not countsPerType.has_key("intergenic"):
-                        countsPerType["intergenic"] = int(line[11])
+                        countsPerType["intergenic"] = int(line[12])
                     else:
-                        countsPerType["intergenic"] += int(line[11])
-                        
-                    if not types.has_key("intergenic"):
-                        types["intergenic"] = 1
-                    else:
-                        types["intergenic"] += 1        
+                        countsPerType["intergenic"] += int(line[12])
                 else:
                            
                     line = line.split("\n")
@@ -373,69 +372,109 @@ class bokehCLIP:
                     else:
                         chromosomes[line[0]] += 1
                         
-                    if not counts.has_key(int(line[11])):
-                        counts[int(line[11])] = 1
+                    if not counts.has_key(int(line[12])):
+                        counts[int(line[12])] = 1
                     else:
-                        counts[int(line[11])] += 1
+                        counts[int(line[12])] += 1
                         
-                    if not density.has_key(float(line[14])):
-                        density[float(line[14])] = 1
+                    if not density.has_key(float(line[15])):
+                        density[float(line[15])] = 1
                     else:
-                        density[float(line[14])] += 1
+                        density[float(line[15])] += 1
                         
-                    if not duplicates.has_key(int(line[15])):
-                        duplicates[int(line[15])] = 1
+                    if not duplicates.has_key(int(line[16])):
+                        duplicates[int(line[16])] = 1
                     else:
-                        duplicates[int(line[15])] += 1
+                        duplicates[int(line[16])] += 1
                         
-                    if line[6] == "exon" and line[9] == "protein_coding":
-                        line[9] = "protein_coding_exon"
-                        if not types.has_key(line[9]):
-                            types[line[9]] = 1
+                    if line[7] == "exon" and line[10] == "protein_coding":
+                        line[10] = "protein_coding_exon"
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
                         else:
-                            types[line[9]] += 1  
+                            types[line[10]] += 1
                             
-                        if not dcQC.has_key(line[9]):
-                            dcQC[line[9]] = [int(line[15]), int(line[11])]
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
                         else:
-                            dcQC[line[9]][0] += int(line[15])
-                            dcQC[line[9]][1] += int(line[11])
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
                             
                             
-                    elif line[6] == "intron" and line[9] == "protein_coding":
-                        line[9] = "protein_coding_intron"
-                        if not types.has_key(line[9]):
-                            types[line[9]] = 1
+                    elif line[7] == "intron" and line[10] == "protein_coding":
+                        line[10] = "protein_coding_intron"
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
                         else:
-                            types[line[9]] += 1   
+                            types[line[10]] += 1
                             
-                        if not dcQC.has_key(line[9]):
-                            dcQC[line[9]] = [int(line[15]), int(line[11])]
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
                         else:
-                            dcQC[line[9]][0] += int(line[15])
-                            dcQC[line[9]][1] += int(line[11])    
-                                
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
+
+                    elif line[7] == "5UTR" and line[10] == "protein_coding":
+                        line[10] = "protein_coding_5UTR"
+
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
+                        else:
+                            types[line[10]] += 1
+
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
+                        else:
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
+
+                    elif line[7] == "3UTR" and line[10] == "protein_coding":
+                        line[10] = "protein_coding_3UTR"
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
+                        else:
+                            types[line[10]] += 1
+
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
+                        else:
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
+
+                    elif line[7] == "CDS" and line[10] == "protein_coding":
+                        line[10] = "protein_coding_CDS"
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
+                        else:
+                            types[line[10]] += 1
+
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
+                        else:
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
+
                     else:
-                        if not types.has_key(line[9]):
-                            types[line[9]] = 1
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
                         else:
-                            types[line[9]] += 1
+                            types[line[10]] += 1
                             
-                        if not dcQC.has_key(line[9]):
-                            dcQC[line[9]] = [int(line[15]), int(line[11])]
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
                         else:
-                            dcQC[line[9]][0] += int(line[15])
-                            dcQC[line[9]][1] += int(line[11])
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
                             
-                    if not regions.has_key(line[6]):
-                        regions[line[6]] = 1
+                    if not regions.has_key(line[7]):
+                        regions[line[7]] = 1
                     else:
-                        regions[line[6]] += 1
+                        regions[line[7]] += 1
                         
-                    if not strands.has_key(line[5]):
-                        strands[line[5]] = 1
+                    if not strands.has_key(line[6]):
+                        strands[line[6]] = 1
                     else:
-                        strands[line[5]] += 1
+                        strands[line[6]] += 1
                     
             for k in dcQC:
                 dupPerType[k] = dcQC[k][0]
@@ -445,10 +484,10 @@ class bokehCLIP:
             chrN = {}
             cn = {}
             dn = {}
-                
+
             for k in chromosomes:
                 chrN[k] = (chromosomes[k]/ float(chrNorm[k]))
-                
+
             for k in countsPerType:
                 if not k == "intergenic":
                     cn[k] = (countsPerType[k] / float(featureNorm[k]))
@@ -626,14 +665,14 @@ class bokehCLIP:
             
             tab1 = Panel(child=cptPlot, title="Counts per type")
             
-            cptDataOutput = open(path+"_countsPerType.txt", "w")
+            cptDataOutput = open(path+"_cptData.txt", "w")
             cptDataOutput.write("Types\tCount\n")
             for i in range(0, len(cptKeys)):
                 cptDataOutput.write(str(cptKeys[i]) + "\t" + str(cptCount[i]) + "\n")
             
             cptDataOutput.close()
             
-            cptNP = Bar(cptNData, title=heading+"_Counts_per_Type", values='cptCount', label=CatAttr(columns=['cptKeys'], sort=False),tools=TOOLS, xlabel="Types", ylabel="Length normalized count")
+            cptNP = Bar(cptNData, title=heading+"_Counts_per_Type", values='cptCount', label=CatAttr(columns=['cptKeys'], sort=False),tools=TOOLS, xlabel="Types", ylabel="Normalized count")
             cptNData_table = DataTable(source=ColumnDataSource(cptNData), columns=[TableColumn(field="cptKeys", title="Types"),TableColumn(field="cptCount", title="Normalized count")], width=600, height=600)
             
             cptNPlot = vplot(
@@ -642,7 +681,7 @@ class bokehCLIP:
             
             tab2 = Panel(child=cptNPlot, title="Counts per type normalized")
             
-            cptNDataOutput = open(path+"_countsPerTypeNormalized.txt", "w")
+            cptNDataOutput = open(path+"_cptNData.txt", "w")
             cptNDataOutput.write("Types\tNormalized count\n")
             for i in range(0, len(cptNKeys)):
                 cptNDataOutput.write(str(cptNKeys[i]) + "\t" + str(cptNCount[i]) + "\n")
@@ -658,14 +697,14 @@ class bokehCLIP:
             
             tab3 = Panel(child=dptPlot, title="Duplicates per type")
             
-            dptDataOutput = open(path+"_duplicationRatioPerType.txt", "w")
+            dptDataOutput = open(path+"_dptData.txt", "w")
             dptDataOutput.write("Types\tNumber of duplicates\n")
             for i in range(0, len(dptKeys)):
                 dptDataOutput.write(str(dptKeys[i]) + "\t" + str(dptCount[i]) + "\n")
             
             dptDataOutput.close()
             
-            dptNP = Bar(dptNData, title=heading+"_Duplicates_per_Type", values='dptCount', label=CatAttr(columns=['dptKeys'], sort=False),tools=TOOLS, xlabel="Types", ylabel="Length normalized count")
+            dptNP = Bar(dptNData, title=heading+"_Duplicates_per_Type", values='dptCount', label=CatAttr(columns=['dptKeys'], sort=False),tools=TOOLS, xlabel="Types", ylabel="Normalized count")
             dptNData_table = DataTable(source=ColumnDataSource(dptNData), columns=[TableColumn(field="dptKeys", title="Types"),TableColumn(field="dptCount", title="Duplicates normalized")], width=600, height=600)
             
             dptNPlot = vplot(
@@ -674,7 +713,7 @@ class bokehCLIP:
             
             tab4 = Panel(child=dptNPlot, title="Duplicates per type normalized")
             
-            dptNDataOutput = open(path+"_duplicationRatioPerTypeNormalized.txt", "w")
+            dptNDataOutput = open(path+"_dptNData.txt", "w")
             dptNDataOutput.write("Types\tDuplicates normalized\n")
             for i in range(0, len(dptNKeys)):
                 dptNDataOutput.write(str(dptNKeys[i]) + "\t" + str(dptNCount[i]) + "\n")
@@ -690,7 +729,7 @@ class bokehCLIP:
             
             tab5 = Panel(child=dcQCPlot, title="Sum(Duplicates)/Sum(Counts)")
             
-            dcQCDataOutput = open(path+"_Sum(Duplicates)divBySum(Counts).txt", "w")
+            dcQCDataOutput = open(path+"_dcQCData.txt", "w")
             dcQCDataOutput.write("Types\tSum(Duplicates)/Sum(Counts)\n")
             for i in range(0, len(dcQCKeys)):
                 dcQCDataOutput.write(str(dcQCKeys[i]) + "\t" + str(dcQCCount[i]) + "\n")
@@ -705,9 +744,9 @@ class bokehCLIP:
                     hplot(typeP, typeData_table),
             )
             
-            tab6 = Panel(child=tPlot, title="Total amount of types")  
+            tab6 = Panel(child=tPlot, title="Total amount of types per feature")  
             
-            typeDataOutput = open(path+"_totalTypes.txt", "w")
+            typeDataOutput = open(path+"_typeData.txt", "w")
             typeDataOutput.write("Types\tNumber of types\n")
             for i in range(0, len(vType)):
                 typeDataOutput.write(str(vType[i]) + "\t" + str(typeCount[i]) + "\n")
@@ -726,14 +765,14 @@ class bokehCLIP:
             
             tab7 = Panel(child=chromPlot, title="Chromosomes")
             
-            chromDataOutput = open(path+"_chromosomes.txt", "w")
+            chromDataOutput = open(path+"_chromData.txt", "w")
             chromDataOutput.write("Chromosomes\tCounts\n")
             for i in range(0, len(chromKeys)):
                 chromDataOutput.write(str(chromKeys[i]) + "\t" + str(chromCounts[i]) + "\n")
             
             chromDataOutput.close()
             
-            chromNP = Bar(chromNData, title=heading+"_chromosomes", values='chromCounts', label=CatAttr(columns=['chromKeys'], sort=False),tools=TOOLS, xlabel="Chromosomes", ylabel="Length normalized count") 
+            chromNP = Bar(chromNData, title=heading+"_chromosomes", values='chromCounts', label=CatAttr(columns=['chromKeys'], sort=False),tools=TOOLS, xlabel="Chromosomes", ylabel="Normalized count") 
             chromNData_table = DataTable(source=ColumnDataSource(chromNData), columns=[TableColumn(field="chromKeys", title="Chromosomes"),TableColumn(field="chromCounts", title="Normalized count")], width=600, height=600)
     
             chromNPlot = vplot(
@@ -742,7 +781,7 @@ class bokehCLIP:
             
             tab8 = Panel(child=chromNPlot, title="Chromosomes normalized")
             
-            chromDataOutput = open(path+"_chromosomesNormalized.txt", "w")
+            chromDataOutput = open(path+"_chromNData.txt", "w")
             chromDataOutput.write("Chromosomes\tCounts\n")
             for i in range(0, len(chromKeys)):
                 chromDataOutput.write(str(chromNKeys[i]) + "\t" + str(chromNCounts[i]) + "\n")
@@ -762,7 +801,7 @@ class bokehCLIP:
             
             tab9 = Panel(child=strandPlot, title="Strands")
             
-            strandDataOutput = open(path+"_strands.txt", "w")
+            strandDataOutput = open(path+"_strandData.txt", "w")
             strandDataOutput.write("Srands\tCounts\n")
             for i in range(0, len(strandKeys)):
                 strandDataOutput.write(str(strandKeys[i]) + "\t" + str(strandCounts[i]) + "\n")
@@ -781,7 +820,7 @@ class bokehCLIP:
             
             regionTab = Panel(child=rPlot, title="Regions")
             
-            regionDataOutput = open(path+"_regions.txt", "w")
+            regionDataOutput = open(path+"_regionData.txt", "w")
             regionDataOutput.write("Regions\tNumber of Regions\n")
             for i in range(0, len(region)):
                 regionDataOutput.write(str(region[i]) + "\t" + str(regionCount[i]) + "\n")
@@ -794,7 +833,7 @@ class bokehCLIP:
              
             tab10 = Panel(child=cData_table, title="Counts")
             
-            countDataOutput = open(path+"_counts.txt", "w")
+            countDataOutput = open(path+"_countData.txt", "w")
             countDataOutput.write("Counts\tNumber of counts\n")
             for i in range(0, len(countKeys)):
                 countDataOutput.write(str(countKeys[i]) + "\t" + str(countCounts[i]) + "\n")
@@ -806,7 +845,7 @@ class bokehCLIP:
              
             tab11 = Panel(child=dpData_table, title="Duplicates")
             
-            dupDataOutput = open(path+"_duplications.txt", "w")
+            dupDataOutput = open(path+"_dupData.txt", "w")
             dupDataOutput.write("Duplicates\tNumber of duplicates\n")
             for i in range(0, len(dpKeys)):
                 dupDataOutput.write(str(dpKeys[i]) + "\t" + str(dpCounts[i]) + "\n")
@@ -1581,7 +1620,7 @@ class bokehCLIP:
             )
             tab1 = Panel(child=iePlot, title="Intron-Exon Junction")
                  
-            ieDataOutput = open(path+"_IntronExonJunction.txt", "w")
+            ieDataOutput = open(path+"_ieData.txt", "w")
             ieDataOutput.write("Distances\tCount\n")
             for i in range(0, len(ieJuncDist)):
                 ieDataOutput.write(str(ieJuncDist[i]) + "\t" + str(ieJuncCount[i]) + "\n")
@@ -1601,7 +1640,7 @@ class bokehCLIP:
             )
             tab2 = Panel(child=eiPlot, title="Exon-Intron Junction")
                  
-            eiDataOutput = open(path+"_ExonIntronJunction.txt", "w")
+            eiDataOutput = open(path+"_eiData.txt", "w")
             eiDataOutput.write("Distances\tCount\n")
             for i in range(0, len(eiJuncDist)):
                 eiDataOutput.write(str(eiJuncDist[i]) + "\t" + str(eiJuncCount[i]) + "\n")
@@ -1621,7 +1660,7 @@ class bokehCLIP:
             )
             tab3 = Panel(child=eePlot, title="Exon-Exon Junction")
                  
-            eeDataOutput = open(path+"_ExonExonJunction.txt", "w")
+            eeDataOutput = open(path+"_eeData.txt", "w")
             eeDataOutput.write("Distances\tCount\n")
             for i in range(0, len(eeJuncDist)):
                 eeDataOutput.write(str(eeJuncDist[i]) + "\t" + str(eeJuncCount[i]) + "\n")
@@ -1641,7 +1680,7 @@ class bokehCLIP:
             )
             tab4 = Panel(child=iiPlot, title="Intron-Intron Junction")
                  
-            iiDataOutput = open(path+"_IntronIntronJunction.txt", "w")
+            iiDataOutput = open(path+"_iiData.txt", "w")
             iiDataOutput.write("Distances\tCount\n")
             for i in range(0, len(iiJuncDist)):
                 iiDataOutput.write(str(iiJuncDist[i]) + "\t" + str(iiJuncCount[i]) + "\n")
@@ -1660,7 +1699,7 @@ class bokehCLIP:
             )
             tab5 = Panel(child=igePlot, title="Intergenic-Exon Junction")
                  
-            igeDataOutput = open(path+"_IntergenicExonJunction.txt", "w")
+            igeDataOutput = open(path+"_igeData.txt", "w")
             igeDataOutput.write("Distances\tCount\n")
             for i in range(0, len(igeJuncDist)):
                 igeDataOutput.write(str(igeJuncDist[i]) + "\t" + str(igeJuncCount[i]) + "\n")
@@ -1680,7 +1719,7 @@ class bokehCLIP:
             )
             tab6 = Panel(child=eigPlot, title="Exon-Intergenic Junction")
                  
-            eigDataOutput = open(path+"_ExonIntergenicJunction.txt", "w")
+            eigDataOutput = open(path+"_eigData.txt", "w")
             eigDataOutput.write("Distances\tCount\n")
             for i in range(0, len(eigJuncDist)):
                 eigDataOutput.write(str(eigJuncDist[i]) + "\t" + str(eigJuncCount[i]) + "\n")
@@ -1699,10 +1738,10 @@ class bokehCLIP:
                     hplot(es11P, es11Data_table)
             )
             
-            tab7 = Panel(child=es11Plot, title="5'-terminal") 
+            tab7 = Panel(child=es11Plot, title="Exon-1/1 Start") 
             
                  
-            es11DataOutput = open(path+"_5PrimeTerminal.txt", "w")
+            es11DataOutput = open(path+"_es11Data.txt", "w")
             es11DataOutput.write("Distances\tCount\n")
             for i in range(0, len(es11JuncDist)):
                 es11DataOutput.write(str(es11JuncDist[i]) + "\t" + str(es11JuncCount[i]) + "\n")
@@ -1720,9 +1759,9 @@ class bokehCLIP:
                     hplot(ee11P, ee11Data_table)
             )
             
-            tab8 = Panel(child=ee11Plot, title="3'-terminal")
+            tab8 = Panel(child=ee11Plot, title="Exon-1/1 End")
                  
-            ee11DataOutput = open(path+"_3PrimeTerminal.txt", "w")
+            ee11DataOutput = open(path+"_ee11Data.txt", "w")
             ee11DataOutput.write("Distances\tCount\n")
             for i in range(0, len(ee11JuncDist)):
                 ee11DataOutput.write(str(ee11JuncDist[i]) + "\t" + str(ee11JuncCount[i]) + "\n")
@@ -1747,7 +1786,7 @@ class bokehCLIP:
             )
             tab9 = Panel(child=iePlotF, title="Intron-Exon Junction")
                  
-            ieFDataOutput = open(path+"_IntronExonJunctionFiltered.txt", "w")
+            ieFDataOutput = open(path+"_ieFData.txt", "w")
             ieFDataOutput.write("Distances\tCount\n")
             for i in range(0, len(ieJuncDistF)):
                 ieFDataOutput.write(str(ieJuncDistF[i]) + "\t" + str(ieJuncCountF[i]) + "\n")
@@ -1768,7 +1807,7 @@ class bokehCLIP:
             )
             tab10 = Panel(child=eiPlotF, title="Exon-Intron Junction")
                  
-            eiFDataOutput = open(path+"_ExonIntronJunctionFiltered.txt", "w")
+            eiFDataOutput = open(path+"_eiFData.txt", "w")
             eiFDataOutput.write("Distances\tCount\n")
             for i in range(0, len(eiJuncDistF)):
                 eiFDataOutput.write(str(eiJuncDistF[i]) + "\t" + str(eiJuncCountF[i]) + "\n")
@@ -1788,7 +1827,7 @@ class bokehCLIP:
             )
             tab11 = Panel(child=eePlotF, title="Exon-Exon Junction")
                  
-            eeFDataOutput = open(path+"_ExonExonJunctionFiltered.txt", "w")
+            eeFDataOutput = open(path+"_eeFData.txt", "w")
             eeFDataOutput.write("Distances\tCount\n")
             for i in range(0, len(eeJuncDistF)):
                 eeFDataOutput.write(str(eeJuncDistF[i]) + "\t" + str(eeJuncCountF[i]) + "\n")
@@ -1808,7 +1847,7 @@ class bokehCLIP:
             )
             tab12 = Panel(child=iiPlotF, title="Intron-Intron Junction")
                  
-            iiFDataOutput = open(path+"_IntronIntronJunctionFiltered.txt", "w")
+            iiFDataOutput = open(path+"_iiFData.txt", "w")
             iiFDataOutput.write("Distances\tCount\n")
             for i in range(0, len(iiJuncDistF)):
                 iiFDataOutput.write(str(iiJuncDistF[i]) + "\t" + str(iiJuncCountF[i]) + "\n")
@@ -1827,7 +1866,7 @@ class bokehCLIP:
             )
             tab13 = Panel(child=igePlotF, title="Intergenic-Exon Junction")
                  
-            igeFDataOutput = open(path+"_IntergenicExonJunctionFiltered.txt", "w")
+            igeFDataOutput = open(path+"_igeFData.txt", "w")
             igeFDataOutput.write("Distances\tCount\n")
             for i in range(0, len(igeJuncDistF)):
                 igeFDataOutput.write(str(igeJuncDistF[i]) + "\t" + str(igeJuncCountF[i]) + "\n")
@@ -1847,7 +1886,7 @@ class bokehCLIP:
             )
             tab14 = Panel(child=eigPlotF, title="Exon-Intergenic Junction")
                  
-            eigFDataOutput = open(path+"_ExonIntergenicJunctionFiltered.txt", "w")
+            eigFDataOutput = open(path+"_eigData.txt", "w")
             eigFDataOutput.write("Distances\tCount\n")
             for i in range(0, len(eigJuncDistF)):
                 eigFDataOutput.write(str(eigJuncDistF[i]) + "\t" + str(eigJuncCountF[i]) + "\n")
@@ -1864,9 +1903,9 @@ class bokehCLIP:
             es11PlotF = vplot(
                     hplot(es11PF, es11Data_tableF)
             )
-            tab15 = Panel(child=es11PlotF, title="5'-terminal")
+            tab15 = Panel(child=es11PlotF, title="Exon-1/1 Start")
                  
-            es11FDataOutput = open(path+"_5PrimeTerminalFiltered.txt", "w")
+            es11FDataOutput = open(path+"_es11Data.txt", "w")
             es11FDataOutput.write("Distances\tCount\n")
             for i in range(0, len(es11JuncDistF)):
                 es11FDataOutput.write(str(es11JuncDistF[i]) + "\t" + str(es11JuncCountF[i]) + "\n")
@@ -1884,9 +1923,9 @@ class bokehCLIP:
                     hplot(ee11PF, ee11Data_tableF)
             )
             
-            tab16 = Panel(child=ee11PlotF, title="3'-terminal")
+            tab16 = Panel(child=ee11PlotF, title="Exon-1/1 End")
                  
-            ee11FDataOutput = open(path+"_3PrimeTerminalFiltered.txt", "w")
+            ee11FDataOutput = open(path+"_ee11Data.txt", "w")
             ee11FDataOutput.write("Distances\tCount\n")
             for i in range(0, len(ee11JuncDistF)):
                 ee11FDataOutput.write(str(ee11JuncDistF[i]) + "\t" + str(ee11JuncCountF[i]) + "\n")
