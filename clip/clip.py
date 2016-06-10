@@ -372,6 +372,20 @@ def cl_dist(parser, args):
     feat = feature(args)
     feat.dist_cl()
 
+"""
+Function for counting cross link sites inside repeat regions
+"""
+def features(parser, args):
+    feat = feature(args)
+    if hasattr(args, 'choice') and args.choice != None:
+        if args.choice == 'a':
+            feat.count_all()
+        elif args.choice == 'o':
+            feat.count_only()
+        else:
+            parser.error('Invalid option for count')
+    else:
+        parser.error('You need -c option for the correct counting of your data!')
 #======================================================================================
 #-------------------------------------------------------------
 def checkFileExists(filename, parser):
@@ -482,8 +496,24 @@ def main():
             elif program =='genomeToReads':
                 checkFileExists(args.input, parser)
                 genomeToReads(args)
+            elif program == 'feature':
+                if len(d) < 3:
+                    usage_count()
+                    os._exit(1)
+                else:
+                    checkFileExists(args.input, parser)
+                    checkFileExists(args.compare, parser)
+                    features(parser,args)
+            elif program == 'dist':
+                if len(d) < 3:
+                    usage_count()
+                    os._exit(1)
+                else:
+                    checkFileExists(args.input, parser)
+                    checkFileExists(args.compare, parser)
+                    cl_dist(parser,args)
             else:
-                parser.error ('Incorrect argument for execution') 
+                parser.error ('Incorrect argument for execution')
 
     # Exception Handling: Interruption / Errors
     except KeyboardInterrupt, exception: # Control - C
