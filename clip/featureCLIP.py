@@ -453,7 +453,7 @@ class feature:
                             length = b_Curr[1] - b_Curr[0]
 
                             if len(d_count) != 0:
-                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length,cl_dist, output)
+                                self.write_out(chrom, strand, b_Curr, d_count, d_dup, length,cl_dist, output)
 
                             if not b_Curr == b_Last:
                                 bi = bi + 1
@@ -493,7 +493,7 @@ class feature:
 
                                     length = b_Curr[1] - b_Curr[0]
 
-                                    self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length,cl_dist, output)
+                                    self.write_out(chrom, strand, b_Curr, d_count, d_dup, length,cl_dist, output)
 
                                     if not b_Curr == b_Last:
                                         bi = bi + 1
@@ -508,7 +508,7 @@ class feature:
                             else:
                                 check = False
 
-    def writeOut(self, chrom, strand, b, d_count, d_dup, length, dist,output):
+    def write_out(self, chrom, strand, b, d_count, d_dup, length, dist,output):
 
         name = b[2]
 
