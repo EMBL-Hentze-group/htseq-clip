@@ -18,6 +18,7 @@ class gtfCLIP:
     gtfFile = ''
     fOutput = ''
     geneType = ''
+    geneName = ''
     windowSize = 50
     windowStep = 20
     
@@ -44,6 +45,9 @@ class gtfCLIP:
             
         if hasattr(options, 'type'):
             self.geneType = options.type 
+        
+        if hasattr (options,'name'):
+            self.geneName = options.name
             
             
     '''
@@ -208,7 +212,16 @@ class gtfCLIP:
                     error = "Wrong gene type: "+self.geneType+". Check your annotation file!!"
                     raise KeyError(error)
                          
-                name = name + '@' + attribute
+                if self.geneName:
+                    if feature.attr.has_key(self.geneName):
+                        gene_name = str(feature.attr[str(self.geneName)])
+                    else:
+                        error = "Wrong gene Name: "+self.geneName+". Check your annotation file!!"
+                        raise KeyError(error)
+
+                    name = name + '@' + gene_name + '@' + attribute
+                else:
+                    name = name+'@'+attribute
                 t = attribute
                 start = feature.iv.start
                 end = feature.iv.end
