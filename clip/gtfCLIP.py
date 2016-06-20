@@ -243,6 +243,10 @@ class gtfCLIP:
         for k in typeFooter:
             output.write("track type "+str(k)+" "+str(typeFooter[k])+"\n")
         
+        if self.geneName:
+            output.write("track"+" "+"gene_name"+"\n")
+        else:
+            output.write("track"+"\n")
         output.close()                 
     #================================================================================= 
        
