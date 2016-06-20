@@ -76,24 +76,38 @@ class bedCLIP:
     ''' 
     def count_all(self):
         
+       choice = 0
         if self.fOutput.endswith(".gz"):
             output = gzip.open(self.fOutput, 'w') 
         else:        
             output = open(self.fOutput, 'w')
-            seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon/intron','Total exon/intron','Functional type','Length(nt)', 'Toatal cross-link sites in region',
-                   'Number of pos where cross-links are located', 'Max count in one pos','Count density','Total remove duplicates','Max no.of removed duplicates')
-            output.write(str("\t").join(seq) + "\n")
-        
+
         #Get the information for normalisation of the plots  
         if self.fCompare.endswith(".gz"):
             f = gzip.open(self.fCompare, 'r') 
         else:        
-            f = open(self.fCompare, 'r') 
-            
+            f = open(self.fCompare, 'r')
+
         for line in f:
             if line.startswith("track"):
-                output.write(line)
-                
+                l = line.split("\n")
+                l = l[0].split()
+                choice = len(l)
+                if choice == 2:
+                    seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
+                   'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
+                   'Density','Total before duplication removal','Max height before duplication removal ')
+                    output.write(str("\t").join(seq) + "\n")
+                elif choice == 1:
+                    seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
+                   'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
+                   'Density','Total before duplication removal','Max height before duplication removal ')
+                    output.write(str("\t").join(seq) + "\n")
+
+        for line in f:
+            if line.startswith("track"):
+                output.write('#'+line)
+        output.write('\n')
         f.close()
         
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
@@ -153,25 +167,38 @@ class bedCLIP:
     ''' 
     def count_only(self):
         
+        choice = 0
         if self.fOutput.endswith(".gz"):
             output = gzip.open(self.fOutput, 'w') 
         else:        
             output = open(self.fOutput, 'w')
-            seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
-                   'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
-                   'Density','Total before duplication removal','Max height before duplication removal ')
-            output.write(str("\t").join(seq) + "\n")
-        
+
         #Get the information for normalisation of the plots  
         if self.fCompare.endswith(".gz"):
             f = gzip.open(self.fCompare, 'r') 
         else:        
-            f = open(self.fCompare, 'r') 
-            
+            f = open(self.fCompare, 'r')
+
         for line in f:
             if line.startswith("track"):
-                output.write(line)
-                
+                l = line.split("\n")
+                l = l[0].split()
+                choice = len(l)
+                if choice == 2:
+                    seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
+                   'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
+                   'Density','Total before duplication removal','Max height before duplication removal ')
+                    output.write(str("\t").join(seq) + "\n")
+                elif choice == 1:
+                    seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
+                   'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
+                   'Density','Total before duplication removal','Max height before duplication removal ')
+                    output.write(str("\t").join(seq) + "\n")
+
+        for line in f:
+            if line.startswith("track"):
+                output.write('#'+line)
+        output.write('\n')
         f.close()
         
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
