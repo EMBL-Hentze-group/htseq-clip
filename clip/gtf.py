@@ -279,12 +279,17 @@ class gtfClip:
         chromFooter = OrderedDict(sorted(chromFooter.items(), key=lambda x: (-x[1], x[0])))
 
         for k in chromFooter:
-            output.write("#track chr "+str(k)+" "+str(chromFooter[k])+"\n")
+            output.write("track chr "+str(k)+" "+str(chromFooter[k])+"\n")
 
         typeFooter = OrderedDict(sorted(typeFooter.items(), key=lambda x: (-x[1], x[0])))
 
         for k in typeFooter:
-            output.write("#track type "+str(k)+" "+str(typeFooter[k])+"\n")
+            output.write("track type "+str(k)+" "+str(typeFooter[k])+"\n")
+            
+        if self.geneName:
+            output.write("track"+" "+"gene_name"+"\n")
+        else:
+            output.write("track"+"\n")
         print 'Finished!'
         output.close()
     #=================================================================================
