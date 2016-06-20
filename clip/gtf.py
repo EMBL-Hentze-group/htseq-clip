@@ -67,6 +67,9 @@ class gtfClip:
         ps_cds = []
         eFlag = None
         fs = []
+        ts = []
+        sc = []
+        ss = []
         eCount = 0
         iCount = 0
 
@@ -243,6 +246,9 @@ class gtfClip:
                 sc_start = 0
                 sc_stop = 0
                 tss = 0
+                sc = []
+                ss = []
+                ts =[]
 
                 ec = 1
                 ic = 1
@@ -274,6 +280,19 @@ class gtfClip:
                 ps_cds.append((feature.iv.start, feature.iv.end))
                 tag = 'utr'
                 gas[giv] += tag
+                
+            if not ts:
+                tss = 0
+            else:
+                tss = int(min(ts))
+            if not sc:
+                sc_start = 0
+            else:
+                sc_start = int(max(sc))
+            if not ss:
+                sc_stop = 0
+            else:
+                sc_stop = int(min(ss))
 
         #Write out information for normalization of plots
         chromFooter = OrderedDict(sorted(chromFooter.items(), key=lambda x: (-x[1], x[0])))
