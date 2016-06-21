@@ -15,6 +15,7 @@ from gtf import gtfClip
 from bokehCLIP import bokehCLIP
 from fastaCLIP import fastaCLIP
 from featureCLIP import feature
+from gffCLIP import gffClip
 
 VERSION = "0.1.1"
 
@@ -108,7 +109,7 @@ usage:                  htseq-clip annotation [options]
 
 Options:
 
- -g, --gtf         GTF or GFF file for annotation processing (.gtf)
+ -g, --gtf         GTF or GFF file for annotation processing (.gtf or .gff)
  
  -o, --output      output file (.bed)
  
@@ -342,12 +343,20 @@ Processing the annotation file
 '''       
 def process(args):
 
-    gtf = gtfClip(args)
-    gtfC = gtfCLIP(args)
-    if args.region:
-        gtf.processGTF()
-    else:
-        gtfC.processGTF()
+    if args.gtf.endswith('.gtf'):
+        gtf = gtfClip(args)
+        gtfC = gtfCLIP(args)
+        if args.region:
+            gtf.processGTF()
+        else:
+            gtfC.processGTF()
+    elif args.gtf.endswith('.gff'):
+        gff = gffClip(args)
+        gtfC = gtfCLIP(args)
+        if args.region:
+            gff.processGTF()
+        else:
+            gtfC.processGTF()
 
 '''
 Processing the annotation file into sliding windows
