@@ -350,7 +350,7 @@ def process(args):
             gtf.processGTF()
         else:
             gtfC.processGTF()
-    elif args.gtf.endswith('.gff'):
+    elif args.gtf.endswith('.gff') or args.gtf.endswith('.gff3'):
         gff = gffClip(args)
         gtfC = gtfCLIP(args)
         if args.region:
