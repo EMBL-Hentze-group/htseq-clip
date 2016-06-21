@@ -196,7 +196,7 @@ class bokehCLIP:
             )
             tab1 = Panel(child=rlPlot, title="Read length")
             
-            rlDataOutput = open(path+"_rlData.txt", "w")
+            rlDataOutput = open(path+"_read-length-data.txt", "w")
             rlDataOutput.write("Read Length\tNumber of Reads\n")
             for i in range(0, len(rlKeys)):
                 rlDataOutput.write(str(rlKeys[i]) + "\t" + str(rlCounts[i]) + "\n")
@@ -208,7 +208,7 @@ class bokehCLIP:
             
             tab2 = Panel(child=dpData_table, title="Duplicates")
             
-            dpDataOutput = open(path+"_dpData.txt", "w")
+            dpDataOutput = open(path+"_duplicates-data.txt", "w")
             dpDataOutput.write("Duplicates\tNumber of duplicates\n")
             for i in range(0, len(dpKeys)):
                 dpDataOutput.write(str(dpKeys[i]) + "\t" + str(dpCounts[i]) + "\n")
@@ -225,7 +225,7 @@ class bokehCLIP:
             
             tab3 = Panel(child=chromPlot, title="Chromosomes")
             
-            chromDataOutput = open(path+"_chromData.txt", "w")
+            chromDataOutput = open(path+"_chromosomes-data.txt", "w")
             chromDataOutput.write("Chromosomes\tCounts\n")
             for i in range(0, len(chromKeys)):
                 chromDataOutput.write(str(chromKeys[i]) + "\t" + str(chromCounts[i]) + "\n")
@@ -242,7 +242,7 @@ class bokehCLIP:
             
             tab4 = Panel(child=strandPlot, title="Strands")
             
-            strandDataOutput = open(path+"_strandData.txt", "w")
+            strandDataOutput = open(path+"_strands-data.txt", "w")
             strandDataOutput.write("Strands\tCounts\n")
             for i in range(0, len(strandKeys)):
                 strandDataOutput.write(str(strandKeys[i]) + "\t" + str(strandCounts[i]) + "\n")
@@ -665,7 +665,7 @@ class bokehCLIP:
             
             tab1 = Panel(child=cptPlot, title="Counts per type")
             
-            cptDataOutput = open(path+"_cptData.txt", "w")
+            cptDataOutput = open(path+"_counts-per-type-data.txt", "w")
             cptDataOutput.write("Types\tCount\n")
             for i in range(0, len(cptKeys)):
                 cptDataOutput.write(str(cptKeys[i]) + "\t" + str(cptCount[i]) + "\n")
@@ -681,7 +681,7 @@ class bokehCLIP:
             
             tab2 = Panel(child=cptNPlot, title="Counts per type normalized")
             
-            cptNDataOutput = open(path+"_cptNData.txt", "w")
+            cptNDataOutput = open(path+"_counts-per-typeNorm.txt", "w")
             cptNDataOutput.write("Types\tNormalized count\n")
             for i in range(0, len(cptNKeys)):
                 cptNDataOutput.write(str(cptNKeys[i]) + "\t" + str(cptNCount[i]) + "\n")
@@ -697,7 +697,7 @@ class bokehCLIP:
             
             tab3 = Panel(child=dptPlot, title="Duplicates per type")
             
-            dptDataOutput = open(path+"_dptData.txt", "w")
+            dptDataOutput = open(path+"_duplicates-per-type.txt", "w")
             dptDataOutput.write("Types\tNumber of duplicates\n")
             for i in range(0, len(dptKeys)):
                 dptDataOutput.write(str(dptKeys[i]) + "\t" + str(dptCount[i]) + "\n")
@@ -713,7 +713,7 @@ class bokehCLIP:
             
             tab4 = Panel(child=dptNPlot, title="Duplicates per type normalized")
             
-            dptNDataOutput = open(path+"_dptNData.txt", "w")
+            dptNDataOutput = open(path+"_duplicates-per-typeNorm.txt", "w")
             dptNDataOutput.write("Types\tDuplicates normalized\n")
             for i in range(0, len(dptNKeys)):
                 dptNDataOutput.write(str(dptNKeys[i]) + "\t" + str(dptNCount[i]) + "\n")
@@ -729,7 +729,7 @@ class bokehCLIP:
             
             tab5 = Panel(child=dcQCPlot, title="Sum(Duplicates)/Sum(Counts)")
             
-            dcQCDataOutput = open(path+"_dcQCData.txt", "w")
+            dcQCDataOutput = open(path+"_dupicates-to-count-ratio.txt", "w")
             dcQCDataOutput.write("Types\tSum(Duplicates)/Sum(Counts)\n")
             for i in range(0, len(dcQCKeys)):
                 dcQCDataOutput.write(str(dcQCKeys[i]) + "\t" + str(dcQCCount[i]) + "\n")
@@ -746,7 +746,7 @@ class bokehCLIP:
             
             tab6 = Panel(child=tPlot, title="Total amount of types per feature")  
             
-            typeDataOutput = open(path+"_typeData.txt", "w")
+            typeDataOutput = open(path+"_types-per-feature.txt", "w")
             typeDataOutput.write("Types\tNumber of types\n")
             for i in range(0, len(vType)):
                 typeDataOutput.write(str(vType[i]) + "\t" + str(typeCount[i]) + "\n")
@@ -765,7 +765,7 @@ class bokehCLIP:
             
             tab7 = Panel(child=chromPlot, title="Chromosomes")
             
-            chromDataOutput = open(path+"_chromData.txt", "w")
+            chromDataOutput = open(path+"_chromosomes.txt", "w")
             chromDataOutput.write("Chromosomes\tCounts\n")
             for i in range(0, len(chromKeys)):
                 chromDataOutput.write(str(chromKeys[i]) + "\t" + str(chromCounts[i]) + "\n")
@@ -781,7 +781,7 @@ class bokehCLIP:
             
             tab8 = Panel(child=chromNPlot, title="Chromosomes normalized")
             
-            chromDataOutput = open(path+"_chromNData.txt", "w")
+            chromDataOutput = open(path+"_chromosomes-norm.txt", "w")
             chromDataOutput.write("Chromosomes\tCounts\n")
             for i in range(0, len(chromKeys)):
                 chromDataOutput.write(str(chromNKeys[i]) + "\t" + str(chromNCounts[i]) + "\n")
@@ -801,7 +801,7 @@ class bokehCLIP:
             
             tab9 = Panel(child=strandPlot, title="Strands")
             
-            strandDataOutput = open(path+"_strandData.txt", "w")
+            strandDataOutput = open(path+"_strands.txt", "w")
             strandDataOutput.write("Srands\tCounts\n")
             for i in range(0, len(strandKeys)):
                 strandDataOutput.write(str(strandKeys[i]) + "\t" + str(strandCounts[i]) + "\n")
@@ -820,7 +820,7 @@ class bokehCLIP:
             
             regionTab = Panel(child=rPlot, title="Regions")
             
-            regionDataOutput = open(path+"_regionData.txt", "w")
+            regionDataOutput = open(path+"_total-regions.txt", "w")
             regionDataOutput.write("Regions\tNumber of Regions\n")
             for i in range(0, len(region)):
                 regionDataOutput.write(str(region[i]) + "\t" + str(regionCount[i]) + "\n")
@@ -833,7 +833,7 @@ class bokehCLIP:
              
             tab10 = Panel(child=cData_table, title="Counts")
             
-            countDataOutput = open(path+"_countData.txt", "w")
+            countDataOutput = open(path+"_total-counts.txt", "w")
             countDataOutput.write("Counts\tNumber of counts\n")
             for i in range(0, len(countKeys)):
                 countDataOutput.write(str(countKeys[i]) + "\t" + str(countCounts[i]) + "\n")
@@ -845,7 +845,7 @@ class bokehCLIP:
              
             tab11 = Panel(child=dpData_table, title="Duplicates")
             
-            dupDataOutput = open(path+"_dupData.txt", "w")
+            dupDataOutput = open(path+"_total-duplicates.txt", "w")
             dupDataOutput.write("Duplicates\tNumber of duplicates\n")
             for i in range(0, len(dpKeys)):
                 dupDataOutput.write(str(dpKeys[i]) + "\t" + str(dpCounts[i]) + "\n")
