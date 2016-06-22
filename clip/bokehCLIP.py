@@ -276,7 +276,7 @@ class bokehCLIP:
         empty = True
         
         for line in almnt_file:
-            if not line.startswith("track"):
+            if not line.startswith("#track"):
                 empty = False
         almnt_file.seek(0)
         
@@ -293,6 +293,7 @@ class bokehCLIP:
             counts      = {}
             countKeys   = []
             countCounts = []
+            total_counts = 0.0
     
             
             density = {}
@@ -374,8 +375,10 @@ class bokehCLIP:
                         
                     if not counts.has_key(int(line[12])):
                         counts[int(line[12])] = 1
+                        total_counts += int(line[12])
                     else:
                         counts[int(line[12])] += 1
+                        total_counts += int(line[12])
                         
                     if not density.has_key(float(line[15])):
                         density[float(line[15])] = 1
@@ -484,13 +487,13 @@ class bokehCLIP:
             chrN = {}
             cn = {}
             dn = {}
-
+            total_length = 0.0
             for k in chromosomes:
                 chrN[k] = (chromosomes[k]/ float(chrNorm[k]))
 
             for k in countsPerType:
                 if not k == "intergenic":
-                    cn[k] = (countsPerType[k] / float(featureNorm[k]))
+                    cn[k] = (countsPerType[k] / float(total_counts))
                 
             for k in dupPerType:
                 if not k == "intergenic":
