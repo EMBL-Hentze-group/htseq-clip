@@ -475,7 +475,7 @@ def main():
         parser.add_argument('-n', '--name', action='store', type=str, default=argparse.SUPPRESS, dest='name', help='gene name for annotation')
         parser.add_argument('-w', '--windowSize', action='store', type=int, default=argparse.SUPPRESS, dest='windowSize', help='window size for sliding window')
         parser.add_argument('-s', '--windowStep', action='store', type=int, default=argparse.SUPPRESS, dest='windowStep', help='window step for sliding window')
-        parser.add_argument('-r', '--region', action='store_true', default= argparse.SUPPRESS, dest='region', help='set if you want exons to be split into cds and utr regions. Default is False.')
+        parser.add_argument('-r', '--region', action='store_true', dest='region', help='set if you want exons to be split into cds and utr regions. Default is False.')
         parser.add_argument('command', nargs = '?', help='name of program to run ')
         args= parser.parse_args()
         d = vars(args)
