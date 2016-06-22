@@ -2,6 +2,7 @@
 # bedCLIP class
 # Authors: Marko Fritz, marko.fritz@embl.de
 #          Thomas Schwarzl, schwarzl@embl.de
+#          Nadia Ashraf
 # Institution: EMBL Heidelberg
 # Date: October 2015
 # --------------------------------------------------
@@ -47,7 +48,7 @@ class bedCLIP:
         d = {}
         
         for almnt in almnt_file:
-            
+
             if almnt.iv.strand == '+':
                 if not d.has_key(almnt.iv.chrom):
                     d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]}
@@ -55,7 +56,7 @@ class bedCLIP:
                     if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
                         d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]
                     else:
-                        d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]) 
+                        d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)])
             else:
                 if not d.has_key(almnt.iv.chrom):
                     d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]}
@@ -63,7 +64,7 @@ class bedCLIP:
                     if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
                         d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]
                     else:
-                        d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)])        
+                        d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)])
                         
         return d       
     #===================================================================================
@@ -75,21 +76,38 @@ class bedCLIP:
     ''' 
     def count_all(self):
         
+       choice = 0
         if self.fOutput.endswith(".gz"):
             output = gzip.open(self.fOutput, 'w') 
         else:        
-            output = open(self.fOutput, 'w') 
-        
+            output = open(self.fOutput, 'w')
+
         #Get the information for normalisation of the plots  
         if self.fCompare.endswith(".gz"):
             f = gzip.open(self.fCompare, 'r') 
         else:        
-            f = open(self.fCompare, 'r') 
-            
-        for line in f:
+            f = open(self.fCompare, 'r')
+        fn = f.readlines()
+        for line in fn:
             if line.startswith("track"):
-                output.write(line)
-                
+                l = line.split("\n")
+                l = l[0].split()
+                choice = len(l)
+                if choice == 2:
+                    seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
+                   'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
+                   'Density','Total before duplication removal','Max height before duplication removal ')
+                    output.write(str("\t").join(seq) + "\n")
+                elif choice == 1:
+                    seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
+                   'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
+                   'Density','Total before duplication removal','Max height before duplication removal ')
+                    output.write(str("\t").join(seq) + "\n")
+
+        for line in fn:
+            if line.startswith("track"):
+                output.write('#'+line)
+        output.write('\n')
         f.close()
         
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
@@ -115,9 +133,13 @@ class bedCLIP:
                         length = b[1] - b[0]
                         
                         name = b[2].split("@")
-                        posi = name[3].split("/")  
-                        
-                        seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(1), strand, name[2], posi[0], posi[1], name[1], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
+                        if choice == 1:
+                            posi = name[3].split("/")
+
+                            seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(1), strand, name[2], posi[0], posi[1], name[1], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
+                        elif choice == 2:
+                            posi = name[4].split("/")
+                            seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], name[1], str(1), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
                         output.write(str("\t").join(seq) + "\n")
                     
                     continue
@@ -128,17 +150,21 @@ class bedCLIP:
                     for b in B:
                         
                         length = b[1] - b[0]
-                        
+
                         name = b[2].split("@")
-                        posi = name[3].split("/")  
+                        if choice == 1:
+                            posi = name[3].split("/")
                         
-                        seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(1), strand, name[2], posi[0], posi[1], name[1], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
+                            seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(1), strand, name[2], posi[0], posi[1], name[1], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
+                        elif choice == 2:
+                            posi = name[4].split("/")
+                            seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], name[1], str(1), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
                         output.write(str("\t").join(seq) + "\n")
                     continue
                          
                 A = d1[chrom][strand]
       
-                self.calculateCount(A, B, chrom, strand, output)
+                self.calculateCount(A, B, chrom, strand, output,choice)
                                    
         output.close()     
     #===================================================================================
@@ -149,21 +175,38 @@ class bedCLIP:
     ''' 
     def count_only(self):
         
+        choice = 0
         if self.fOutput.endswith(".gz"):
             output = gzip.open(self.fOutput, 'w') 
         else:        
-            output = open(self.fOutput, 'w') 
-        
+            output = open(self.fOutput, 'w')
+
         #Get the information for normalisation of the plots  
         if self.fCompare.endswith(".gz"):
             f = gzip.open(self.fCompare, 'r') 
         else:        
-            f = open(self.fCompare, 'r') 
-            
-        for line in f:
+            f = open(self.fCompare, 'r')
+        fn = f.readlines()
+        for line in fn:
             if line.startswith("track"):
-                output.write(line)
-                
+                l = line.split("\n")
+                l = l[0].split()
+                choice = len(l)
+                if choice == 2:
+                    seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
+                   'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
+                   'Density','Total before duplication removal','Max height before duplication removal ')
+                    output.write(str("\t").join(seq) + "\n")
+                elif choice == 1:
+                    seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
+                   'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
+                   'Density','Total before duplication removal','Max height before duplication removal ')
+                    output.write(str("\t").join(seq) + "\n")
+
+        for line in fn:
+            if line.startswith("track"):
+                output.write('#'+line)
+        output.write('\n')
         f.close()
         
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
@@ -184,7 +227,7 @@ class bedCLIP:
                 A = d1[chrom][strand]
                 B = d2[chrom][strand]
       
-                self.calculateCount(A, B, chrom, strand, output)
+                self.calculateCount(A, B, chrom, strand, output,choice)
                                    
         output.close()     
     #===================================================================================
@@ -192,7 +235,7 @@ class bedCLIP:
     '''
     This method calculates the counts of cross-link sites
     '''    
-    def calculateCount(self, A, B, chrom, strand, output):
+    def calculateCount(self, A, B, chrom, strand, output,c):
         
         if len(B) > 0:
             
@@ -242,9 +285,9 @@ class bedCLIP:
                             length = b_Curr[1] - b_Curr[0] 
                             
                             if not self.choice == "o":
-                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output)
+                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output,c)
                             elif self.choice == "o" and len(d_count) != 0:
-                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output)
+                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output,c)
                             
                             if not b_Curr == b_Last:
                                 bi = bi + 1
@@ -288,7 +331,10 @@ class bedCLIP:
                                 check = False
                                 
             if not intergenicCounts == 0:
-                seq = (chrom, '~', '~', '~', '~', strand, 'intergenic', '~', '~', 'intergenic', '~', str(intergenicCounts), '~', '~', '~', '~', '~')
+                if c == 2:
+                    seq = (chrom, '~', '~', '~', '~','~', strand, 'intergenic', '~', '~', 'intergenic', '~', str(intergenicCounts), '~', '~', '~', '~', '~')
+                elif c == 1:
+                    seq = (chrom, '~', '~', '~', '~', strand, 'intergenic', '~', '~', 'intergenic', '~', str(intergenicCounts), '~', '~', '~', '~', '~')
                 output.write(str("\t").join(seq) + "\n")
                                 
                     
@@ -333,14 +379,14 @@ class bedCLIP:
          
         if len(B) > 0:
               
-            #first exon position in chromosom   
+            #first exon position in chromosome
             b_First = B[0]
-            #last exon postion in chromosom
-            b_Last  = B[-1]
+            #last exon position in chromosome
+            b_Last = B[-1]
               
             bi = 0
                 
-            #foreach cl       
+            #for each cl
             for a in A:
                   
                 check = True
@@ -547,32 +593,40 @@ class bedCLIP:
     Write in output file
     '''
     def writeOut(self, chrom, strand, b, d_count, d_dup, length, output):
-        
+
         name = b[2].split("@")
-        posi = name[3].split("/")
-                            
+
+
         if len(d_count) > 0:
-                  
+
             counts = 0
             for key in d_count:
                 if not d_count[key] == 0:
                     counts += 1
             m_count = max(d_count.keys(), key=(lambda k: d_count[k]))
-                                
+
             dup_counts = 0
             for dup in d_dup:
                 if not d_dup[dup] == 0:
-                    dup_counts += d_dup[dup] 
+                    dup_counts += d_dup[dup]
             m_dup = max(d_dup.keys(), key=(lambda k: d_dup[k]))
-            
-            density = float(counts) / float(length) 
-                                
-            seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(b[3]), strand, name[2], posi[0], posi[1], name[1], str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]), str(density), str(dup_counts), str(d_dup[m_dup]))
+
+            density = float(counts) / float(length)
+            if choice == 2:
+                posi = name[4].split("/")
+                seq = (chrom, str(b[0]+1), str(b[1]+1), name[0],name[1], str(b[3]), strand, name[3], posi[0], posi[1], name[2], str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]), str(density), str(dup_counts), str(d_dup[m_dup]))
+            elif choice == 1:
+                posi = name[3].split("/")
+                seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(b[3]), strand, name[2], posi[0], posi[1], name[1], str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]), str(density), str(dup_counts), str(d_dup[m_dup]))
             output.write(str("\t").join(seq) + "\n")
         else:
-            seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(b[3]), strand, name[2], posi[0], posi[1], name[1], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
+            if choice == 2:
+                posi = name[4].split("/")
+                seq = (chrom, str(b[0]+1), str(b[1]+1), name[0],name[1], str(b[3]), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
+            elif choice == 1:
+                posi = name[3].split("/")
+                seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(b[3]), strand, name[2], posi[0], posi[1], name[1], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
             output.write(str("\t").join(seq) + "\n")
-     
     #===================================================================================
     
     

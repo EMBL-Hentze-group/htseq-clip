@@ -2,18 +2,22 @@
 # htseq-clip main
 # Authors: Marko Fritz, marko.fritz@embl.de
 #          Thomas Schwarzl, schwarzl@embl.de
+#          Nadia Ashraf, nadia.ashraf@embl.de
 # Institution: EMBL Heidelberg
 # Date: October 2015
 # --------------------------------------------------
     
-import optparse, traceback, os
+import argparse, traceback, os
 from bamCLIP import bamCLIP
 from bedCLIP import bedCLIP
 from gtfCLIP import gtfCLIP
+from gtf import gtfClip
 from bokehCLIP import bokehCLIP
 from fastaCLIP import fastaCLIP
+from featureCLIP import feature
+from gffCLIP import gffClip
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 #======================================================================================
 def usage():
@@ -24,32 +28,32 @@ usage:       htseq-clip <function> [options]
 The functions include:
     
 [annotation]
-    annotation                           flattens an annotation gtf file
-    slidingWindow                        creates sliding windows based on given annotation file
+    annotation              flattens an annotation gtf file
+    slidingWindow           creates sliding windows based on given annotation file
     
 [iCLIP]
-    extract                              extracts crosslink, insertion or deletion sites
+    extract                 extracts crosslink, insertion or deletion sites
     
 [Counting]
-    count                                count sites in annotation
-    countSlidingWindows                  count sites in sliding windows
+    count                   count sites in annotation
+    countSlidingWindows     count sites in sliding windows
+    feature                 count sites in repeated regions
     
 [Distances]
-    junction                             calculates distances to junctions
-    
+    junction                calculates distances to junctions
+    dist                    calculates nearest cross link site to a feature
 [Visualisation] 
-    plot                                 visualisation 
+    plot                    visualisation 
     
 [Transformation]
-    slidingWindowsToDEXSeq                transform sliding window counts to DEXSeq format
+    slidingWindowToDEXSeq  transform sliding window counts to DEXSeq format
     
 [In development]
-    genomeToReads                        splits up an genome fasta to reads for mappability tests
-    removeRandomBarcodeDuplicates        removes random barcode duplicates from a fastq file
+    genomeToReads           splits up an genome fasta to reads for mappability tests 
     
 [General help]
-    -h, --help                           help
-    --version                            version
+    -h, --help               help
+    --version                version
     
 '''
     
@@ -105,11 +109,13 @@ usage:                  htseq-clip annotation [options]
 
 Options:
 
- -g, --gtf         GTF or GFF file for annotation processing (.gtf)
+ -g, --gtf         GTF or GFF file for annotation processing (.gtf or .gff)
  
  -o, --output      output file (.bed)
  
  -t, --type        Gene type for annotation
+
+ -r, --region      True if you want exons to be split into cds and utr regions. Default is False.
   
                                
  -h, --help        help
@@ -143,6 +149,52 @@ Options:
  -h, --help          help
  --version           version
 '''  
+
+def usage_dist():
+    print '''
+htseq-clip distance:  calculates the nearest cross link site to a region/feature
+usage:                htseq-clip dist [options]
+
+Options:
+
+ -i, --input         extracted crosslink, insertion or deletion sites (.bed)
+
+ -o, --output        output file (.txt)
+
+ -f, --compare       file containing regions/features for example rmsk file for repeat elements (.bed)
+
+
+ -h, --help          help
+ --version           version
+'''
+
+def usage_feature():
+    print '''
+htseq-clip count:  counts the number of crosslink/deletion/insertion sites
+usage:             htseq-clip count [options]
+
+Options:
+
+ -i, --input         extracted crosslink, insertion or deletion sites (.bed)
+
+ -o, --output        output file (.txt)
+
+ -f, --compare       features file e.g. rmsk file for repeat elements (.bed)
+
+ -c, --choice        parameter for the choice of included counts:
+
+                     a if you want to have all counts included
+                     even if a chromosome or strand does not
+                     contain any crosslink sites
+
+                     o if you want to have only the counts included
+                     of exons/introns which possess crosslink
+                     sites
+
+
+ -h, --help          help
+ --version           version
+'''
 
 def usage_junction():
     print '''
@@ -240,44 +292,6 @@ Options:
  -h, --help          help
  --version           version
 '''  
-    
-def usage_genomeToReads():
-    print '''
-htseq-clip genomeToReads:  splits up an genome fasta to reads for mappability tests  
-usage:                     htseq-clip genomeToReads [options]
-
-Options:
-
- -i, --input             input file (.fa)
- 
- -o, --output            output file (.fasta)
- 
- -x, --maxReadLength     maximum read length (default: 0)
-
-                              
- -h, --help              help
- --version               version
-''' 
-    
-def usage_removeRandomBarcodeDuplicates():  
-    print '''
-htseq-clip removeRandomBarcodeDuplicates:  removes random barcode duplicates from a fastq file 
-usage:                                     htseq-clip removeRandomBarcodeDuplicates [options]
-
-Options:
-
- -i, --input        input file (.fastq)
- 
- -o, --output       output file (.fasta)
- 
- -b, --barcode      postion of barcode (integer with length 4)
- 
- -n --mismatches    number of allowed mismatches
-
-                              
- -h, --help              help
- --version               version
-''' 
 
 
 #======================================================================================
@@ -285,14 +299,14 @@ Options:
 '''
 Counting the cross-link sites per feature
 '''    
-def count(program, parser, options, args):
+def count(program, parser, args):
     
-    bedC = bedCLIP(options)
+    bedC = bedCLIP(args)
     
-    if hasattr(options, 'choice') and options.choice != None:
-        if options.choice == 'a':
+    if hasattr(args, 'choice') and args.choice != None:
+        if args.choice == 'a':
             bedC.count_all() 
-        elif options.choice == 'o':      
+        elif args.choice == 'o':      
             bedC.count_only()
         else:
             parser.error('Invalid option for count')
@@ -302,28 +316,28 @@ def count(program, parser, options, args):
 '''
 Sliding window counts
 '''            
-def countSlidingWindow(options, args):
+def countSlidingWindow(args):
     
-    bedC = bedCLIP(options)
+    bedC = bedCLIP(args)
     bedC.countSlidingWindow()
 
 '''
 Extract cross-link sites
 '''
-def extract(parser, options ,args):
+def extract(parser,args):
     
-    bamC = bamCLIP(options)
+    bamC = bamCLIP(args)
     
-    if hasattr(options, 'choice') and options.choice != None:
-        if options.choice.startswith("s"):
+    if hasattr(args, 'choice') and args.choice != None:
+        if args.choice.startswith("s"):
             bamC.extract_StartSites() 
-        elif options.choice == 'm':      
+        elif args.choice == 'm':      
             bamC.extract_MiddleSites()
-        elif options.choice == 'e':      
+        elif args.choice == 'e':      
             bamC.extract_EndSites()
-        elif options.choice == 'd':      
+        elif args.choice == 'd':      
             bamC.extract_DeletionSites()
-        elif options.choice == 'i':      
+        elif args.choice == 'i':      
             bamC.extract_InsertionSites()
         else:
             parser.error('Invalid option for extraction')
@@ -333,43 +347,36 @@ def extract(parser, options ,args):
 '''
 Processing genome.fa file into fasta format 
 '''    
-def genomeToReads(options, args):
+def genomeToReads(args):
     
-    fastaC = fastaCLIP(options)   
+    fastaC = fastaCLIP(args)   
     fastaC.genomeToReads()
 
 '''
 Calculate distance from cross-link site to exon/intron junction site
 '''        
-def junction(program, options, args):
+def junction(program, args):
     
-    bedC = bedCLIP(options)
+    bedC = bedCLIP(args)
     bedC.junction()
-    
-'''
-Removes random barcode duplicates
-'''        
-def removeBD(options, args):
-    
-    fastaC = fastaCLIP(options)
-    fastaC.remove()
-
 
 '''
 Plotting function
-'''        
-def plot(parser, options, args):
+'''
+
+
+def plot(parser, args):
     
-    bokehC = bokehCLIP(options)
+    bokehC = bokehCLIP(args)
     
-    if hasattr(options, 'choice') and options.choice != None:
-        if options.choice == 'c':      
+    if hasattr(args, 'choice') and args.choice != None:
+        if args.choice == 'c':      
             bokehC.plot_count()
-        elif options.choice == 'd':
+        elif args.choice == 'd':
             bokehC.plot_comparison() 
-        elif options.choice == 'j':      
+        elif args.choice == 'j':      
             bokehC.plot_junction()
-        elif options.choice == 'r':      
+        elif args.choice == 'r':      
             bokehC.plot_read()
         
         else:
@@ -380,27 +387,60 @@ def plot(parser, options, args):
 '''
 Processing the annotation file
 '''       
-def process(options, args):
-    
-    gtfC = gtfCLIP(options)
-    gtfC.processGTF()
+def process(args):
+
+    if args.gtf.endswith('.gtf'):
+        gtf = gtfClip(args)
+        gtfC = gtfCLIP(args)
+        if args.region:
+            gtf.processGTF()
+        else:
+            gtfC.processGTF()
+    elif args.gtf.endswith('.gff') or args.gtf.endswith('.gff3'):
+        gff = gffClip(args)
+        gtfC = gtfCLIP(args)
+        if args.region:
+            gff.processGTF()
+        else:
+            gtfC.processGTF()
 
 '''
 Processing the annotation file into sliding windows
 '''    
-def slidingWindow(options, args):
+def slidingWindow(args):
     
-    gtfC = gtfCLIP(options)
+    gtfC = gtfCLIP(args)
     gtfC.slidingWindow()
 
 '''
 Converting the sliding window counts into DEXSeq format
 '''    
-def toDEXSeq(options, args):
+def toDEXSeq(args):
     
-    bedC = bedCLIP(options)
+    bedC = bedCLIP(args)
     bedC.toDEXSeq()
+"""
+Calculate distance to nearest cross link site
+"""
 
+def cl_dist(parser, args):
+    feat = feature(args)
+    feat.dist_cl()
+
+"""
+Function for counting cross link sites inside repeat regions
+"""
+def features(parser, args):
+    feat = feature(args)
+    if hasattr(args, 'choice') and args.choice != None:
+        if args.choice == 'a':
+            feat.count_all()
+        elif args.choice == 'o':
+            feat.count_only()
+        else:
+            parser.error('Invalid option for count')
+    else:
+        parser.error('You need -c option for the correct counting of your data!')
 #======================================================================================
 #-------------------------------------------------------------
 def checkFileExists(filename, parser):
@@ -417,111 +457,117 @@ def main():
     
     try:
         # get parser and add arguments
-        parser = optparse.OptionParser(formatter=optparse.TitledHelpFormatter(), usage=globals()['__doc__'], version="%prog 1.0")
+        parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, usage=globals()['__doc__'], version="%prog 1.0", conflict_handler='resolve', argument_default=argparse.SUPPRESS)
 
-        parser.add_option('-v', '--verbose', action='store_true', default=False, help='verbose output')
-        parser.add_option('-b', '--barcode', action='store', type='string',  default=None, dest='barcode', help='barcode')
-        parser.add_option('-n', '--mismatches', action='store', type='int',  default=2, dest='mismatches', help='number of mismatches')
-        parser.add_option('-i', '--input', action='store', type='string',  default=None, dest='input', help='input file ')
-        parser.add_option('-o', '--output', action='store', type='string',  default=None, dest='output', help='output file name')
-        parser.add_option('-f', '--compare', action='store', type='string',  default=None, dest='compare', help='file which you want to compare with your input file')
-        parser.add_option('-c', '--choice', action='store', type='string',  default=None, dest='choice', help='option')
-        parser.add_option('-q', '--minAlignmentQuality',   action='store', type='int', default=10,   dest='minAlignmentQuality', help='minimum alignment quality')
-        parser.add_option('-m', '--minReadLength', action='store', type='int', default=0, dest='minReadLength', help='minimum read length')
-        parser.add_option('-x', '--maxReadLength', action='store', type='int', default=0, dest='maxReadLength', help='maximum read length')
-        parser.add_option('-l', '--maxReadIntervalLength', action='store', type='int', default=10000, dest='maxReadIntervalLength', help='maximum read interval length')
-        parser.add_option('-p', '--primary',   action='store_true', default=False,  dest='primary', help='set if you want to use only primary positions of multimapping reads')
-        parser.add_option('-d', '--dist', action='store', type='int', default=4000, dest='dist', help='Maximum distance between two sites of a read if its higher than this value it will be count as this value')
-        parser.add_option('-g', '--gtf', action='store', type='string', default=None, dest='gtf', help='gtf file for annotation')
-        parser.add_option('-t', '--type', action='store', type='string', default='gene_biotype', dest='type', help='gene type for annotation')
-        parser.add_option('-w', '--windowSize', action='store', type='int', default=50, dest='windowSize', help='window size for sliding window')
-        parser.add_option('-s', '--windowStep', action='store', type='int', default=20, dest='windowStep', help='window step for sliding window')
-            
-        (options, args) = parser.parse_args()
+        parser.add_argument('-v', '--verbose', action='store_true', default=argparse.SUPPRESS, help='verbose output')
+        parser.add_argument('-i', '--input', action='store', type= str,  default=argparse.SUPPRESS, dest='input', help='input file')
+        parser.add_argument('-o', '--output', action='store', type= str,  default=argparse.SUPPRESS, dest='output', help='output file name')
+        parser.add_argument('-f', '--compare', action='store', type= str,  default=argparse.SUPPRESS, dest='compare', help='file which you want to compare with your input file')
+        parser.add_argument('-c', '--choice', action='store', type=str,  default=argparse.SUPPRESS, dest='choice', help='option')
+        parser.add_argument('-q', '--minAlignmentQuality',   action='store', type=int, default=argparse.SUPPRESS,   dest='minAlignmentQuality', help='minimum alignment quality')
+        parser.add_argument('-m', '--minReadLength', action='store', type=int, default=argparse.SUPPRESS, dest='minReadLength', help='minimum read length')
+        parser.add_argument('-x', '--maxReadLength', action='store', type=int, default=argparse.SUPPRESS, dest='maxReadLength', help='maximum read length')
+        parser.add_argument('-l', '--maxReadIntervalLength', action='store', type=int, default=argparse.SUPPRESS, dest='maxReadIntervalLength', help='maximum read interval length')
+        parser.add_argument('-p', '--primary', action='store_true', default=argparse.SUPPRESS,  dest='primary', help='set if you want to use only primary positions of multimapping reads')
+        parser.add_argument('-d', '--dist', action='store', type=int, default=argparse.SUPPRESS, dest='dist', help='Maximum distance between two sites of a read if its higher than this value it will be count as this value')
+        parser.add_argument('-g', '--gtf', action='store', type=str, default=argparse.SUPPRESS, dest='gtf', help='gtf file for annotation')
+        parser.add_argument('-t', '--type', action='store', type=str, default=argparse.SUPPRESS, dest='type', help='gene type for annotation')
+        parser.add_argument('-n', '--name', action='store', type=str, default=argparse.SUPPRESS, dest='name', help='gene name for annotation')
+        parser.add_argument('-w', '--windowSize', action='store', type=int, default=argparse.SUPPRESS, dest='windowSize', help='window size for sliding window')
+        parser.add_argument('-s', '--windowStep', action='store', type=int, default=argparse.SUPPRESS, dest='windowStep', help='window step for sliding window')
+        parser.add_argument('-r', '--region', action='store_true', default= argparse.SUPPRESS, dest='region', help='set if you want exons to be split into cds and utr regions. Default is False.')
+        parser.add_argument('command', nargs = '?', help='name of program to run ')
+        args= parser.parse_args()
+        d = vars(args)
 
         # check if there are all arguments
-        if len(args) != 1:
+        if args.command == None:
             usage()
             os._exit(1)
         else:
 
-            program = args[0]
+            program = args.command
 
             if program == "extract":
-                if options.input == None:
+                if len(d) < 3:
                     usage_extract()
                     os._exit(1)
                 else:   
-                    checkFileExists(options.input, parser)
-                    extract(parser, options, args)
+                    checkFileExists(args.input, parser)
+                    extract(parser, args)
             elif program == 'countSlidingWindows':
-                if options.input == None:
+                if len(d) < 3:
                     usage_countSlidingWindows()
                     os._exit(1)
                 else:
-                    checkFileExists(options.input, parser)
-                    checkFileExists(options.compare, parser)
-                    countSlidingWindow(options, args)
+                    checkFileExists(args.input, parser)
+                    checkFileExists(args.compare, parser)
+                    countSlidingWindow(args)
             elif program == 'junction':
-                if options.input == None:
+                if len(d) < 3:
                     usage_junction()
                     os._exit(1)
                 else: 
-                    checkFileExists(options.input, parser)
-                    checkFileExists(options.compare, parser)
-                    junction(program, options, args)
+                    checkFileExists(args.input, parser)
+                    checkFileExists(args.compare, parser)
+                    junction(program, args)
             elif program == 'count':
-                if options.input == None:
+                if len(d) < 3:
                     usage_count()
                     os._exit(1)
                 else: 
-                    checkFileExists(options.input, parser)
-                    checkFileExists(options.compare, parser)
-                    count(program, parser, options, args)
+                    checkFileExists(args.input, parser)
+                    checkFileExists(args.compare, parser)
+                    count(program, parser, args)
             elif program == 'annotation':
-                if options.gtf == None:
+                if len(d) < 3:
                     usage_annotation()
                     os._exit(1)
-                else: 
-                    checkFileExists(options.gtf, parser)
-                    process(options, args)
+                else:
+                    checkFileExists(args.gtf, parser)
+                    process(args)
             elif program == 'plot':
-                if options.input == None:
+                if len(d) < 3:
                     usage_plot()
                     os._exit(1)
-                else: 
-                    checkFileExists(options.input, parser)
-                    plot(parser, options, args)
+                else:
+                    checkFileExists(args.input, parser)
+                    plot(parser, args)
             elif program =='createSlidingWindows':
-                if options.input == None:
+                if len(d) < 3:
                     usage_createSlidingWindows()
                     os._exit(1)
                 else: 
-                    checkFileExists(options.input, parser)
-                    slidingWindow(options, args)
+                    checkFileExists(args.input, parser)
+                    slidingWindow(args)
             elif program =='slidingWindowsToDEXSeq':
-                if options.input == None:
+                if len(d) < 3:
                     usage_slidingWindowsToDEXSeq()
                     os._exit(1)
                 else:
-                    checkFileExists(options.input, parser)
-                    toDEXSeq(options, args)
+                    checkFileExists(args.input, parser)
+                    toDEXSeq(args)
             elif program =='genomeToReads':
-                if options.input == None:
-                    usage_genomeToReads()
+                checkFileExists(args.input, parser)
+                genomeToReads(args)
+            elif program == 'feature':
+                if len(d) < 3:
+                    usage_feature()
                     os._exit(1)
                 else:
-                    checkFileExists(options.input, parser)
-                    genomeToReads(options, args)
-            elif program == 'removeRandomBarcodeDuplicates':
-                if options.input == None:
-                    usage_removeRandomBarcodeDuplicates()
+                    checkFileExists(args.input, parser)
+                    checkFileExists(args.compare, parser)
+                    features(parser,args)
+            elif program == 'dist':
+                if len(d) < 3:
+                    usage_dist()
                     os._exit(1)
                 else:
-                    checkFileExists(options.input, parser)
-                    removeBD(options, args)
+                    checkFileExists(args.input, parser)
+                    checkFileExists(args.compare, parser)
+                    cl_dist(parser,args)
             else:
-                parser.error ('Incorrect argument for execution') 
+                parser.error ('Incorrect argument for execution')
 
     # Exception Handling: Interruption / Errors
     except KeyboardInterrupt, exception: # Control - C

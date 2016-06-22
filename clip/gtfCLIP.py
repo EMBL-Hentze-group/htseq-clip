@@ -18,6 +18,7 @@ class gtfCLIP:
     gtfFile = ''
     fOutput = ''
     geneType = ''
+    geneName = ''
     windowSize = 50
     windowStep = 20
     
@@ -30,11 +31,7 @@ class gtfCLIP:
             self.fInput = options.input
         
         if hasattr(options, 'output'):
-<<<<<<< HEAD
             self.fOutput = options.output  
-=======
-            self.fOutput = options.output   
->>>>>>> b1fbc1dde60f3c475e7c8d5afcb0a3c6d16eb6df
             
         if hasattr(options, 'windowSize'):
             self.windowSize = options.windowSize  
@@ -44,6 +41,9 @@ class gtfCLIP:
             
         if hasattr(options, 'type'):
             self.geneType = options.type 
+        
+        if hasattr (options,'name'):
+            self.geneName = options.name
             
             
     '''
@@ -208,7 +208,16 @@ class gtfCLIP:
                     error = "Wrong gene type: "+self.geneType+". Check your annotation file!!"
                     raise KeyError(error)
                          
-                name = name + '@' + attribute
+                if self.geneName:
+                    if feature.attr.has_key(self.geneName):
+                        gene_name = str(feature.attr[str(self.geneName)])
+                    else:
+                        error = "Wrong gene Name: "+self.geneName+". Check your annotation file!!"
+                        raise KeyError(error)
+
+                    name = name + '@' + gene_name + '@' + attribute
+                else:
+                    name = name+'@'+attribute
                 t = attribute
                 start = feature.iv.start
                 end = feature.iv.end
@@ -234,6 +243,10 @@ class gtfCLIP:
         for k in typeFooter:
             output.write("track type "+str(k)+" "+str(typeFooter[k])+"\n")
         
+        if self.geneName:
+            output.write("track"+" "+"gene_name"+"\n")
+        else:
+            output.write("track"+"\n")
         output.close()                 
     #================================================================================= 
        
