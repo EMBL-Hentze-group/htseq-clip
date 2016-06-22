@@ -150,6 +150,52 @@ Options:
  --version           version
 '''  
 
+def usage_dist():
+    print '''
+htseq-clip distance:  calculates the nearest cross link site to a region/feature
+usage:                htseq-clip dist [options]
+
+Options:
+
+ -i, --input         extracted crosslink, insertion or deletion sites (.bed)
+
+ -o, --output        output file (.txt)
+
+ -f, --compare       file containing regions/features for example rmsk file for repeat elements (.bed)
+
+
+ -h, --help          help
+ --version           version
+'''
+
+def usage_feature():
+    print '''
+htseq-clip count:  counts the number of crosslink/deletion/insertion sites
+usage:             htseq-clip count [options]
+
+Options:
+
+ -i, --input         extracted crosslink, insertion or deletion sites (.bed)
+
+ -o, --output        output file (.txt)
+
+ -f, --compare       features file e.g. rmsk file for repeat elements (.bed)
+
+ -c, --choice        parameter for the choice of included counts:
+
+                     a if you want to have all counts included
+                     even if a chromosome or strand does not
+                     contain any crosslink sites
+
+                     o if you want to have only the counts included
+                     of exons/introns which possess crosslink
+                     sites
+
+
+ -h, --help          help
+ --version           version
+'''
+
 def usage_junction():
     print '''
 htseq-clip junction:  calculates the distance from crosslink/deletion/insertion sites to the junction
@@ -430,17 +476,16 @@ def main():
         parser.add_argument('-w', '--windowSize', action='store', type=int, default=argparse.SUPPRESS, dest='windowSize', help='window size for sliding window')
         parser.add_argument('-s', '--windowStep', action='store', type=int, default=argparse.SUPPRESS, dest='windowStep', help='window step for sliding window')
         parser.add_argument('-r', '--region', action='store_true', default= argparse.SUPPRESS, dest='region', help='set if you want exons to be split into cds and utr regions. Default is False.')
-        parser.add_argument('command', help='name of program to run ')
+        parser.add_argument('command', nargs = '?', help='name of program to run ')
         args= parser.parse_args()
         d = vars(args)
 
         # check if there are all arguments
-        if len(d) < 1:
+        if args.command == None:
             usage()
             os._exit(1)
         else:
-            print len(vars(args))
-            print args
+
             program = args.command
 
             if program == "extract":
@@ -485,7 +530,7 @@ def main():
                 if len(d) < 3:
                     usage_plot()
                     os._exit(1)
-                else: 
+                else:
                     checkFileExists(args.input, parser)
                     plot(parser, args)
             elif program =='createSlidingWindows':
@@ -507,7 +552,7 @@ def main():
                 genomeToReads(args)
             elif program == 'feature':
                 if len(d) < 3:
-                    usage_count()
+                    usage_feature()
                     os._exit(1)
                 else:
                     checkFileExists(args.input, parser)
@@ -515,7 +560,7 @@ def main():
                     features(parser,args)
             elif program == 'dist':
                 if len(d) < 3:
-                    usage_count()
+                    usage_dist()
                     os._exit(1)
                 else:
                     checkFileExists(args.input, parser)
