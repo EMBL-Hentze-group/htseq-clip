@@ -1,0 +1,6 @@
+{
+	"bamdir": "/g/hentze/projects/iCLIP/Fpr1/data/sequencing/star-ensembl83-pen-m3-jun",
+	"outdir": "data/Fpr1-multi",
+    "gtfdir": "/g/hentze/users/Nadia/data/yeast_genes/Saccharomyces_cerevisiae.R64-1-1.84.gtf",
+	"annotation_file": "S.cerevisiae"
+}
