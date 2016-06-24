@@ -24,7 +24,7 @@ configfile: "config.json"
 # SET DIRECTORIES
 # ----------------------------------------------------------------------------------------
 
-# Automatically read in all samples
+
 OUTDIR = config["outdir"]
 GTF = config["gtfdir"]
 GTFN = config["annotation_file"]
@@ -32,15 +32,18 @@ BAMDIR = config["bamdir"]
 END_PATTERN = config["bam_end"]
 FASTA = config["fasta"]
 FASTAN = config["fasta_name"]
+
 # ----------------------------------------------------------------------------------------
 # SAMPLES
 # ----------------------------------------------------------------------------------------
 
 # Automatically read in all samples
 SAMPLES, = glob_wildcards(expand("{sample_dir}/{{samples}}.{pattern}",pattern = END_PATTERN, sample_dir = config["bamdir"])[0])
+
 # ----------------------------------------------------------------------------------------
 
 SITES = "MS SS ES DEL INS S1".split()
+
 # ----------------------------------------------------------------------------------------	
 # :::::::: ALL :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # ----------------------------------------------------------------------------------------	
