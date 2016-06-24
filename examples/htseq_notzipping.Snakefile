@@ -104,40 +104,40 @@ rule process:
 	input:
 		gtf=GTF
 	output:
-		expand("../{outdir}/gtf/{gtfn}.bed", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.bed", gtfn=GTFN, outdir=OUTDIR)
 	log:
-		expand("../{logs}/{gtfn}.log", gtfn=GTFN, outdir=OUTDIR, logs = LOG)
+		expand("{logs}/{gtfn}.log", gtfn=GTFN, outdir=OUTDIR, logs = LOG)
 	shell:
 		"python {CLIP} process -g {input.gtf} -o {output} 2> {log}"
 		
 rule sort_gtf:
 	input:
-		expand("../{outdir}/gtf/{gtfn}.bed", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.bed", gtfn=GTFN, outdir=OUTDIR)
 	output:
-		expand("../{outdir}/gtf/{gtfn}.sorted.bed", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.sorted.bed", gtfn=GTFN, outdir=OUTDIR)
 	log:
-		expand("../{logs}/{gtfn}.sorted.log", gtfn=GTFN , outdir=OUTDIR, logs = LOG)
+		expand("{logs}/{gtfn}.sorted.log", gtfn=GTFN , outdir=OUTDIR, logs = LOG)
 	shell:
 		"sort -k1,1 -k2,2n {input} > {output} 2> {log}"
 		
 				
 rule sliding_window:
 	input:
-		expand("../{outdir}/gtf/{gtfn}.bed", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.bed", gtfn=GTFN, outdir=OUTDIR)
 	output:
-		expand("../{outdir}/gtf/{gtfn}.sw.bed", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.sw.bed", gtfn=GTFN, outdir=OUTDIR)
 	log:
-		expand("../{logs}/{gtfn}.sw.log", gtfn=GTFN, outdir=OUTDIR, logs = LOG)
+		expand("{logs}/{gtfn}.sw.log", gtfn=GTFN, outdir=OUTDIR, logs = LOG)
 	shell:
 		"python {CLIP} slidingWindow -i {input} -o {output} -w 50 -s 20 2> {log}"
 		
 rule sort_sliding_window:
 	input:
-		expand("../{outdir}/gtf/{gtfn}.sw.bed", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.sw.bed", gtfn=GTFN, outdir=OUTDIR)
 	output:
-		expand("../{outdir}/gtf/{gtfn}.sw.sorted.bed", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.sw.sorted.bed", gtfn=GTFN, outdir=OUTDIR)
 	log:
-		expand("../{logs}/{gtfn}.sw.sorted.log", gtfn=GTFN , outdir=OUTDIR, logs = LOG)
+		expand("{logs}/{gtfn}.sw.sorted.log", gtfn=GTFN , outdir=OUTDIR, logs = LOG)
 	shell:
 		"sort -k1,1 -k2,2n {input} > {output} 2> {log}"
 		
@@ -149,13 +149,13 @@ rule sort_sliding_window:
 #START SITES
 rule extract_SS:
 	input:
-		expand("../{outdir}/extract/{samples}_SS.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_SS.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
 		
 rule do_extract_SS:
 	input:
 		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_SS.temporary.bed")
+		temp("{OUTDIR}/extract/{sample}_SS.temporary.bed")
 	log:
 		"LOG/{sample}_SS.extract.log"
 	shell:
@@ -164,13 +164,13 @@ rule do_extract_SS:
 #START-1 SITES
 rule extract_S1:
 	input:
-		expand("../../{outdir}/extract/{samples}_S1.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_S1.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
 		
 rule do_extract_S1:
 	input:
 		expand("{bamdir}/{{sample}}.sorted.nodupmulti.bam", bamdir=BAMDIR)
 	output:
-		temp("../../{OUTDIR}/extract/{sample}_S1.temporary.bed")
+		temp("{OUTDIR}/extract/{sample}_S1.temporary.bed")
 	log:
 		"LOG/{sample}_S1.extract.log"
 	shell:
@@ -179,13 +179,13 @@ rule do_extract_S1:
 #MIDDLE SITES
 rule extract_MS:
 	input:
-		expand("../{outdir}/extract/{samples}_MS.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_MS.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
 		
 rule do_extract_MS:
 	input:
 		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_MS.temporary.bed")
+		temp("{OUTDIR}/extract/{sample}_MS.temporary.bed")
 	log:
 		"LOG/{sample}_MS.extract.log"
 	shell:
@@ -194,13 +194,13 @@ rule do_extract_MS:
 #END SITES
 rule extract_ES:
 	input:
-		expand("../{outdir}/extract/{samples}_ES.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_ES.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
 		
 rule do_extract_ES:
 	input:
 		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_ES.temporary.bed")
+		temp("{OUTDIR}/extract/{sample}_ES.temporary.bed")
 	log:
 		"LOG/{sample}_ES.extract.log"
 	shell:
@@ -209,13 +209,13 @@ rule do_extract_ES:
 #DELETION SITES
 rule extract_DEL:
 	input:
-		expand("../{outdir}/extract/{samples}_DEL.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_DEL.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
 		
 rule do_extract_DEL:
 	input:
 		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_DEL.temporary.bed")
+		temp("{OUTDIR}/extract/{sample}_DEL.temporary.bed")
 	log:
 		"LOG/{sample}_DEL.extract.log"
 	shell:
@@ -224,14 +224,14 @@ rule do_extract_DEL:
 #INSERTION SITES
 rule extract_INS:
 	input:
-		expand("../{outdir}/extract/{samples}_INS.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_INS.temporary.bed", samples=SAMPLES, outdir=OUTDIR)
 
 		
 rule do_extract_INS:
 	input:
 		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_INS.temporary.bed")
+		temp("{OUTDIR}/extract/{sample}_INS.temporary.bed")
 	log:
 		"LOG/{sample}_INS.extract.log"
 	shell:
@@ -244,13 +244,13 @@ rule do_extract_INS:
 # ----------------------------------------------------------------------------------------	
 rule sort:
 	input:
-		expand("../{outdir}/extract/{samples}_{sites}.bed", samples=SAMPLES, outdir=OUTDIR, sites=SITES)
+		expand("{outdir}/extract/{samples}_{sites}.bed", samples=SAMPLES, outdir=OUTDIR, sites=SITES)
 
 rule do_sort:		
 	input:
-		"../{OUTDIR}/extract/{sample}_{site}.temporary.bed"
+		"{OUTDIR}/extract/{sample}_{site}.temporary.bed"
 	output:
-		"../{OUTDIR}/extract/{sample}_{site,\w+}.bed"
+		"{OUTDIR}/extract/{sample}_{site,\w+}.bed"
 	log:
 		"LOG/{sample}_{site}.extract.sort.log"
 	shell:
@@ -263,14 +263,14 @@ rule do_sort:
 
 rule junction:
 	input:
-		expand("../{outdir}/junction/{samples}_{sites}to{gtfn}.txt", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/junction/{samples}_{sites}to{gtfn}.txt", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_junction:
 	input:
-		bed="../{OUTDIR}/extract/{sample}_{site}.bed",
-		gtf="../{OUTDIR}/gtf/{gtfn}.sorted.bed"
+		bed="{OUTDIR}/extract/{sample}_{site}.bed",
+		gtf="{OUTDIR}/gtf/{gtfn}.sorted.bed"
 	output:
-		"../{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt"
+		"{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt"
 	log:
 		"LOG/{sample}_{site}.junction.log"
 	shell:
@@ -283,14 +283,14 @@ rule do_junction:
 
 rule count:
 	input:
-		expand("../../{outdir}/counts/{samples}_{sites}to{gtfn}.count.txt", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/counts/{samples}_{sites}to{gtfn}.count.txt", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_count:
 	input:
-		bed="../../{OUTDIR}/extract/{sample}_{site}.bed",
-		gtf="../../data/yeast_genes/sorted.{gtfn}.bed"
+		bed="{OUTDIR}/extract/{sample}_{site}.bed",
+		gtf="data/yeast_genes/sorted.{gtfn}.bed"
 	output:
-		"../../{OUTDIR}/counts/{sample}_{site}to{gtfn}.count.txt"
+		"{OUTDIR}/counts/{sample}_{site}to{gtfn}.count.txt"
 	log:
 		"LOG/{sample}_{site}.count.log"
 	shell:
@@ -303,14 +303,14 @@ rule do_count:
 
 rule sw:
 	input:
-		expand("../{outdir}/slidingWindow/{samples}_{sites}to{gtfn}.sw.txt", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/slidingWindow/{samples}_{sites}to{gtfn}.sw.txt", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_sw:
 	input:
-		bed="../{OUTDIR}/extract/{sample}_{site}.bed",
-		gtf="../{OUTDIR}/gtf/{gtfn}.sw.sorted.bed"
+		bed="{OUTDIR}/extract/{sample}_{site}.bed",
+		gtf="{OUTDIR}/gtf/{gtfn}.sw.sorted.bed"
 	output:
-		"../{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt"
+		"{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt"
 	log:
 		"LOG/{sample}_{site}.sw.count.log"
 	shell:
@@ -324,13 +324,13 @@ rule do_sw:
 
 rule dexseq:
 	input:
-		expand("../{outdir}/dexseq/{samples}_{sites}to{gtfn}.dex.txt", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/dexseq/{samples}_{sites}to{gtfn}.dex.txt", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_dexseq:
 	input:
-		"../{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt"
+		"{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt"
 	output:
-		"../{OUTDIR}/dexseq/{sample}_{site}to{gtfn}.dex.txt"
+		"{OUTDIR}/dexseq/{sample}_{site}to{gtfn}.dex.txt"
 	log:
 		"LOG/{sample}_{site}.dex.log"
 	shell:
@@ -342,13 +342,13 @@ rule do_dexseq:
 
 rule jplot:
 	input:
-		expand("../{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		
 rule do_jplot:
 	input:
-		"../{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt"
+		"{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt"
 	output:
-		"../{OUTDIR}/plots/junction/{sample}_{site}/{sample}_{site}to{gtfn}_junction.html"
+		"{OUTDIR}/plots/junction/{sample}_{site}/{sample}_{site}to{gtfn}_junction.html"
 	log:
 		"LOG/{sample}_{site}.jplot.log"
 	shell:
@@ -361,13 +361,13 @@ rule do_jplot:
 
 rule cplot:
 	input:
-		expand("../../{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}.count.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}.count.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		
 rule do_cplot:
 	input:
-		"../../{OUTDIR}/counts/{sample}_{site}to{gtfn}.count.txt"
+		"{OUTDIR}/counts/{sample}_{site}to{gtfn}.count.txt"
 	output:
-		"../../{OUTDIR}/plots/counts/{sample}_{site}/{sample}_{site}to{gtfn}.count.html"
+		"{OUTDIR}/plots/counts/{sample}_{site}/{sample}_{site}to{gtfn}.count.html"
 	log:
 		"LOG/{sample}_{site}.cplot.log"
 	shell:
@@ -379,13 +379,13 @@ rule do_cplot:
 
 rule rplot:
 	input:
-		expand("../../{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}.read.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}.read.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		
 rule do_rplot:
 	input:
-		"../../{OUTDIR}/counts/{sample}_{site}to{gtfn}.bed"
+		"{OUTDIR}/counts/{sample}_{site}to{gtfn}.bed"
 	output:
-		"../../{OUTDIR}/plots/reads/{sample}_{site}/{sample}_{site}to{gtfn}.read.html"
+		"{OUTDIR}/plots/reads/{sample}_{site}/{sample}_{site}to{gtfn}.read.html"
 	log:
 		"LOG/{sample}_{site}.rplot.log"
 	shell:
@@ -397,14 +397,14 @@ rule do_rplot:
 		
 rule plot:
 	input:
-		expand("../{outdir}/plots/{samples}/{samples}_{sites}to{gtfn}_exonStart.pdf", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/{samples}/{samples}_{sites}to{gtfn}_exonStart.pdf", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 
 rule do_plot:
 	input:
-		expand("../{outdir}/junction/{{sample}}_{{site}}to{{gtfn}}.txt", outdir=OUTDIR)
+		expand("{outdir}/junction/{{sample}}_{{site}}to{{gtfn}}.txt", outdir=OUTDIR)
 	output:
-		file=expand("../{outdir}/plots/{{sample}}/{{sample}}_{{site}}to{{gtfn}}_exonStart.pdf", outdir=OUTDIR)
-		#dir=expand("../{outdir}/plots/{{sample}}/", outdir=OUTDIR)
+		file=expand("{outdir}/plots/{{sample}}/{{sample}}_{{site}}to{{gtfn}}_exonStart.pdf", outdir=OUTDIR)
+		#dir=expand("{outdir}/plots/{{sample}}/", outdir=OUTDIR)
 	log:
 		"LOG/{sample}_{site}.plot.log"
 	shell:
