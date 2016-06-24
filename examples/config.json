@@ -3,4 +3,7 @@
 	"outdir": "data/Fpr1-multi",
     "gtfdir": "/g/hentze/users/Nadia/data/yeast_genes/Saccharomyces_cerevisiae.R64-1-1.84.gtf",
 	"annotation_file": "S.cerevisiae"
+	"fasta": "/g/hentze/projects/Software/htseq-clip/fasta/GRCh38.p3.genome.fa"
+	"fasta_name": "GRCh38.p3.genome"
+	"bam_end": "sorted.bam"
 }
