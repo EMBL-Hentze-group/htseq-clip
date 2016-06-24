@@ -208,13 +208,13 @@ rule do_extract_ES:
 #DELETION SITES
 rule extract_DEL:
 	input:
-		expand("../{outdir}/extract/{samples}_DEL.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_DEL.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
 		
 rule do_extract_DEL:
 	input:
 		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_DEL.temporary.bed.gz")
+		temp("{OUTDIR}/extract/{sample}_DEL.temporary.bed.gz")
 	log:
 		"LOG/{sample}_DEL.extract.log"
 	shell:
@@ -223,14 +223,14 @@ rule do_extract_DEL:
 #INSERTION SITES
 rule extract_INS:
 	input:
-		expand("../{outdir}/extract/{samples}_INS.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_INS.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
 
 		
 rule do_extract_INS:
 	input:
 		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_INS.temporary.bed.gz")
+		temp("{OUTDIR}/extract/{sample}_INS.temporary.bed.gz")
 	log:
 		"LOG/{sample}_INS.extract.log"
 	shell:
@@ -243,13 +243,13 @@ rule do_extract_INS:
 # ----------------------------------------------------------------------------------------	
 rule sort:
 	input:
-		expand("../{outdir}/extract/{samples}_{sites}.bed.gz", samples=SAMPLES, outdir=OUTDIR, sites=SITES)
+		expand("{outdir}/extract/{samples}_{sites}.bed.gz", samples=SAMPLES, outdir=OUTDIR, sites=SITES)
 
 rule do_sort:		
 	input:
-		"../{OUTDIR}/extract/{sample}_{site}.temporary.bed.gz"
+		"{OUTDIR}/extract/{sample}_{site}.temporary.bed.gz"
 	output:
-		"../{OUTDIR}/extract/{sample}_{site,\w+}.bed.gz"
+		"{OUTDIR}/extract/{sample}_{site,\w+}.bed.gz"
 	log:
 		"LOG/{sample}_{site}.extract.sort.log"
 	shell:
@@ -261,14 +261,14 @@ rule do_sort:
 
 rule junction:
 	input:
-		expand("../{outdir}/junction/{samples}_{sites}to{gtfn}.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/junction/{samples}_{sites}to{gtfn}.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_junction:
 	input:
-		bed="../{OUTDIR}/extract/{sample}_{site}.bed.gz",
-		gtf="../{OUTDIR}/gtf/{gtfn}.sorted.bed.gz"
+		bed="{OUTDIR}/extract/{sample}_{site}.bed.gz",
+		gtf="{OUTDIR}/gtf/{gtfn}.sorted.bed.gz"
 	output:
-		"../{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt.gz"
+		"{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt.gz"
 	log:
 		"LOG/{sample}_{site}.junction.log"
 	shell:
@@ -281,12 +281,12 @@ rule do_junction:
 
 rule count:
 	input:
-		expand("../{outdir}/counts/{samples}_{sites}to{gtfn}.count.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/counts/{samples}_{sites}to{gtfn}.count.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_count:
 	input:
-		bed="../{OUTDIR}/extract/{sample}_{site}.bed.gz",
-		gtf="../{OUTDIR}/gtf/{gtfn}.sorted.bed.gz"
+		bed="{OUTDIR}/extract/{sample}_{site}.bed.gz",
+		gtf="{OUTDIR}/gtf/{gtfn}.sorted.bed.gz"
 	output:
 		"../{OUTDIR}/counts/{sample}_{site}to{gtfn}.count.txt.gz"
 	log:
@@ -301,14 +301,14 @@ rule do_count:
 
 rule sw:
 	input:
-		expand("../{outdir}/slidingWindow/{samples}_{sites}to{gtfn}.sw.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/slidingWindow/{samples}_{sites}to{gtfn}.sw.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_sw:
 	input:
-		bed="../{OUTDIR}/extract/{sample}_{site}.bed.gz",
-		gtf="../{OUTDIR}/gtf/{gtfn}.sw.sorted.bed.gz"
+		bed="{OUTDIR}/extract/{sample}_{site}.bed.gz",
+		gtf="{OUTDIR}/gtf/{gtfn}.sw.sorted.bed.gz"
 	output:
-		"../{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt.gz"
+		"{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt.gz"
 	log:
 		"LOG/{sample}_{site}.sw.count.log"
 	shell:
@@ -320,13 +320,13 @@ rule do_sw:
 
 rule dexseq:
 	input:
-		expand("../{outdir}/dexseq/{samples}_{sites}to{gtfn}.dex.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/dexseq/{samples}_{sites}to{gtfn}.dex.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_dexseq:
 	input:
-		"../{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt.gz"
+		"{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt.gz"
 	output:
-		"../{OUTDIR}/dexseq/{sample}_{site}to{gtfn}.dex.txt.gz"
+		"{OUTDIR}/dexseq/{sample}_{site}to{gtfn}.dex.txt.gz"
 	log:
 		"LOG/{sample}_{site}.dex.log"
 	shell:
@@ -339,13 +339,13 @@ rule do_dexseq:
 
 rule rplot:
 	input:
-		expand("../{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}_reads.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}_reads.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		
 rule do_rplot:
 	input:
-		"../{OUTDIR}/extract/{sample}_{site}.bed.gz"
+		"{OUTDIR}/extract/{sample}_{site}.bed.gz"
 	output:
-		"../{OUTDIR}/plots/reads/{sample}_{site}/{sample}_{site}to{gtfn}_reads.html"
+		"{OUTDIR}/plots/reads/{sample}_{site}/{sample}_{site}to{gtfn}_reads.html"
 	log:
 		"LOG/{sample}_{site}.rplot.log"
 	shell:
@@ -358,13 +358,13 @@ rule do_rplot:
 
 rule cplot:
 	input:
-		expand("../{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}_counts.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}_counts.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		
 rule do_cplot:
 	input:
-		"../{OUTDIR}/counts/{sample}_{site}to{gtfn}.count.txt.gz"
+		"{OUTDIR}/counts/{sample}_{site}to{gtfn}.count.txt.gz"
 	output:
-		"../{OUTDIR}/plots/counts/{sample}_{site}/{sample}_{site}to{gtfn}_counts.html"
+		"{OUTDIR}/plots/counts/{sample}_{site}/{sample}_{site}to{gtfn}_counts.html"
 	log:
 		"LOG/{sample}_{site}.cplot.log"
 	shell:
@@ -377,13 +377,13 @@ rule do_cplot:
 
 rule jplot:
 	input:
-		expand("../{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		
 rule do_jplot:
 	input:
-		"../{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt.gz"
+		"{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt.gz"
 	output:
-		"../{OUTDIR}/plots/junction/{sample}_{site}/{sample}_{site}to{gtfn}_junction.html"
+		"{OUTDIR}/plots/junction/{sample}_{site}/{sample}_{site}to{gtfn}_junction.html"
 	log:
 		"LOG/{sample}_{site}.jplot.log"
 	shell:
