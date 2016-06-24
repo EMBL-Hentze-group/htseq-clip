@@ -2,8 +2,8 @@ import os
 from snakemake.utils import report
 
 # ========================================================================================
-# Pipeline by Marko Fritz <marko.fritz@embl.de>, Thomas Schwarzl <schwarzl@embl.de>
-# __author__  = "Marko Fritz, Thomas Schwarzl"
+# Pipeline by Marko Fritz <marko.fritz@embl.de>, Thomas Schwarzl <schwarzl@embl.de>, Nadia Ashraf <nadia.ashraf@embl.de>
+# __author__  = "Marko Fritz, Thomas Schwarzl, Nadia Ashraf"
 # __license__ = "EMBL"
 # ========================================================================================
 # Options and paths
@@ -15,18 +15,22 @@ This workflow does standard htSeq-CLIP processing for single-read.
 """
 
 # ----------------------------------------------------------------------------------------
+# CONFIG FILE
+# ----------------------------------------------------------------------------------------
+configfile: "config.json"
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 # TOOL PATHS
 # ----------------------------------------------------------------------------------------
 
-GTF = "/g/hentze/projects/Software/htseq-clip/Genomes/gencode.v23.extended_plus_tRNAs_modified1.gtf"
-GTFN = "gencode.v23.extended_plus_tRNAs_modified1"
-
-FASTA = "/g/hentze/projects/Software/htseq-clip/fasta/GRCh38.p3.genome.fa"
-FASTAN = "GRCh38.p3.genome"
-
-#dir for output
-OUTDIR = "marko_thesis"
-BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam/hnRNPC_ULE"
+OUTDIR = config["outdir"]
+GTF = config["gtfdir"]
+GTFN = config["annotation_file"]
+BAMDIR = config["bamdir"]
+FASTA = config["fasta"]
+FASTAN = config["fasta_name"]
+END_PATTERN = config["bam_end"]
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
@@ -35,7 +39,7 @@ BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam/hnRNPC_ULE"
 
 # Automatically read in all samples
 
-SAMPLES, = glob_wildcards("/g/hentze/projects/Software/htseq-clip/bam/hnRNPC_ULE/{samples}.bam")
+SAMPLES, = glob_wildcards(expand("{sample_dir}/{{samples}}.{pattern}",pattern = END_PATTERN, sample_dir = config["bamdir"])[0])
 # ----------------------------------------------------------------------------------------
 
 SITES = "MS SS ES DEL INS".split()
@@ -116,7 +120,7 @@ rule process:
 	log:
 		expand("../logs/{gtfn}.log", gtfn=GTFN, outdir=OUTDIR)
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py annotation -g {input.gtf} -t gene_type -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py process -g {input.gtf} -t gene_type -o {output} 2> {log}"
 		
 rule sort_gtf:
 	input:
@@ -137,7 +141,7 @@ rule sliding_window:
 	log:
 		expand("../logs/{gtfn}.sw.log", gtfn=GTFN, outdir=OUTDIR)
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py createSlidingWindows -i {input} -o {output} -w 100 -s 40 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py slidingWindow -i {input} -o {output} -w 50 -s 20 2> {log}"
 		
 rule sort_sliding_window:
 	input:
@@ -306,7 +310,7 @@ rule do_sw:
 	log:
 		"../logs/{sample}_{site}.sw.count.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py countSlidingWindows -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py countSlidingWindow -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
 				
 # ----------------------------------------------------------------------------------------
 # DO CONVERTION TO DEXSEQ
@@ -324,7 +328,7 @@ rule do_dexseq:
 	log:
 		"../logs/{sample}_{site}.dex.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py slidingWindowsToDEXSeq -i {input} -o {output} 2> {log}"
+		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py toDexSeq -i {input} -o {output} 2> {log}"
 		
 		
 # ----------------------------------------------------------------------------------------	
@@ -343,6 +347,7 @@ rule do_rplot:
 	log:
 		"../logs/{sample}_{site}.rplot.log"
 	shell:
+		"PYTHONPATH="" "
 		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py plot -i {input} -o {output} -c r 2> {log}"
 		
 # ----------------------------------------------------------------------------------------	
@@ -361,6 +366,7 @@ rule do_cplot:
 	log:
 		"../logs/{sample}_{site}.cplot.log"
 	shell:
+		"PYTHONPATH="" "
 		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py plot -i {input} -o {output} -c c 2> {log}"
 		
 # ----------------------------------------------------------------------------------------	
@@ -379,5 +385,6 @@ rule do_jplot:
 	log:
 		"../logs/{sample}_{site}.jplot.log"
 	shell:
+		"PYTHONPATH="" "
 		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py plot -i {input} -o {output} -c j 2> {log}"
 		
