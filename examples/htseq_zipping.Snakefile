@@ -44,7 +44,7 @@ LOG = config["logs"]
 SAMPLES, = glob_wildcards(expand("{sample_dir}/{{samples}}.{pattern}",pattern = END_PATTERN, sample_dir = config["bamdir"])[0])
 # ----------------------------------------------------------------------------------------
 
-SITES = "MS SS ES DEL INS".split()
+SITES = "MS SS ES DEL INS S1".split()
 # ----------------------------------------------------------------------------------------	
 # :::::::: ALL :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # ----------------------------------------------------------------------------------------	
@@ -174,6 +174,21 @@ rule do_extract_SS:
 		"LOG/{sample}_SS.extract.log"
 	shell:
 		"python {CLIP} extract -i {input} -o {output} -c s 2> {log}"
+
+#START-1 SITES
+rule extract_S1:
+	input:
+		expand("{outdir}/extract/{samples}_S1.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
+		
+rule do_extract_S1:
+	input:
+		expand("{bamdir}/{{sample}}.sorted.nodupmulti.bam", bamdir=BAMDIR)
+	output:
+		temp("{OUTDIR}/extract/{sample}_S1.temporary.bed.gz")
+	log:
+		"LOG/{sample}_S1.extract.log"
+	shell:
+		"python {CLIP} extract -i {input} -o {output} -c s-1 2> {log}"
 
 #MIDDLE SITES
 rule extract_MS:
