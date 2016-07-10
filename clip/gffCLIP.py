@@ -1,5 +1,5 @@
 # --------------------------------------------------
-# gtfCLIP class
+# gffCLIP class
 # Authors: Marko Fritz, marko.fritz@embl.de
 #          Thomas Schwarzl, schwarzl@embl.de
 #          Nadia Ashraf, nadia.ashraf@embl.de
