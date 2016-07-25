@@ -76,7 +76,7 @@ class bedCLIP:
     ''' 
     def count_all(self):
         
-       choice = 0
+        choice = 0
         if self.fOutput.endswith(".gz"):
             output = gzip.open(self.fOutput, 'w') 
         else:        
@@ -97,12 +97,12 @@ class bedCLIP:
                     seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
                    'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
                    'Density','Total before duplication removal','Max height before duplication removal ')
-                    output.write(str("\t").join(seq) + "\n")
+                    output.write(str("\t").join(seq))
                 elif choice == 1:
                     seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
                    'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
                    'Density','Total before duplication removal','Max height before duplication removal ')
-                    output.write(str("\t").join(seq) + "\n")
+                    output.write(str("\t").join(seq))
 
         for line in fn:
             if line.startswith("track"):
@@ -166,7 +166,7 @@ class bedCLIP:
       
                 self.calculateCount(A, B, chrom, strand, output,choice)
                                    
-        output.close()     
+        output.close()       
     #===================================================================================
     #===================================================================================
     '''
