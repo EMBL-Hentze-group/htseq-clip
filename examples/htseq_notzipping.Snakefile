@@ -84,13 +84,13 @@ rule all:
 		expand("{outdir}/dexseq/{samples}_{sites}to{gtfn}.dex.txt", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: BOKEH JUNCTION PLOTS :::::::::
-		#expand("{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: BOKEH COUNT PLOTS :::::::::
-		#expand("{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}.count.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}.count.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
 		# ::::::: BOKEH READ PLOTS :::::::::
-		#expand("{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}.read.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}.read.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
 		# ::::::: PLOT :::::::::
 		#expand("{outdir}/plots/{samples}/{samples}_{sites}to{gtfn}_exonStart.pdf", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
@@ -395,21 +395,21 @@ rule do_rplot:
 # PLOT
 # ----------------------------------------------------------------------------------------
 		
-rule plot:
-	input:
-		expand("{outdir}/plots/{samples}/{samples}_{sites}to{gtfn}_exonStart.pdf", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+#rule plot:
+#	input:
+#		expand("{outdir}/plots/{samples}/{samples}_{sites}to{gtfn}_exonStart.pdf", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 
-rule do_plot:
-	input:
-		expand("{outdir}/junction/{{sample}}_{{site}}to{{gtfn}}.txt", outdir=OUTDIR)
-	output:
-		file=expand("{outdir}/plots/{{sample}}/{{sample}}_{{site}}to{{gtfn}}_exonStart.pdf", outdir=OUTDIR)
-		#dir=expand("{outdir}/plots/{{sample}}/", outdir=OUTDIR)
-	log:
-		"LOG/{sample}_{site}.plot.log"
-	shell:
-		"PYTHONPATH="" "
-		"Rscript /g/hentze/projects/Software/htseq-clip/htseq-clip/junction.r {input} $(dirname {output}) 2> {log}"
+#rule do_plot:
+#	input:
+#		expand("{outdir}/junction/{{sample}}_{{site}}to{{gtfn}}.txt", outdir=OUTDIR)
+#	output:
+#		file=expand("{outdir}/plots/{{sample}}/{{sample}}_{{site}}to{{gtfn}}_exonStart.pdf", outdir=OUTDIR)
+#		#dir=expand("{outdir}/plots/{{sample}}/", outdir=OUTDIR)
+#	log:
+#		"LOG/{sample}_{site}.plot.log"
+#	shell:
+#		"PYTHONPATH="" "
+#		"Rscript /g/hentze/projects/Software/htseq-clip/htseq-clip/junction.r {input} $(dirname {output}) 2> {log}"
 		
 rule mkplotdir:
 	output:
