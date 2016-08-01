@@ -155,39 +155,45 @@ class gtfCLIP:
                     #Flagging of introns and writing out in output file
                     #else there is only one exon
                     if not len(fs) == 1:
-                            
-                        #Initialisation of Flags
-                        p = 0
-                        eFlag1 = fs[p][4]
-                        p = p + 2
-                        eFlag2 = fs[p][4]
-                             
-                        for line in fs:
-                            if line[6] == "e":
-                                seq = (line[0], line[1], line[2], line[3], str(line[4]), line[5], "\n")
-                                output.write(str('\t').join(seq))
-                            elif line[6] == "i":
-                                
-                                #Simple binary operations to calculate the flag for the introns
-                                #The intron flag is calculated by using the left exon flag and the 
-                                #right exon flag by using the bits of the binary coded flag
-                                #for further information how they are calculated look up the
-                                #documentation
-                                line[4] = ((eFlag1 & 1) << 1) | (eFlag2 >> 1)    
-                                
-                                seq = (line[0], line[1], line[2], line[3], str(line[4]), line[5], "\n")
-                                output.write(str('\t').join(seq))
-                 
-                                eFlag1 = eFlag2
-                                p = p + 2
-                                if not p > len(fs):
+                            # Initialisation of Flags
+
+                        if len(fs) == 2:
+                            for line in fs:
+                                if line[6] == "e":
+                                    seq = (line[0], line[1], line[2], line[3], str(line[4]), line[5], "\n")
+                                    output.write(str('\t').join(seq))
+                                elif line[6] == "i":
+                                    seq = (line[0], line[1], line[2], line[3], str(line[4]), line[5], "\n")
+                                    output.write(str('\t').join(seq))
+                        else:
+                            for val in range(len(fs)):
+                                if fs[val][6] == 'i':
+
+                                    p = val-1
+                                    eFlag1 = fs[p][4]
+                                    p = p + 1
                                     eFlag2 = fs[p][4]
+                                    #Simple binary operations to calculate the flag for the introns
+                                    #The intron flag is calculated by using the left exon flag and the
+                                    #right exon flag by using the bits of the binary coded flag
+                                    # for further information how they are calculated look up the
+                                    # documentation
+                                    fs[val][4] = ((eFlag1 & 1) << 1) | (eFlag2 >> 1)
+
+                                    seq = (fs[val][0], fs[val][1], fs[val][2], fs[val][3], str(fs[val][4]), fs[val][5], "\n")
+                                    output.write(str('\t').join(seq))
+
+
+                                elif fs[val][6] == "e":
+                                    seq = (fs[val][0], fs[val][1], fs[val][2], fs[val][3], str(fs[val][4]), fs[val][5], "\n")
+                                    output.write(str('\t').join(seq))
+
                     else:
                         #if gene type is is something else, you have to flag it with 3 because there only exists one isoform
                         if fs[0][4] == None:
                             fs[0][4] = 3
                         seq = (fs[0][0], fs[0][1], fs[0][2], fs[0][3], str(fs[0][4]), fs[0][5], "\n")
-                        output.write(str('\t').join(seq))                                 
+                        output.write(str('\t').join(seq))                               
                                 
                             
                     gas = HTSeq.GenomicArrayOfSets('auto', stranded = True)
