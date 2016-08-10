@@ -28,6 +28,7 @@ OUTDIR = config["outdir"]
 GTF = config["gtfdir"]
 GTFN = config["annotation_file"]
 BAMDIR = config["bamdir"]
+BEDDIR = config["beddir"]
 FASTA = config["fasta"]
 FASTAN = config["fasta_name"]
 END_PATTERN = config["bam_end"]
@@ -41,7 +42,7 @@ LOG = config["logs"]
 
 # Automatically read in all samples
 
-SAMPLES, = glob_wildcards(expand("{sample_dir}/{{samples}}.{pattern}",pattern = END_PATTERN, sample_dir = config["bamdir"])[0])
+SAMPLES, = glob_wildcards(expand("{sample_dir}/{{samples}}.{pattern}",pattern = "sorted.nodup.bam", sample_dir = config["bamdir"])[0])
 # ----------------------------------------------------------------------------------------
 
 SITES = "MS SS ES DEL INS S1".split()
@@ -57,7 +58,7 @@ rule all:
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		# ::::::: PROCESS FASTA :::::::::
 		#expand("{outdir}/fastq/{fastan}.fastq.gz", fastan=FASTAN, outdir=OUTDIR),
-		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: PROCESS GTF :::::::::
 		expand("{outdir}/gtf/{gtfn}.bed.gz", gtfn=GTFN, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -74,7 +75,7 @@ rule all:
 		expand("{outdir}/extract/{samples}_{sites}.bed.gz", samples=SAMPLES, outdir=OUTDIR, sites=SITES),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: COUNT :::::::::
-		expand("{outdir}/counts/{samples}_{sites}to{gtfn}.count.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
+		#expand("{outdir}/counts/{samples}_{sites}to{gtfn}.count.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: JUNCTION :::::::::
 		expand("{outdir}/junction/{samples}_{sites}to{gtfn}.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
@@ -167,7 +168,7 @@ rule extract_SS:
 		
 rule do_extract_SS:
 	input:
-		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
+		expand("{bamdir}/{{sample}}.sorted.nodup.bam", bamdir=BAMDIR)
 	output:
 		temp("{OUTDIR}/extract/{sample}_SS.temporary.bed.gz")
 	log:
@@ -243,7 +244,7 @@ rule extract_INS:
 		
 rule do_extract_INS:
 	input:
-		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
+		expand("{bamdir}/{{sample}}.sorted.nodup.bam", bamdir=BAMDIR)
 	output:
 		temp("{OUTDIR}/extract/{sample}_INS.temporary.bed.gz")
 	log:
@@ -252,8 +253,55 @@ rule do_extract_INS:
 		"python {CLIP} extract -i {input} -o {output} -c i 2> {log}"
 		
 		
-		
-# ----------------------------------------------------------------------------------------	
+# ----------------------------------------------------------------------------------------
+# BIGWIG create:
+# ----------------------------------------------------------------------------------------
+rule chromesizes:
+	input:
+		expand("{outdir}/bedTobig/{sample}.chromsize", sample=SAMPLES,  outdir=OUTDIR)
+ 
+rule do_chromesizes:
+	input:
+		expand("{bamdir}/{{sample}}.sorted.nodup.bam", bamdir=BAMDIR)
+	output:
+		expand("{outdir}/bedTobig/{{sample}}.chromsize", outdir=OUTDIR)
+	message:
+		"extracting chromosome sizes for {wildcards.sample}"
+	shell:
+		"""samtools idxstats {input} | perl -alne 'print "$F[0]\t$F[1]" if $F[0]!~/\*/' > {output}"""
+
+# Create befgraphs
+rule bedgraph:
+	input:
+		expand("{outdir}/bedTobig/{sample}.bedgraph",sample=SAMPLES, outdir=OUTDIR)
+
+rule do_bedgraph:
+	input:
+		bed = expand("{bed_dir}/{{sample}}.bed", bed_dir = BEDDIR),
+		chromsizes = expand("{outdir}/bedTobig/{{sample}}.chromsize", outdir = OUTDIR)
+	output:
+		expand("{outdir}/bedTobig/{{sample}}.bedgraph", outdir=OUTDIR)
+	message:
+		"Create bedgraphs for sample {wildcards.sample}"
+	shell:
+		"""genomeCoverageBed -bg -split -i {input.bed} -g {input.chromsizes}  | perl -alne '$"="\t"; $F[-1]=int($F[-1]+0.5); print "@F"'> {output}"""
+
+# Create BigWig
+rule bigwig:
+	input: 
+		expand("{outdir}/bedTobig/{sample}.bw", outdir=OUTDIR,sample=SAMPLES)
+
+rule do_bigwig:
+	input:
+		bedgraph = expand("{outdir}/bedTobig/{{sample}}.bedgraph", outdir=OUTDIR),
+		chromsize = expand("{outdir}/bedTobig/{{sample}}.chromsize", outdir=OUTDIR)
+	output:
+		expand("{outdir}/bedTobig/{{sample}}.bw",outdir=OUTDIR  )
+	message:
+		"Create BigWigs for sample {wildcards.sample}"
+	shell:
+		"bedGraphToBigWig {input.bedgraph} {input.chromsize} {output}"
+# ---------------------------------------------------------------------------------------	
 # EXTRACT SITES
 # ----------------------------------------------------------------------------------------	
 rule sort:

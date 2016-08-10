@@ -29,6 +29,7 @@ OUTDIR = config["outdir"]
 GTF = config["gtfdir"]
 GTFN = config["annotation_file"]
 BAMDIR = config["bamdir"]
+BEDDIR = config["beddir"]
 END_PATTERN = config["bam_end"]
 FASTA = config["fasta"]
 FASTAN = config["fasta_name"]
@@ -84,13 +85,13 @@ rule all:
 		expand("{outdir}/dexseq/{samples}_{sites}to{gtfn}.dex.txt", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: BOKEH JUNCTION PLOTS :::::::::
-		expand("{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: BOKEH COUNT PLOTS :::::::::
-		expand("{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}.count.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}.count.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
 		# ::::::: BOKEH READ PLOTS :::::::::
-		expand("{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}.read.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}.read.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
 		# ::::::: PLOT :::::::::
 		#expand("{outdir}/plots/{samples}/{samples}_{sites}to{gtfn}_exonStart.pdf", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
@@ -416,3 +417,55 @@ rule mkplotdir:
 		"../plots/{sample}/"
 	shell:
 		"mkdir -p {output}"
+
+
+# ----------------------------------------------------------------------------------------
+# BIGWIG create:
+# ----------------------------------------------------------------------------------------
+rule chromesizes:
+    input:
+        expand("{outdir}/bedTobig/{sample}.chromsize", sample=SAMPLES,  outdir=OUTDIR)
+
+rule do_chromesizes:
+    input:
+        expand("{bamdir}/{{sample}}.sorted.nodup.bam", bamdir=BAMDIR)
+    output:
+        expand("{outdir}/bedTobig/{{sample}}.chromsize", outdir=OUTDIR)
+    message:
+        "extracting chromosome sizes for {wildcards.sample}"
+    shell:
+        """samtools idxstats {input} | perl -alne 'print "$F[0]\t$F[1]" if $F[0]!~/\*/' > {output}"""
+
+# Create befgraphs
+rule bedgraph:
+    input:
+        expand("{outdir}/bedTobig/{sample}.bedgraph",sample=SAMPLES, outdir=OUTDIR)
+
+rule do_bedgraph:
+    input:
+        bed = expand("{bed_dir}/{{sample}}.bed", bed_dir = BEDDIR),
+        chromsizes = expand("{outdir}/bedTobig/{{sample}}.chromsize", outdir = OUTDIR)
+    output:
+        expand("{outdir}/bedTobig/{{sample}}.bedgraph", outdir=OUTDIR)
+    message:
+        "Create bedgraphs for sample {wildcards.sample}"
+    shell:
+        """genomeCoverageBed -bg -split -i {input.bed} -g {input.chromsizes}  | perl -alne '$"="\t"; $F[-1]=int($F[-1]+0.5); print "@F"'> {output}"""
+
+# Create BigWig
+rule bigwig:
+    input:
+        expand("{outdir}/bedTobig/{sample}.bw", outdir=OUTDIR,sample=SAMPLES)
+
+rule do_bigwig:
+    input:
+        bedgraph = expand("{outdir}/bedTobig/{{sample}}.bedgraph", outdir=OUTDIR),
+        chromsize = expand("{outdir}/bedTobig/{{sample}}.chromsize", outdir=OUTDIR)
+    output:
+        expand("{outdir}/bedTobig/{{sample}}.bw",outdir=OUTDIR  )
+    message:
+        "Create BigWigs for sample {wildcards.sample}"
+    shell:
+        "bedGraphToBigWig {input.bedgraph} {input.chromsize} {output}"
+
+
