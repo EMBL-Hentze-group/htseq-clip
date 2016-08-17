@@ -86,6 +86,11 @@ Options:
                                   
                                   d for deletion sites
 
+ -e, --mate                       select which read to extract the crosslink sites from
+                                  
+                                  f for first read
+                                  s for second read
+                                  
  -q, --minAlignmentQuality        minimum alignment quality (default: 10)
  
  -m, --maxReadLength              minimum read length (default: 0)
@@ -329,8 +334,11 @@ def extract(parser,args):
     bamC = bamCLIP(args)
     
     if hasattr(args, 'choice') and args.choice != None:
-        if args.choice.startswith("s"):
-            bamC.extract_StartSites() 
+        if args.choice.startswith("s") :
+			if hasattr(args,'mate') and args.mate != None:
+				bamC.extract_StartSites()
+			else:
+				parser.error('You need --mate option. Indicate which read to extract cross linking sites from') 
         elif args.choice == 'm':      
             bamC.extract_MiddleSites()
         elif args.choice == 'e':      
@@ -462,8 +470,9 @@ def main():
         parser.add_argument('-v', '--verbose', action='store_true', default=argparse.SUPPRESS, help='verbose output')
         parser.add_argument('-i', '--input', action='store', type= str,  default=argparse.SUPPRESS, dest='input', help='input file')
         parser.add_argument('-o', '--output', action='store', type= str,  default=argparse.SUPPRESS, dest='output', help='output file name')
-        parser.add_argument('-f', '--compare', action='store', type= str,  default=argparse.SUPPRESS, dest='compare', help='file which you want to compare with your input file')
+    	parser.add_argument('-f', '--compare', action='store', type= str,  default=argparse.SUPPRESS, dest='compare', help='file which you want to compare with your input file')
         parser.add_argument('-c', '--choice', action='store', type=str,  default=argparse.SUPPRESS, dest='choice', help='option')
+        parser.add_argument('-e', '--mate', action='store', type=str, default=argparse.SUPPRESS, dest='mate', help='select first or second read')
         parser.add_argument('-q', '--minAlignmentQuality',   action='store', type=int, default=argparse.SUPPRESS,   dest='minAlignmentQuality', help='minimum alignment quality')
         parser.add_argument('-m', '--minReadLength', action='store', type=int, default=argparse.SUPPRESS, dest='minReadLength', help='minimum read length')
         parser.add_argument('-x', '--maxReadLength', action='store', type=int, default=argparse.SUPPRESS, dest='maxReadLength', help='maximum read length')
