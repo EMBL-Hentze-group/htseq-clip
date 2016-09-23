@@ -16,6 +16,8 @@ from bokehCLIP import bokehCLIP
 from fastaCLIP import fastaCLIP
 from featureCLIP import feature
 from gffCLIP import gffClip
+from customFILE import custom
+from heatmap import HeatMap
 
 VERSION = "0.1.1"
 
@@ -23,7 +25,7 @@ VERSION = "0.1.1"
 def usage():
     print '''
 htseq-clip:  A flexible toolset for the analysis of iCLIP sequencing data
-usage:       htseq-clip <function> [options]
+usage:       htseq-clip <command> [options]
     
 The functions include:
     
@@ -109,7 +111,7 @@ usage:                  htseq-clip annotation [options]
 
 Options:
 
- -g, --gtf         GTF or GFF file for annotation processing (.gtf or .gff)
+ -g, --gtf         GTF or GFF file for annotation processing (.gtf)
  
  -o, --output      output file (.bed)
  
@@ -150,27 +152,9 @@ Options:
  --version           version
 '''  
 
-def usage_dist():
-    print '''
-htseq-clip distance:  calculates the nearest cross link site to a region/feature
-usage:                htseq-clip dist [options]
-
-Options:
-
- -i, --input         extracted crosslink, insertion or deletion sites (.bed)
-
- -o, --output        output file (.txt)
-
- -f, --compare       file containing regions/features for example rmsk file for repeat elements (.bed)
-
-
- -h, --help          help
- --version           version
-'''
-
 def usage_feature():
     print '''
-htseq-clip count:  counts the number of crosslink/deletion/insertion sites
+htseq-clip feature:  counts the number of crosslink/deletion/insertion sites
 usage:             htseq-clip count [options]
 
 Options:
@@ -191,6 +175,11 @@ Options:
                      of exons/introns which possess crosslink
                      sites
 
+ -sc, --score        If both files contain alignment score as 5th column. Default is 'y'. If no score information is provided then 0 is
+                     written in score column of output file.
+
+ -st, --strand       If both files contain strand information as 6th column. Default is 'y'. If no information about strand is provided
+                     then '.' is written in strand column of output file representing either of the two strands (+/-).
 
  -h, --help          help
  --version           version
@@ -212,7 +201,30 @@ Options:
                              
  -h, --help          help
  --version           version
-''' 
+'''
+
+def usage_dist():
+    print '''
+htseq-clip distance:  calculates the nearest cross link site to a region/feature
+usage:                htseq-clip dist [options]
+
+Options:
+
+ -i, --input         extracted crosslink, insertion or deletion sites (.bed)
+
+ -o, --output        output file (.txt)
+
+ -f, --compare       file containing regions/features for example rmsk file for repeat elements (.bed)
+
+ -sc, --score        If both files contain alignment score as 5th column. Default is 'y'. If no score information is provided then 0 is
+                     written in score column of output file.
+
+ -st, --strand       If both files contain strand information as 6th column. Default is 'y'. If no information about strand is provided
+                     then '.' is written in strand column of output file representing either of the two strands (+/-).
+
+ -h, --help          help
+ --version           version
+'''
     
 def usage_createSlidingWindows():
     print '''
@@ -293,6 +305,30 @@ Options:
  --version           version
 '''  
 
+def usage_heat():
+    print '''
+htseq-clip heatmap:  plots the heatmap
+usage:            htseq-clip heatmap [options]
+
+Options:
+
+ -i, --input         input files. 2 .txt files; 1st input is cross link count inside the feature.
+                     2nd input is cross link sites outside (upstream and downstream) the feature.
+
+ -o, --output        output files. 2 output files. 1st is .txt for storing the densities of cross link
+                     in each feature. 2nd is .pdf for saving the heatmap.
+
+ -h, --height        height of heatmap in inches. Default is 5 inches.
+
+ -wd, --width        width of heatmap in inches. Default is 5 inches.
+
+ -e, --element       Feature for which heatmap is to be generated. This is case sensitive, so make sure
+                     to use same case for the feature as in the input file.
+
+
+ -h, --help          help
+ --version           version
+'''
 
 #======================================================================================
 #======================================================================================
@@ -364,31 +400,29 @@ def junction(program, args):
 Plotting function
 '''
 
-
 def plot(parser, args):
-    
+
     bokehC = bokehCLIP(args)
-    
+
     if hasattr(args, 'choice') and args.choice != None:
-        if args.choice == 'c':      
+        if args.choice == 'c':
             bokehC.plot_count()
         elif args.choice == 'd':
-            bokehC.plot_comparison() 
-        elif args.choice == 'j':      
+            bokehC.plot_comparison()
+        elif args.choice == 'j':
             bokehC.plot_junction()
-        elif args.choice == 'r':      
+        elif args.choice == 'r':
             bokehC.plot_read()
-        
+
         else:
             parser.error('Invalid option for plotting')
     else:
         parser.error('You need -c option for the correct plotting of your data!')
-        
+
 '''
 Processing the annotation file
 '''       
 def process(args):
-
     if args.gtf.endswith('.gtf'):
         gtf = gtfClip(args)
         gtfC = gtfCLIP(args)
@@ -400,7 +434,7 @@ def process(args):
         gff = gffClip(args)
         gtfC = gtfCLIP(args)
         if args.region:
-            gff.processGTF()
+            gff.processGFF()
         else:
             gtfC.processGTF()
 
@@ -441,6 +475,13 @@ def features(parser, args):
             parser.error('Invalid option for count')
     else:
         parser.error('You need -c option for the correct counting of your data!')
+
+"""
+Function for creating heatmap for visualizing the cross link trends.
+"""
+def heatmap(parser,args):
+    heat = HeatMap(args)
+    heat.heatmap()
 #======================================================================================
 #-------------------------------------------------------------
 def checkFileExists(filename, parser):
@@ -457,27 +498,32 @@ def main():
     
     try:
         # get parser and add arguments
-        parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, usage=globals()['__doc__'], version="%prog 1.0", conflict_handler='resolve', argument_default=argparse.SUPPRESS)
+        parser = argparse.ArgumentParser(version="%prog 1.0", conflict_handler='resolve')
 
         parser.add_argument('-v', '--verbose', action='store_true', default=argparse.SUPPRESS, help='verbose output')
-        parser.add_argument('-i', '--input', action='store', type= str,  default=argparse.SUPPRESS, dest='input', help='input file')
-        parser.add_argument('-o', '--output', action='store', type= str,  default=argparse.SUPPRESS, dest='output', help='output file name')
+        parser.add_argument('-i', '--input', action='store',nargs = '+', type= str,  default=argparse.SUPPRESS, dest='input', help='input file')
+        parser.add_argument('-o', '--output', action='store',nargs = '+', type= str,  default=argparse.SUPPRESS, dest='output', help='output file name')
         parser.add_argument('-f', '--compare', action='store', type= str,  default=argparse.SUPPRESS, dest='compare', help='file which you want to compare with your input file')
         parser.add_argument('-c', '--choice', action='store', type=str,  default=argparse.SUPPRESS, dest='choice', help='option')
         parser.add_argument('-q', '--minAlignmentQuality',   action='store', type=int, default=argparse.SUPPRESS,   dest='minAlignmentQuality', help='minimum alignment quality')
         parser.add_argument('-m', '--minReadLength', action='store', type=int, default=argparse.SUPPRESS, dest='minReadLength', help='minimum read length')
         parser.add_argument('-x', '--maxReadLength', action='store', type=int, default=argparse.SUPPRESS, dest='maxReadLength', help='maximum read length')
+        parser.add_argument('-h', '--height', action='store', type=int, default=argparse.SUPPRESS, dest='height', help='height of heatmap')
+        parser.add_argument('-wd', '--width', action='store', type=int, default=argparse.SUPPRESS, dest='width', help='width of heatmap')
         parser.add_argument('-l', '--maxReadIntervalLength', action='store', type=int, default=argparse.SUPPRESS, dest='maxReadIntervalLength', help='maximum read interval length')
         parser.add_argument('-p', '--primary', action='store_true', default=argparse.SUPPRESS,  dest='primary', help='set if you want to use only primary positions of multimapping reads')
         parser.add_argument('-d', '--dist', action='store', type=int, default=argparse.SUPPRESS, dest='dist', help='Maximum distance between two sites of a read if its higher than this value it will be count as this value')
         parser.add_argument('-g', '--gtf', action='store', type=str, default=argparse.SUPPRESS, dest='gtf', help='gtf file for annotation')
         parser.add_argument('-t', '--type', action='store', type=str, default=argparse.SUPPRESS, dest='type', help='gene type for annotation')
         parser.add_argument('-n', '--name', action='store', type=str, default=argparse.SUPPRESS, dest='name', help='gene name for annotation')
+        parser.add_argument('-sc', '--score', action='store', type=str, default=argparse.SUPPRESS, dest='score', help='alignment score')
+        parser.add_argument('-st', '--strand', action='store', type=str, default=argparse.SUPPRESS, dest='strand', help='region strand')
         parser.add_argument('-w', '--windowSize', action='store', type=int, default=argparse.SUPPRESS, dest='windowSize', help='window size for sliding window')
         parser.add_argument('-s', '--windowStep', action='store', type=int, default=argparse.SUPPRESS, dest='windowStep', help='window step for sliding window')
-        parser.add_argument('-r', '--region', action='store_true', default= argparse.SUPPRESS, dest='region', help='set if you want exons to be split into cds and utr regions. Default is False.')
-        parser.add_argument('command', nargs = '?', help='name of program to run ')
-        args= parser.parse_args()
+        parser.add_argument('-r', '--region', action='store_true', dest='region', help='set if you want exons to be split into cds and utr regions. Default is False.')
+        parser.add_argument('-e', '--element', action='store_true', dest='element', help='Region for heatmap e.g. Alu.')
+        parser.add_argument('command', nargs = '?', default = None, help='name of program to run ')
+        args = parser.parse_args()
         d = vars(args)
 
         # check if there are all arguments
@@ -493,7 +539,7 @@ def main():
                     usage_extract()
                     os._exit(1)
                 else:   
-                    checkFileExists(args.input, parser)
+                    checkFileExists(args.input[0], parser)
                     extract(parser, args)
             elif program == 'countSlidingWindows':
                 if len(d) < 3:
@@ -516,7 +562,7 @@ def main():
                     usage_count()
                     os._exit(1)
                 else: 
-                    checkFileExists(args.input, parser)
+                    checkFileExists(args.input[0],parser)
                     checkFileExists(args.compare, parser)
                     count(program, parser, args)
             elif program == 'annotation':
@@ -531,7 +577,7 @@ def main():
                     usage_plot()
                     os._exit(1)
                 else:
-                    checkFileExists(args.input, parser)
+                    checkFileExists(args.input[0], parser)
                     plot(parser, args)
             elif program =='createSlidingWindows':
                 if len(d) < 3:
@@ -555,7 +601,7 @@ def main():
                     usage_feature()
                     os._exit(1)
                 else:
-                    checkFileExists(args.input, parser)
+                    checkFileExists(args.input[0], parser)
                     checkFileExists(args.compare, parser)
                     features(parser,args)
             elif program == 'dist':
@@ -563,9 +609,19 @@ def main():
                     usage_dist()
                     os._exit(1)
                 else:
-                    checkFileExists(args.input, parser)
+                    checkFileExists(args.input[0], parser)
                     checkFileExists(args.compare, parser)
                     cl_dist(parser,args)
+
+            elif program == 'heatmap':
+                if len(d) <3:
+                    usage_heat()
+                    os.exit(1)
+                else:
+                    checkFileExists(args.input[0],parser)
+                    checkFileExists(args.input[1],parser)
+                    heatmap(parser,args)
+
             else:
                 parser.error ('Incorrect argument for execution')
 
