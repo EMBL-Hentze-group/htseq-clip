@@ -285,9 +285,9 @@ class bedCLIP:
                             length = b_Curr[1] - b_Curr[0] 
                             
                             if not self.choice == "o":
-                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output,c)
+                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output)
                             elif self.choice == "o" and len(d_count) != 0:
-                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output,c)
+                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output)
                             
                             if not b_Curr == b_Last:
                                 bi = bi + 1
