@@ -16,7 +16,6 @@ from bokehCLIP import bokehCLIP
 from fastaCLIP import fastaCLIP
 from featureCLIP import feature
 from gffCLIP import gffClip
-from customFILE import custom
 from heatmap import HeatMap
 
 VERSION = "0.1.1"
