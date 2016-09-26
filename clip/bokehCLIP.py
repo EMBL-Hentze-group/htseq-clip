@@ -29,13 +29,13 @@ class bokehCLIP:
     def __init__(self, options):
         
         if hasattr(options, 'input'):
-            self.fInput = options.input 
+            self.fInput = options.input[0] 
             
         if hasattr(options, 'compare'):
             self.fCompare = options.compare
             
         if hasattr(options, 'output'):
-            self.fOutput = options.output
+            self.fOutput = options.output[0]
             
         if hasattr(options, 'choice'):
             self.choice = options.choice
