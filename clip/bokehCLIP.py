@@ -390,9 +390,9 @@ class bokehCLIP:
                         total_counts += int(line[totalField-6])
 
                     if not density.has_key(float(line[totalField-3])):
-                        density[float(line[totalField-6])] = 1
+                        density[float(line[totalField-3])] = 1
                     else:
-                        density[float(line[totalField-6])] += 1
+                        density[float(line[totalField-3])] += 1
                         
                     if not duplicates.has_key(int(line[totalField-2])):
                         duplicates[int(line[totalField-2])] = 1
