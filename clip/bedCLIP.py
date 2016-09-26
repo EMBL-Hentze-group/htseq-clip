@@ -21,10 +21,10 @@ class bedCLIP:
     def __init__(self, options):
         
         if hasattr(options, 'input'):
-            self.fInput = options.input
+            self.fInput = options.input[0]
         
         if hasattr(options, 'output'):
-            self.fOutput = options.output
+            self.fOutput = options.output[0]
             
         if hasattr(options, 'compare'):
             self.fCompare = options.compare
@@ -75,8 +75,7 @@ class bedCLIP:
     given reference
     ''' 
     def count_all(self):
-        
-       choice = 0
+        choice = 0
         if self.fOutput.endswith(".gz"):
             output = gzip.open(self.fOutput, 'w') 
         else:        
@@ -97,12 +96,14 @@ class bedCLIP:
                     seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
                    'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
                    'Density','Total before duplication removal','Max height before duplication removal ')
-                    output.write(str("\t").join(seq) + "\n")
+                    output.write(str("\t").join(seq))
+                    output.write('\n')
                 elif choice == 1:
                     seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
                    'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
                    'Density','Total before duplication removal','Max height before duplication removal ')
-                    output.write(str("\t").join(seq) + "\n")
+                    output.write(str("\t").join(seq))
+                    output.write('\n')
 
         for line in fn:
             if line.startswith("track"):
