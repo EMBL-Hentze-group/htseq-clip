@@ -12,20 +12,22 @@ import gzip, HTSeq
 from collections import OrderedDict
 
 class feature:
-    data = {}
+
     fInput = ""   #crosslink sites file .bed format
     fOutput = ""  #output file .txt format
     fCompare = ""  #input file (repeats file) .bed format
     choice = ""
-    dist = 4000
+    dist = 200     #upstream/downstream search window size
+    strand = 'y'   #if strand info is provided or not
+    score = 'y'    #if score is provided or not
 
     def __init__(self, options):
 
         if hasattr(options, 'input'):
-            self.fInput = options.input
+            self.fInput = options.input[0]
 
         if hasattr(options, 'output'):
-            self.fOutput = options.output
+            self.fOutput = options.output[0]
 
         if hasattr(options, 'compare'):
             self.fCompare = options.compare
@@ -36,7 +38,13 @@ class feature:
         if hasattr(options, 'dist'):
             self.dist = options.dist
 
-        self.data = {'dist': self.dist}
+        if hasattr(options, 'strand'):
+            self.strand = options.strand
+
+        if hasattr(options, 'score'):
+            self.score = options.score
+
+
 
     #=====================================================
     """
@@ -50,22 +58,68 @@ class feature:
 
         for almnt in data_file:
 
-            if almnt.iv.strand == '+':
+            if self.score == 'y' and self.strand == 'n':
+
                 if not d.has_key(almnt.iv.chrom):
-                    d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]}
+                        d[almnt.iv.chrom] = {'.' : [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]}
                 else:
-                    if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
-                        d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]
+                    if not d[almnt.iv.chrom].has_key('.'):
+                        d[almnt.iv.chrom]['.'] = [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]
                     else:
-                        d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)])
+                        d[almnt.iv.chrom]['.'].append([almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)])
+
+            elif self.score == 'n' and self.strand == 'y':
+
+                if almnt.iv.strand == '+':
+                    if not d.has_key(almnt.iv.chrom):
+                        d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, 0]]}
+
+                    else:
+                        if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
+                            d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, 0]]
+                        else:
+                            d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.start_d, almnt.iv.end_d, almnt.name, 0])
+
+                else:
+                    if not d.has_key(almnt.iv.chrom):
+                        d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, 0]]}
+
+                    else:
+                        if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
+                            d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, 0]]
+                        else:
+                            d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.end_d, almnt.iv.start_d, almnt.name, 0])
+
+
+            elif self.score == 'y' and self.strand == 'y':
+                if almnt.iv.strand == '+':
+                    if not d.has_key(almnt.iv.chrom):
+                        d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]}
+
+                    else:
+                        if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
+                            d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]
+                        else:
+                            d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)])
+
+                else:
+                    if not d.has_key(almnt.iv.chrom):
+                        d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]}
+
+                    else:
+                        if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
+                            d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]
+                        else:
+                            d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)])
+
             else:
                 if not d.has_key(almnt.iv.chrom):
-                    d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]}
+                        d[almnt.iv.chrom] = {'.' : [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, 0]]}
                 else:
-                    if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
-                        d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]
+                    if not d[almnt.iv.chrom].has_key('.'):
+                        d[almnt.iv.chrom]['.'] = [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, 0]]
                     else:
-                        d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)])
+                        d[almnt.iv.chrom]['.'].append([almnt.iv.start_d, almnt.iv.end_d, almnt.name, 0])
 
         return d
 
@@ -136,9 +190,10 @@ class feature:
             output = gzip.open(self.fOutput, 'w')
         else:
             output = open(self.fOutput, 'w')
-            seq = ('Chromosome','Region start pos','Region end pos','Region name','Region score (Smith-Waterman Score)','Strand','Length(nt)',
-                   'Total cross-link sites in region','Number of pos where cross-links are located', 'Max count in one pos','Count density',
-                   'Total remove duplicates','Max no.of removed duplicates')
+            seq = ('Chromosome','Region start pos','Region end pos','Region name','Region score','Strand','Length(nt)',
+                  'Total cross-link sites in region','Number of pos where cross-links are located', 'Max count in one pos','Count density',
+                  'Total remove duplicates','Max no.of removed duplicates')
+
             output.write(str("\t").join(seq) + "\n")
 
         #Get the information for normalisation of the plots
@@ -147,24 +202,29 @@ class feature:
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
         almnt_file2 = HTSeq.BED_Reader(self.fCompare)
 
-        self.process(almnt_file2,output)
+        #self.process(almnt_file2,output)
 
         d1 = self.build_dict(almnt_file1)
         d2 = self.build_dict(almnt_file2)
 
+        if (not d1.has_key('chr1')) or (not d2.has_key('chr1')):
+            error = "Chromosome number format is not same, please make sure it's same for both files!"
+            raise ValueError(error)
+
+        else:
         #only if there are reads on the current chromsome
         #and on the same strand, the counting is performed
-        for chrom in d1:
-            if not d2.has_key(chrom):
-                continue
-            for strand in d1[chrom]:
-                if not d2[chrom].has_key(strand):
+            for chrom in d1:
+                if not d2.has_key(chrom):
                     continue
+                for strand in d1[chrom]:
+                    if not d2[chrom].has_key(strand):
+                        continue
 
-                A = d1[chrom][strand]
-                B = d2[chrom][strand]
+                    A = d1[chrom][strand]
+                    B = d2[chrom][strand]
 
-                self.calculateCount(A, B, chrom, strand, output)
+                    self.calculateCount(A, B, chrom, strand, output)
 
         output.close()
     #===================================================================================
@@ -227,6 +287,7 @@ class feature:
                             elif self.choice == "o" and len(d_count) != 0:
                                 self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output)
 
+
                             if not b_Curr == b_Last:
                                 bi = bi + 1
                             else:
@@ -248,6 +309,7 @@ class feature:
 
                                 d_count[a[0]] += 1
                                 d_dup[a[0]] += a[3]
+
 
 
                                 #if last cross-link site found write out
@@ -293,9 +355,11 @@ class feature:
             density = float(counts) / float(length)
 
             seq = (chrom, str(b[0]+1), str(b[1]+1), name, str(b[3]), strand, str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]), str(density), str(dup_counts), str(d_dup[m_dup]))
+            #seq = (chrom, str(b[0]+1), str(b[1]+1), name, strand, str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]), str(density), str(dup_counts), str(d_dup[m_dup]))
             output.write(str("\t").join(seq) + "\n")
         else:
             seq = (chrom, str(b[0]+1), str(b[1]+1), name, str(b[3]), strand, str(length), str(0), str(0), str(0), str(0), str(0), str(0))
+            #seq = (chrom, str(b[0]+1), str(b[1]+1), name, strand, str(length), str(0), str(0), str(0), str(0), str(0), str(0))
             output.write(str("\t").join(seq) + "\n")
 
     """
@@ -308,6 +372,7 @@ class feature:
         chromFooter = {}
 
         for repeat in rmsk_file:
+            repeat.iv.strand = '.'
             if not chromFooter.has_key(repeat.iv.chrom):
                 chromFooter[repeat.iv.chrom] = (repeat.iv.end - repeat.iv.start)
             else:
@@ -337,8 +402,8 @@ class feature:
             output = gzip.open(self.fOutput, 'w')
         else:
             output = open(self.fOutput, 'w')
-            seq = ('Chromosome','Region start pos','Region end pos','Region name','Region score (Smith-Waterman Score)','Strand','Length in nt',
-                   'Total cross-link sites in region','Number of pos where cross-links are located', 'Max count in one pos','Distance to nearest CL site','Count density',
+            seq = ('Chromosome','Region start pos','Region end pos','Region name','Region score','Strand','Length in nt',
+                   'Total cross-link sites in region','Number of pos where cross-links are located', 'Max count in one pos','Position of nearest cross link site','Distance to nearest cross-link site','Count density',
                    'Total remove duplicates','Max no.of removed duplicates')
             output.write(str("\t").join(seq) + "\n")
 
@@ -349,7 +414,7 @@ class feature:
         almnt_file2 = HTSeq.BED_Reader(self.fCompare)
 
         d1 = self.build_dict(almnt_file1)
-        d2= self.built_dict_SW(almnt_file2,500)
+        d2= self.built_dict_SW(almnt_file2,self.dist)
 
         for chrom in d1:
             if not d2.has_key(chrom):
@@ -404,6 +469,13 @@ class feature:
     Function for counting CLs outside feature and determining nearest CL site to the feature
     """
     def get_cl_dist(self,A,B,chrom,strand,output):
+
+        #A is dictionary of all cross link (cl) sites
+        #B is dictionary of annotation/features/regions. Contains genomic start end positions of all regions, strand information (if available), chromosome number, alignment score(if available),
+        #and name of the region .
+
+        #get first region and count how many cl sites fall in that region
+        #loop over cls and compare their position with the region coordinates.
         if len(B) > 0:
 
             bi = 0
@@ -462,30 +534,38 @@ class feature:
                             d_count = {}
                             d_dup = {}
                             cl_dist = {}
+
                         else:
 
                             if a[0] >= b_Curr[0] and a[1] <= b_Curr[1]:
+
                                 #if nothing is in the feature generate the data structure
                                 if len(d_count) == 0:
                                     length = b_Curr[1] - b_Curr[0]
 
+                                    #create dictionary instances for storing cout,duplication, and distance information
                                     for i in range(length+1):
                                         d_count[i+b_Curr[0]] = 0
                                         d_dup[i+b_Curr[0]] = 0
                                         cl_dist[i+b_Curr[0]] = 0
 
+                                #for count add 1 every time same cross link position is hit
+                                #for duplicate add the duplicate information from cross links bed file
                                 d_count[a[0]] += 1
                                 d_dup[a[0]] += a[3]
-                                if strand == '+':
-                                    if 'upstream' in b_Curr[2]:
-                                        cl_dist[a[0]] += min(b_Curr[1]-a[0],B[bi+1][0]-a[0])
-                                    else:
-                                        cl_dist[a[0]] += min(a[0]-b_Curr[0],a[0]-B[bi-1][1])
+
+                                #for nearest distance calculte start - cl position and end - cl position and keep the minimum of the two.
+                                #separate calculations for forward and reverse strands.
+
+                                #upstream region; get distance of cl from start pos of region and end pos of the previous region and keep the minimum of the two
+                                #downstream region; get distance of cl form end pos of region and start pos of next region and keep minimum of the two.
+
+
+                                if 'upstream' in b_Curr[2]:
+                                    cl_dist[a[0]] += min(abs(b_Curr[0]-a[0]), abs(a[0]-B[bi-1][1]))
                                 else:
-                                    if 'downstream' in b_Curr[2]:
-                                        cl_dist[a[0]] += min(b_Curr[1]-a[0],B[bi+1][0]-a[0])
-                                    else:
-                                        cl_dist[a[0]] += min(a[0]-b_Curr[0],a[0]-B[bi-1][1])
+                                    cl_dist[a[0]] += min(abs(a[0]-b_Curr[1]), abs(B[bi+1][0]-a[0]))
+
 
                                 #if last cross-link site found write out
                                 if a == A[-1]:
@@ -527,13 +607,15 @@ class feature:
                     dup_counts += d_dup[dup]
             m_dup = max(d_dup.keys(), key=(lambda k: d_dup[k]))
 
-            min_dist = min(dist.keys(), key=(lambda k: d_dup[k]))
+            min_pos = min(dist.keys(), key=(lambda k: d_dup[k]))
 
             density = float(counts) / float(length)
+            min_dist= min(abs((b[0]+1) - min_pos),abs((b[1]+1)-min_pos))
 
-            seq = (chrom, str(b[0]+1), str(b[1]+1), name, str(b[3]), strand, str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]),str(min_dist), str(density), str(dup_counts), str(d_dup[m_dup]))
+            seq = (chrom, str(b[0]+1), str(b[1]+1), name, str(b[3]), strand, str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]),str(min_pos),str(min_dist), str(density), str(dup_counts), str(d_dup[m_dup]))
             output.write(str("\t").join(seq) + "\n")
         else:
-            seq = (chrom, str(b[0]+1), str(b[1]+1), name, str(b[3]), strand, str(length), str(0), str(0), str(0), str(0), str(0), str(0), str(0))
+            seq = (chrom, str(b[0]+1), str(b[1]+1), name, str(b[3]), strand, str(length), str(0), str(0), str(0),str(0), str(0), str(0), str(0), str(0))
             output.write(str("\t").join(seq) + "\n")
+
 
