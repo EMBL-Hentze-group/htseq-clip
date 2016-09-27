@@ -1,5 +1,5 @@
 # --------------------------------------------------
-# gffCLIP class
+# gtfCLIP class
 # Authors: Marko Fritz, marko.fritz@embl.de
 #          Thomas Schwarzl, schwarzl@embl.de
 #          Nadia Ashraf, nadia.ashraf@embl.de
@@ -28,10 +28,10 @@ class gffClip:
             self.gtfFile = options.gtf
 
         if hasattr(options, 'input'):
-            self.fInput = options.input
+            self.fInput = options.input[0]
 
         if hasattr(options, 'output'):
-            self.fOutput = options.output
+            self.fOutput = options.output[0]
 
         if hasattr(options, 'windowSize'):
             self.windowSize = options.windowSize
@@ -418,7 +418,7 @@ class gffClip:
          #flag regions(utrs and cds).
 
             #loopove through positions of cds and utrs for each transcript and flag the positions accordingly
-            # Flag = 3 means starting and ending position for the regions are same for all transcripts
+            #Flag = 3 means starting and ending position for the regions are same for all transcripts
             #Flag = 1 means in some transcripts ending positions differ
             #Flag = 2 means in some transcripts starting positions differ
             #Flag = 0 means neither starting nor ending position match for any transcripts (unreliable positions)
