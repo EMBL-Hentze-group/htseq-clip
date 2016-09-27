@@ -21,10 +21,10 @@ class bedCLIP:
     def __init__(self, options):
         
         if hasattr(options, 'input'):
-            self.fInput = options.input
+            self.fInput = options.input[0]
         
         if hasattr(options, 'output'):
-            self.fOutput = options.output
+            self.fOutput = options.output[0]
             
         if hasattr(options, 'compare'):
             self.fCompare = options.compare
@@ -75,7 +75,6 @@ class bedCLIP:
     given reference
     ''' 
     def count_all(self):
-        
         choice = 0
         if self.fOutput.endswith(".gz"):
             output = gzip.open(self.fOutput, 'w') 
@@ -98,11 +97,13 @@ class bedCLIP:
                    'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
                    'Density','Total before duplication removal','Max height before duplication removal ')
                     output.write(str("\t").join(seq))
+                    output.write('\n')
                 elif choice == 1:
                     seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
                    'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
                    'Density','Total before duplication removal','Max height before duplication removal ')
                     output.write(str("\t").join(seq))
+                    output.write('\n')
 
         for line in fn:
             if line.startswith("track"):
@@ -166,7 +167,7 @@ class bedCLIP:
       
                 self.calculateCount(A, B, chrom, strand, output,choice)
                                    
-        output.close()       
+        output.close()     
     #===================================================================================
     #===================================================================================
     '''
@@ -235,7 +236,7 @@ class bedCLIP:
     '''
     This method calculates the counts of cross-link sites
     '''    
-    def calculateCount(self, A, B, chrom, strand, output,c):
+    def calculateCount(self, A, B, chrom, strand, output, c):
         
         if len(B) > 0:
             
@@ -288,6 +289,7 @@ class bedCLIP:
                                 self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output,c)
                             elif self.choice == "o" and len(d_count) != 0:
                                 self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output,c)
+
                             
                             if not b_Curr == b_Last:
                                 bi = bi + 1
@@ -315,7 +317,7 @@ class bedCLIP:
                                     
                                     length = b_Curr[1] - b_Curr[0] 
                                     
-                                    self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output)
+                                    self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output,c)
                             
                                     if not b_Curr == b_Last:
                                         bi = bi + 1
@@ -341,6 +343,7 @@ class bedCLIP:
     #===================================================================================
      
     #===================================================================================
+
     '''
     Method that calculates the distances from cross-link sites to exon/intron regions
     '''
@@ -592,7 +595,7 @@ class bedCLIP:
     '''
     Write in output file
     '''
-    def writeOut(self, chrom, strand, b, d_count, d_dup, length, output):
+    def writeOut(self, chrom, strand, b, d_count, d_dup, length, output, choice):
 
         name = b[2].split("@")
 
@@ -618,6 +621,7 @@ class bedCLIP:
             elif choice == 1:
                 posi = name[3].split("/")
                 seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(b[3]), strand, name[2], posi[0], posi[1], name[1], str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]), str(density), str(dup_counts), str(d_dup[m_dup]))
+
             output.write(str("\t").join(seq) + "\n")
         else:
             if choice == 2:
@@ -627,6 +631,7 @@ class bedCLIP:
                 posi = name[3].split("/")
                 seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], str(b[3]), strand, name[2], posi[0], posi[1], name[1], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
             output.write(str("\t").join(seq) + "\n")
+
     #===================================================================================
     
     
