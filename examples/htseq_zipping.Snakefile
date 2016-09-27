@@ -2,8 +2,8 @@ import os
 from snakemake.utils import report
 
 # ========================================================================================
-# Pipeline by Marko Fritz <marko.fritz@embl.de>, Thomas Schwarzl <schwarzl@embl.de>
-# __author__  = "Marko Fritz, Thomas Schwarzl"
+# Pipeline by Marko Fritz <marko.fritz@embl.de>, Thomas Schwarzl <schwarzl@embl.de>, Nadia Ashraf <nadia.ashraf@embl.de>
+# __author__  = "Marko Fritz, Thomas Schwarzl, Nadia Ashraf"
 # __license__ = "EMBL"
 # ========================================================================================
 # Options and paths
@@ -15,18 +15,25 @@ This workflow does standard htSeq-CLIP processing for single-read.
 """
 
 # ----------------------------------------------------------------------------------------
+# CONFIG FILE
+# ----------------------------------------------------------------------------------------
+configfile: "config.json"
+# ----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 # TOOL PATHS
 # ----------------------------------------------------------------------------------------
 
-GTF = "/g/hentze/projects/Software/htseq-clip/Genomes/gencode.v23.extended_plus_tRNAs_modified1.gtf"
-GTFN = "gencode.v23.extended_plus_tRNAs_modified1"
-
-FASTA = "/g/hentze/projects/Software/htseq-clip/fasta/GRCh38.p3.genome.fa"
-FASTAN = "GRCh38.p3.genome"
-
-#dir for output
-OUTDIR = "marko_thesis"
-BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam/hnRNPC_ULE"
+OUTDIR = config["outdir"]
+GTF = config["gtfdir"]
+GTFN = config["annotation_file"]
+BAMDIR = config["bamdir"]
+BEDDIR = config["beddir"]
+FASTA = config["fasta"]
+FASTAN = config["fasta_name"]
+END_PATTERN = config["bam_end"]
+CLIP = config["clip"]
+LOG = config["logs"]
 # ----------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------
@@ -35,10 +42,10 @@ BAMDIR = "/g/hentze/projects/Software/htseq-clip/bam/hnRNPC_ULE"
 
 # Automatically read in all samples
 
-SAMPLES, = glob_wildcards("/g/hentze/projects/Software/htseq-clip/bam/hnRNPC_ULE/{samples}.bam")
+SAMPLES, = glob_wildcards(expand("{sample_dir}/{{samples}}.{pattern}",pattern = "sorted.nodup.bam", sample_dir = config["bamdir"])[0])
 # ----------------------------------------------------------------------------------------
 
-SITES = "MS SS ES DEL INS".split()
+SITES = "MS SS ES DEL INS S1".split()
 # ----------------------------------------------------------------------------------------	
 # :::::::: ALL :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # ----------------------------------------------------------------------------------------	
@@ -50,43 +57,43 @@ rule all:
 	input:
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		# ::::::: PROCESS FASTA :::::::::
-		#expand("../{outdir}/fastq/{fastan}.fastq.gz", fastan=FASTAN, outdir=OUTDIR),
-		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+		#expand("{outdir}/fastq/{fastan}.fastq.gz", fastan=FASTAN, outdir=OUTDIR),
+		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: PROCESS GTF :::::::::
-		expand("../{outdir}/gtf/{gtfn}.bed.gz", gtfn=GTFN, outdir=OUTDIR),
+		expand("{outdir}/gtf/{gtfn}.bed.gz", gtfn=GTFN, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		# ::::::: SORT PROCESSED GTF :::::::::
-		expand("../{outdir}/gtf/{gtfn}.sorted.bed.gz", gtfn=GTFN, outdir=OUTDIR),
+		expand("{outdir}/gtf/{gtfn}.sorted.bed.gz", gtfn=GTFN, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: PROCESS SLIDING WINDOW :::::::::
-		expand("../{outdir}/gtf/{gtfn}.sw.bed.gz", gtfn=GTFN, outdir=OUTDIR),
+		expand("{outdir}/gtf/{gtfn}.sw.bed.gz", gtfn=GTFN, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: SORT SLIDING WINDOW :::::::::
-		expand("../{outdir}/gtf/{gtfn}.sw.sorted.bed.gz", gtfn=GTFN, outdir=OUTDIR),
+		expand("{outdir}/gtf/{gtfn}.sw.sorted.bed.gz", gtfn=GTFN, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: EXTRACT SITES :::::::::
-		expand("../{outdir}/extract/{samples}_{sites}.bed.gz", samples=SAMPLES, outdir=OUTDIR, sites=SITES),
+		expand("{outdir}/extract/{samples}_{sites}.bed.gz", samples=SAMPLES, outdir=OUTDIR, sites=SITES),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: COUNT :::::::::
-		expand("../{outdir}/counts/{samples}_{sites}to{gtfn}.count.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
+		#expand("{outdir}/counts/{samples}_{sites}to{gtfn}.count.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: JUNCTION :::::::::
-		expand("../{outdir}/junction/{samples}_{sites}to{gtfn}.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
+		expand("{outdir}/junction/{samples}_{sites}to{gtfn}.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: DO SLIDING WINDOW :::::::::
-		expand("../{outdir}/slidingWindow/{samples}_{sites}to{gtfn}.sw.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
+		expand("{outdir}/slidingWindow/{samples}_{sites}to{gtfn}.sw.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: DO CONVERTION TO DEXSEQ :::::::::
-		expand("../{outdir}/dexseq/{samples}_{sites}to{gtfn}.dex.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
+		expand("{outdir}/dexseq/{samples}_{sites}to{gtfn}.dex.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: BOKEH READ PLOTS :::::::::
-		expand("../{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}_reads.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR),
+		expand("{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}_reads.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: BOKEH COUNT PLOTS :::::::::
-		expand("../{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}_counts.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR),
+		expand("{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}_counts.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR),
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		# ::::::: BOKEH JUNCTION PLOTS :::::::::
-		expand("../{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 # ----------------------------------------------------------------------------------------	
@@ -97,9 +104,9 @@ rule process_fasta:
 	input:
 		fasta=FASTA
 	output:
-		expand("../{outdir}/fastq/{fastan}.fastq.gz", fastan=FASTAN, outdir=OUTDIR)
+		expand("{outdir}/fastq/{fastan}.fastq.gz", fastan=FASTAN, outdir=OUTDIR)
 	log:
-		expand("../logs/{fastan}.log", fastan=FASTAN, outdir=OUTDIR)
+		expand("logs/{fastan}.log", fastan=FASTAN, outdir=OUTDIR)
 	shell:
 		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py genomeToReads -i {input.fasta} -o {output} -x 42 2> {log}"
 		
@@ -112,40 +119,40 @@ rule process:
 	input:
 		gtf=GTF
 	output:
-		expand("../{outdir}/gtf/{gtfn}.bed.gz", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.bed.gz", gtfn=GTFN, outdir=OUTDIR)
 	log:
-		expand("../logs/{gtfn}.log", gtfn=GTFN, outdir=OUTDIR)
+		expand("{logs}/{gtfn}.log", gtfn=GTFN, outdir=OUTDIR, logs = LOG)
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py annotation -g {input.gtf} -t gene_type -o {output} 2> {log}"
+		"python {CLIP} process -g {input.gtf} -t gene_type -o {output} 2> {log}"
 		
 rule sort_gtf:
 	input:
-		expand("../{outdir}/gtf/{gtfn}.bed.gz", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.bed.gz", gtfn=GTFN, outdir=OUTDIR)
 	output:
-		expand("../{outdir}/gtf/{gtfn}.sorted.bed.gz", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.sorted.bed.gz", gtfn=GTFN, outdir=OUTDIR)
 	log:
-		expand("../logs/{gtfn}.sorted.log", gtfn=GTFN , outdir=OUTDIR)
+		expand("{logs}/{gtfn}.sorted.log", gtfn=GTFN , outdir=OUTDIR, logs = LOG)
 	shell:
 		"zcat {input} | sort -k1,1 -k2,2n | gzip > {output} 2> {log}"
 		
 				
 rule sliding_window:
 	input:
-		expand("../{outdir}/gtf/{gtfn}.bed.gz", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.bed.gz", gtfn=GTFN, outdir=OUTDIR)
 	output:
-		expand("../{outdir}/gtf/{gtfn}.sw.bed.gz", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.sw.bed.gz", gtfn=GTFN, outdir=OUTDIR)
 	log:
-		expand("../logs/{gtfn}.sw.log", gtfn=GTFN, outdir=OUTDIR)
+		expand("{logs}/{gtfn}.sw.log", gtfn=GTFN, outdir=OUTDIR, logs = LOG)
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py createSlidingWindows -i {input} -o {output} -w 100 -s 40 2> {log}"
+		"python {CLIP} slidingWindow -i {input} -o {output} -w 50 -s 20 2> {log}"
 		
 rule sort_sliding_window:
 	input:
-		expand("../{outdir}/gtf/{gtfn}.sw.bed.gz", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.sw.bed.gz", gtfn=GTFN, outdir=OUTDIR)
 	output:
-		expand("../{outdir}/gtf/{gtfn}.sw.sorted.bed.gz", gtfn=GTFN, outdir=OUTDIR)
+		expand("{outdir}/gtf/{gtfn}.sw.sorted.bed.gz", gtfn=GTFN, outdir=OUTDIR)
 	log:
-		expand("../logs/{gtfn}.sw.sorted.log", gtfn=GTFN , outdir=OUTDIR)
+		expand("{logs}/{gtfn}.sw.sorted.log", gtfn=GTFN , outdir=OUTDIR, logs = LOG)
 	shell:
 		"zcat {input} | sort -k1,1 -k2,2n | gzip > {output} 2> {log}"
 		
@@ -157,95 +164,157 @@ rule sort_sliding_window:
 #START SITES
 rule extract_SS:
 	input:
-		expand("../{outdir}/extract/{samples}_SS.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_SS.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
 		
 rule do_extract_SS:
 	input:
-		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
+		expand("{bamdir}/{{sample}}.sorted.nodup.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_SS.temporary.bed.gz")
+		temp("{OUTDIR}/extract/{sample}_SS.temporary.bed.gz")
 	log:
-		"../logs/{sample}_SS.extract.log"
+		"LOG/{sample}_SS.extract.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py extract -i {input} -o {output} -c s 2> {log}"
+		"python {CLIP} extract -i {input} -o {output} -c s 2> {log}"
+
+#START-1 SITES
+rule extract_S1:
+	input:
+		expand("{outdir}/extract/{samples}_S1.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
+		
+rule do_extract_S1:
+	input:
+		expand("{bamdir}/{{sample}}.sorted.nodupmulti.bam", bamdir=BAMDIR)
+	output:
+		temp("{OUTDIR}/extract/{sample}_S1.temporary.bed.gz")
+	log:
+		"LOG/{sample}_S1.extract.log"
+	shell:
+		"python {CLIP} extract -i {input} -o {output} -c s-1 2> {log}"
 
 #MIDDLE SITES
 rule extract_MS:
 	input:
-		expand("../{outdir}/extract/{samples}_MS.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_MS.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
 		
 rule do_extract_MS:
 	input:
 		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_MS.temporary.bed.gz")
+		temp("{OUTDIR}/extract/{sample}_MS.temporary.bed.gz")
 	log:
-		"../logs/{sample}_MS.extract.log"
+		"LOG/{sample}_MS.extract.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py extract -i {input} -o {output} -c m 2> {log}"
+		"python {CLIP} extract -i {input} -o {output} -c m 2> {log}"
 
 #END SITES
 rule extract_ES:
 	input:
-		expand("../{outdir}/extract/{samples}_ES.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_ES.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
 		
 rule do_extract_ES:
 	input:
 		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_ES.temporary.bed.gz")
+		temp("{OUTDIR}/extract/{sample}_ES.temporary.bed.gz")
 	log:
-		"../logs/{sample}_ES.extract.log"
+		"LOG/{sample}_ES.extract.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py extract -i {input} -o {output} -c e 2> {log}"
+		"python {CLIP} extract -i {input} -o {output} -c e 2> {log}"
 
 #DELETION SITES
 rule extract_DEL:
 	input:
-		expand("../{outdir}/extract/{samples}_DEL.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_DEL.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
 		
 rule do_extract_DEL:
 	input:
 		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_DEL.temporary.bed.gz")
+		temp("{OUTDIR}/extract/{sample}_DEL.temporary.bed.gz")
 	log:
-		"../logs/{sample}_DEL.extract.log"
+		"LOG/{sample}_DEL.extract.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py extract -i {input} -o {output} -c d 2> {log}"
+		"python {CLIP} extract -i {input} -o {output} -c d 2> {log}"
 
 #INSERTION SITES
 rule extract_INS:
 	input:
-		expand("../{outdir}/extract/{samples}_INS.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
+		expand("{outdir}/extract/{samples}_INS.temporary.bed.gz", samples=SAMPLES, outdir=OUTDIR)
 
 		
 rule do_extract_INS:
 	input:
-		expand("{bamdir}/{{sample}}.bam", bamdir=BAMDIR)
+		expand("{bamdir}/{{sample}}.sorted.nodup.bam", bamdir=BAMDIR)
 	output:
-		temp("../{OUTDIR}/extract/{sample}_INS.temporary.bed.gz")
+		temp("{OUTDIR}/extract/{sample}_INS.temporary.bed.gz")
 	log:
-		"../logs/{sample}_INS.extract.log"
+		"LOG/{sample}_INS.extract.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py extract -i {input} -o {output} -c i 2> {log}"
+		"python {CLIP} extract -i {input} -o {output} -c i 2> {log}"
 		
 		
-		
-# ----------------------------------------------------------------------------------------	
+# ----------------------------------------------------------------------------------------
+# BIGWIG create:
+# ----------------------------------------------------------------------------------------
+rule chromesizes:
+	input:
+		expand("{outdir}/bedTobig/{sample}.chromsize", sample=SAMPLES,  outdir=OUTDIR)
+ 
+rule do_chromesizes:
+	input:
+		expand("{bamdir}/{{sample}}.sorted.nodup.bam", bamdir=BAMDIR)
+	output:
+		expand("{outdir}/bedTobig/{{sample}}.chromsize", outdir=OUTDIR)
+	message:
+		"extracting chromosome sizes for {wildcards.sample}"
+	shell:
+		"""samtools idxstats {input} | perl -alne 'print "$F[0]\t$F[1]" if $F[0]!~/\*/' > {output}"""
+
+# Create befgraphs
+rule bedgraph:
+	input:
+		expand("{outdir}/bedTobig/{sample}.bedgraph",sample=SAMPLES, outdir=OUTDIR)
+
+rule do_bedgraph:
+	input:
+		bed = expand("{bed_dir}/{{sample}}.bed", bed_dir = BEDDIR),
+		chromsizes = expand("{outdir}/bedTobig/{{sample}}.chromsize", outdir = OUTDIR)
+	output:
+		expand("{outdir}/bedTobig/{{sample}}.bedgraph", outdir=OUTDIR)
+	message:
+		"Create bedgraphs for sample {wildcards.sample}"
+	shell:
+		"""genomeCoverageBed -bg -split -i {input.bed} -g {input.chromsizes}  | perl -alne '$"="\t"; $F[-1]=int($F[-1]+0.5); print "@F"'> {output}"""
+
+# Create BigWig
+rule bigwig:
+	input: 
+		expand("{outdir}/bedTobig/{sample}.bw", outdir=OUTDIR,sample=SAMPLES)
+
+rule do_bigwig:
+	input:
+		bedgraph = expand("{outdir}/bedTobig/{{sample}}.bedgraph", outdir=OUTDIR),
+		chromsize = expand("{outdir}/bedTobig/{{sample}}.chromsize", outdir=OUTDIR)
+	output:
+		expand("{outdir}/bedTobig/{{sample}}.bw",outdir=OUTDIR  )
+	message:
+		"Create BigWigs for sample {wildcards.sample}"
+	shell:
+		"bedGraphToBigWig {input.bedgraph} {input.chromsize} {output}"
+# ---------------------------------------------------------------------------------------	
 # EXTRACT SITES
 # ----------------------------------------------------------------------------------------	
 rule sort:
 	input:
-		expand("../{outdir}/extract/{samples}_{sites}.bed.gz", samples=SAMPLES, outdir=OUTDIR, sites=SITES)
+		expand("{outdir}/extract/{samples}_{sites}.bed.gz", samples=SAMPLES, outdir=OUTDIR, sites=SITES)
 
 rule do_sort:		
 	input:
-		"../{OUTDIR}/extract/{sample}_{site}.temporary.bed.gz"
+		"{OUTDIR}/extract/{sample}_{site}.temporary.bed.gz"
 	output:
-		"../{OUTDIR}/extract/{sample}_{site,\w+}.bed.gz"
+		"{OUTDIR}/extract/{sample}_{site,\w+}.bed.gz"
 	log:
-		"{../logs/sample}_{site}.extract.sort.log"
+		"LOG/{sample}_{site}.extract.sort.log"
 	shell:
 		"zcat {input} | sort -k1,1 -k2,2n | gzip > {output} 2> {log}"
 		
@@ -255,18 +324,18 @@ rule do_sort:
 
 rule junction:
 	input:
-		expand("../{outdir}/junction/{samples}_{sites}to{gtfn}.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/junction/{samples}_{sites}to{gtfn}.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_junction:
 	input:
-		bed="../{OUTDIR}/extract/{sample}_{site}.bed.gz",
-		gtf="../{OUTDIR}/gtf/{gtfn}.sorted.bed.gz"
+		bed="{OUTDIR}/extract/{sample}_{site}.bed.gz",
+		gtf="{OUTDIR}/gtf/{gtfn}.sorted.bed.gz"
 	output:
-		"../{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt.gz"
+		"{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt.gz"
 	log:
-		"../logs/{sample}_{site}.junction.log"
+		"LOG/{sample}_{site}.junction.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py junction -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
+		"python {CLIP} junction -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
 		
 		
 # ----------------------------------------------------------------------------------------
@@ -275,18 +344,18 @@ rule do_junction:
 
 rule count:
 	input:
-		expand("../{outdir}/counts/{samples}_{sites}to{gtfn}.count.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/counts/{samples}_{sites}to{gtfn}.count.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_count:
 	input:
-		bed="../{OUTDIR}/extract/{sample}_{site}.bed.gz",
-		gtf="../{OUTDIR}/gtf/{gtfn}.sorted.bed.gz"
+		bed="{OUTDIR}/extract/{sample}_{site}.bed.gz",
+		gtf="{OUTDIR}/gtf/{gtfn}.sorted.bed.gz"
 	output:
 		"../{OUTDIR}/counts/{sample}_{site}to{gtfn}.count.txt.gz"
 	log:
-		"../logs/{sample}_{site}.count.log"
+		"LOG/{sample}_{site}.count.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py count -i {input.bed} -f {input.gtf} -o {output} -c o 2> {log}"
+		"python {CLIP} count -i {input.bed} -f {input.gtf} -o {output} -c o 2> {log}"
 		
 		
 # ----------------------------------------------------------------------------------------
@@ -295,18 +364,18 @@ rule do_count:
 
 rule sw:
 	input:
-		expand("../{outdir}/slidingWindow/{samples}_{sites}to{gtfn}.sw.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/slidingWindow/{samples}_{sites}to{gtfn}.sw.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_sw:
 	input:
-		bed="../{OUTDIR}/extract/{sample}_{site}.bed.gz",
-		gtf="../{OUTDIR}/gtf/{gtfn}.sw.sorted.bed.gz"
+		bed="{OUTDIR}/extract/{sample}_{site}.bed.gz",
+		gtf="{OUTDIR}/gtf/{gtfn}.sw.sorted.bed.gz"
 	output:
-		"../{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt.gz"
+		"{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt.gz"
 	log:
-		"../logs/{sample}_{site}.sw.count.log"
+		"LOG/{sample}_{site}.sw.count.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py countSlidingWindows -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
+		"python {CLIP} countSlidingWindow -i {input.bed} -f {input.gtf} -o {output} 2> {log}"
 				
 # ----------------------------------------------------------------------------------------
 # DO CONVERTION TO DEXSEQ
@@ -314,17 +383,17 @@ rule do_sw:
 
 rule dexseq:
 	input:
-		expand("../{outdir}/dexseq/{samples}_{sites}to{gtfn}.dex.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
+		expand("{outdir}/dexseq/{samples}_{sites}to{gtfn}.dex.txt.gz", samples=SAMPLES, outdir=OUTDIR, gtfn=GTFN, sites=SITES)
 		
 rule do_dexseq:
 	input:
-		"../{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt.gz"
+		"{OUTDIR}/slidingWindow/{sample}_{site}to{gtfn}.sw.txt.gz"
 	output:
-		"../{OUTDIR}/dexseq/{sample}_{site}to{gtfn}.dex.txt.gz"
+		"{OUTDIR}/dexseq/{sample}_{site}to{gtfn}.dex.txt.gz"
 	log:
-		"../logs/{sample}_{site}.dex.log"
+		"LOG/{sample}_{site}.dex.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py slidingWindowsToDEXSeq -i {input} -o {output} 2> {log}"
+		"python {CLIP} toDexSeq -i {input} -o {output} 2> {log}"
 		
 		
 # ----------------------------------------------------------------------------------------	
@@ -333,17 +402,18 @@ rule do_dexseq:
 
 rule rplot:
 	input:
-		expand("../{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}_reads.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/reads/{samples}_{sites}/{samples}_{sites}to{gtfn}_reads.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		
 rule do_rplot:
 	input:
-		"../{OUTDIR}/extract/{sample}_{site}.bed.gz"
+		"{OUTDIR}/extract/{sample}_{site}.bed.gz"
 	output:
-		"../{OUTDIR}/plots/reads/{sample}_{site}/{sample}_{site}to{gtfn}_reads.html"
+		"{OUTDIR}/plots/reads/{sample}_{site}/{sample}_{site}to{gtfn}_reads.html"
 	log:
-		"../logs/{sample}_{site}.rplot.log"
+		"LOG/{sample}_{site}.rplot.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py plot -i {input} -o {output} -c r 2> {log}"
+		"PYTHONPATH="" "
+		"python {CLIP} plot -i {input} -o {output} -c r 2> {log}"
 		
 # ----------------------------------------------------------------------------------------	
 # BOKEH COUNT PLOTS
@@ -351,17 +421,18 @@ rule do_rplot:
 
 rule cplot:
 	input:
-		expand("../{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}_counts.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/counts/{samples}_{sites}/{samples}_{sites}to{gtfn}_counts.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		
 rule do_cplot:
 	input:
-		"../{OUTDIR}/counts/{sample}_{site}to{gtfn}.count.txt.gz"
+		"{OUTDIR}/counts/{sample}_{site}to{gtfn}.count.txt.gz"
 	output:
-		"../{OUTDIR}/plots/counts/{sample}_{site}/{sample}_{site}to{gtfn}_counts.html"
+		"{OUTDIR}/plots/counts/{sample}_{site}/{sample}_{site}to{gtfn}_counts.html"
 	log:
-		"../logs/{sample}_{site}.cplot.log"
+		"LOG/{sample}_{site}.cplot.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py plot -i {input} -o {output} -c c 2> {log}"
+		"PYTHONPATH="" "
+		"python {CLIP} plot -i {input} -o {output} -c c 2> {log}"
 		
 # ----------------------------------------------------------------------------------------	
 # BOKEH JUNCTION PLOTS
@@ -369,15 +440,16 @@ rule do_cplot:
 
 rule jplot:
 	input:
-		expand("../{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
+		expand("{outdir}/plots/junction/{samples}_{sites}/{samples}_{sites}to{gtfn}_junction.html", samples=SAMPLES, gtfn=GTFN, sites=SITES, outdir=OUTDIR)
 		
 rule do_jplot:
 	input:
-		"../{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt.gz"
+		"{OUTDIR}/junction/{sample}_{site}to{gtfn}.txt.gz"
 	output:
-		"../{OUTDIR}/plots/junction/{sample}_{site}/{sample}_{site}to{gtfn}_junction.html"
+		"{OUTDIR}/plots/junction/{sample}_{site}/{sample}_{site}to{gtfn}_junction.html"
 	log:
-		"../logs/{sample}_{site}.jplot.log"
+		"LOG/{sample}_{site}.jplot.log"
 	shell:
-		"python /g/hentze/projects/Software/htseq-clip/clip/clip.py plot -i {input} -o {output} -c j 2> {log}"
+		"PYTHONPATH="" "
+		"python {CLIP} plot -i {input} -o {output} -c j 2> {log}"
 		
