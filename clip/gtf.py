@@ -28,10 +28,10 @@ class gtfClip:
             self.gtfFile = options.gtf
 
         if hasattr(options, 'input'):
-            self.fInput = options.input
+            self.fInput = options.input[0]
 
         if hasattr(options, 'output'):
-            self.fOutput = options.output
+            self.fOutput = options.output[0]
 
         if hasattr(options, 'windowSize'):
             self.windowSize = options.windowSize
