@@ -47,6 +47,9 @@ class bamCLIP:
             
         if hasattr(options, 'choice'):
             self.choice = options.choice
+		
+        if hasattr(options, 'mate'):
+			self.mate = options.mate
            
         self.data = {'maxReadLength' : self.maxReadLength,
                      'minReadLength' : self.minReadLength,
@@ -56,18 +59,34 @@ class bamCLIP:
               
     #================================================================================ 
     '''
-    This method determines if a read fullfills the critera to be included in the analysis
+    This method determines if a read fullfills the critera to be included in the analysis.
     '''
     def readFullfillsQualityCriteria(self, almnt):
-        if almnt.paired_end and almnt.pe_which == "second":
-            self.count += 1
-            return False
-        else:
-            return(almnt.aligned and
-                   almnt.iv.length <= self.data['maxReadIntervalLength'] and
-                   almnt.aQual >= self.data['minAlignmentQuality'] and
-                   not almnt.failed_platform_qc and #SAM flag 0x0200
-                   self.primaryFilter(almnt))
+        rmate = self.mate
+        
+        if rmate == 's': #select the second read of a pair to extract
+            if almnt.paired_end and almnt.pe_which == "second":
+                return(almnt.aligned and almnt.iv.length <= self.data['maxReadIntervalLength'] and
+                       almnt.aQual >= self.data['minAlignmentQuality'] and not almnt.failed_platform_qc
+                       and self.primaryFilter(almnt))
+            elif almnt.paired_end and almnt.pe_which == "first":
+                self.count += 1
+                return False
+            elif not almnt.paired_end:
+                raise("Data are not paired end %s" % almnt.paired_end)
+                
+                
+        elif rmate == 'f': #select the first read of a pair to extract
+            if ( not almnt.paired_end ) or (almnt.paired_end and almnt.pe_which =="first"):
+                return(almnt.aligned and
+                       almnt.iv.length <= self.data['maxReadIntervalLength'] and
+                       almnt.aQual >= self.data['minAlignmentQuality'] and
+                       not almnt.failed_platform_qc and #SAM flag 0x0200
+                       self.primaryFilter(almnt))
+            elif almnt.paired_end and almnt.pe_which == "second":
+                self.count += 1
+                return False
+
     #================================================================================ 
             
     #================================================================================ 
@@ -153,7 +172,7 @@ class bamCLIP:
     '''
     Returns GenomicPosition for desired site based on start site
     '''
-    def getStartSiteAsBed(self, almnt):
+    def getStartSiteAsBed_firstread(self, almnt):
         dp = self.choice.split("s")
         
         ignore = False
@@ -166,14 +185,14 @@ class bamCLIP:
                 dp = int(dp[0])
             else:
                 dp = int(dp[1])
-        
+
         if almnt.iv.strand == "+":
             x = almnt.iv.start_d + dp
         elif almnt.iv.strand == "-":
             x = almnt.iv.start_d - dp
         else:
             raise("Strand not known %s" % almnt.iv.strand)
-        
+
         if x < 0:
             if ignore == False:
                 error = "Value Error: Start position cannot be less than zero!! Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". Check your data!"
@@ -190,8 +209,47 @@ class bamCLIP:
                 yb = 1
                 pass
             
-            seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
+            seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand, almnt.pe_which)
     
+            return(str("\t").join(seq))
+	
+
+    def getStartSiteAsBed_secondread(self, almnt):
+        dp = self.choice.split("s")
+        
+        ignore = False
+        if dp[1] == '':
+            dp = 0
+        else:
+            if "i" in dp[1]:
+                ignore = True
+                dp = dp[1].split("i")
+                dp = int(dp[0])
+            else:
+                dp = int(dp[1])
+
+        if almnt.iv.strand == "+":
+            x = almnt.iv.end_d - 1
+        elif almnt.iv.strand == "-":
+            x = almnt.iv.end_d + 1
+        else:
+            raise("Strand not known %s" % almnt.iv.strand)
+
+        if x < 0:
+            if ignore == False:
+                error = "Value Error: Start position cannot be less than zero!! Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". Check your data!"
+                raise ValueError(error)
+            return None
+        else:
+            y = x+1
+            try:
+                yb = almnt.optional_field('YB')
+            except Exception:
+                yb = 1
+                pass
+
+            seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand, almnt.pe_which)
+
             return(str("\t").join(seq))
     #=================================================================================
     #=================================================================================
@@ -318,24 +376,37 @@ class bamCLIP:
     Extract start sites
     '''
     def extract_StartSites(self):
-    
+        rmate = self.mate
+		
         almnt_file = HTSeq.BAM_Reader(self.fInput)
         if self.fOutput.endswith(".gz"):
             fOutput = gzip.open(self.fOutput, 'w')
         else:
             fOutput = open(self.fOutput, 'w')
-    
-        for almnt in almnt_file:
-            if self.readFullfillsQualityCriteria(almnt):
-                
-                out = self.getStartSiteAsBed(almnt)
-        
-                if not out == None:
-                    fOutput.write(out + "\n")
-       
-        fOutput.close()
-        
-        print self.count
+        if rmate == 'f':
+            for almnt in almnt_file:
+                if self.readFullfillsQualityCriteria(almnt):
+
+                    out = self.getStartSiteAsBed_firstread(almnt)
+                    if not out == None:
+                        fOutput.write(out + "\n")
+            fOutput.close()
+            print self.count
+
+        elif rmate == 's':
+            for almnt in almnt_file:
+                if almnt.pe_which=="second" and self.readFullfillsQualityCriteria(almnt):
+                    out = self.getStartSiteAsBed_secondread(almnt)
+                    if not out == None:
+                        fOutput.write(out + "\n")
+                elif not almnt.paired_end:
+                    error = " The data are not paired_end - eg. Read :{0} does not have a pair".format(almnt.read.name)
+                    raise Exception(error)
+
+
+            fOutput.close()
+            print self.count
+
 
     '''
     Extract middle sites
@@ -367,7 +438,6 @@ class bamCLIP:
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
                 fOutput.write(self.getEndSiteAsBed(almnt) + "\n")
-       
         fOutput.close()
         
     '''
