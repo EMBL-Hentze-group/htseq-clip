@@ -1,0 +1,12 @@
+{
+	"bamdir": "/g/hentze/projects/iCLIP/Fpr1/data/sequencing/star-ensembl83-pen-m3-jun",
+	"outdir": "/g/hentze/users/Panos/outputTest",
+    "gtfdir": "/g/hentze/users/Nadia/data/yeast_genes/Saccharomyces_cerevisiae.R64-1-1.84.gtf",
+	"annotation_file": "S.cerevisiae",
+	"fasta": "/g/hentze/projects/Software/htseq-clip/fasta/GRCh38.p3.genome.fa",
+	"fasta_name": "GRCh38.p3.genome",
+	"bam_end": "sorted.bam",
+	"logs": "../logs",
+	"clip": "/g/hentze/users/Panos/htseq_clip_new/htseq-clip/clip/clip.py",
+	"beddir": "/g/hentze/users/Panos/testSnakemake/bed_big/Fpr1_befiles"
+}
