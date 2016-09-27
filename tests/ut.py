@@ -2,6 +2,7 @@
 # UNIT TEST CLASS
 # Authors: Marko Fritz, marko.fritz@embl.de
 #          Thomas Schwarzl, schwarzl@embl.de
+#          Nadia Ashraf, nadia.ashraf@embl.de
 # Institution: EMBL Heidelberg
 # Date: January 2016
 # --------------------------------------------------
@@ -9,10 +10,11 @@
 import unittest
 import sys
 sys.path.append("..")
-
-from clip import bamCLIP
-from clip import bedCLIP
-from clip import gtfCLIP
+from clip.bamCLIP import bamCLIP
+from clip.bedCLIP import bedCLIP
+from clip.gtfCLIP import gtfCLIP
+from clip.gtf import gtfClip
+from clip.gffCLIP import gffClip
 
 
 ####################################################################################
@@ -428,17 +430,17 @@ class TestExtractMethods(unittest.TestCase):
 ####################################################################################
 class TestProcessMethods(unittest.TestCase):
      
-    def test_process(self):
+    def test01_process(self):
         
         options = {}
         
-        gtfCLIP.gtfCLIP.gtfFile = "testProcess/test.gtf"
-        gtfCLIP.gtfCLIP.fOutput = "UnitTestOutput/testProcess/test.bed"
-        gtfCLIP.gtfCLIP.geneType = "gene_type"
+        gtfCLIP.gtfFile = "testProcess/test.gtf"
+        gtfCLIP.fOutput = "UnitTestOutput/testProcess/test01.bed"
+        gtfCLIP.geneType = "gene_type"
          
-        gtfC = gtfCLIP.gtfCLIP(options)
+        gtfC = gtfCLIP(options)
         gtfC.processGTF()
-        outputTest = open("UnitTestOutput/testProcess/test.bed", "r")
+        outputTest = open("UnitTestOutput/testProcess/test01.bed", "r")
         checkTest  = open("testProcess/checkTestProcess/test_check.bed", "r")
          
         v1 = []
@@ -454,19 +456,212 @@ class TestProcessMethods(unittest.TestCase):
         checkTest.close()
               
         self.assertEqual(v1, v2)
-         
-    def test_process_empty(self):
+
+    def test02_process(self):
+
+        options = {}
+
+        gtfCLIP.gtfFile = "testProcess/gtftry.gtf"
+        gtfCLIP.fOutput = "UnitTestOutput/testProcess/test02.bed"
+        gtfCLIP.geneType = "gene_type"
+        gtfCLIP.geneName = 'gene_name'
+
+        gtfC = gtfCLIP(options)
+        gtfC.processGTF()
+        outputTest = open("UnitTestOutput/testProcess/test02.bed", "r")
+        checkTest  = open("testProcess/checkTestProcess/test02_check.bed", "r")
+
+        v1 = []
+        v2 = []
+
+        for line in outputTest:
+            v1.append(line)
+
+        for line in checkTest:
+            v2.append(line)
+
+        outputTest.close()
+        checkTest.close()
+
+        self.assertEqual(v1, v2)
+
+    def test03_process(self):
+
+        options = {}
+
+        gtfClip.gtfFile = "testProcess/gtftry.gtf"
+        gtfClip.fOutput = "UnitTestOutput/testProcess/test03.bed"
+        gtfClip.geneType = "gene_type"
+
+        gtfC = gtfClip(options)
+        gtfC.processGTF()
+        outputTest = open("UnitTestOutput/testProcess/test03.bed", "r")
+        checkTest  = open("testProcess/checkTestProcess/test03_check.bed", "r")
+
+        v1 = []
+        v2 = []
+
+        for line in outputTest:
+            v1.append(line)
+
+        for line in checkTest:
+            v2.append(line)
+
+        outputTest.close()
+        checkTest.close()
+
+        self.assertEqual(v1, v2)
+
+    def test04_process(self):
+
+        options = {}
+
+        gtfClip.gtfFile = "testProcess/gtftry.gtf"
+        gtfClip.fOutput = "UnitTestOutput/testProcess/test04.bed"
+        gtfClip.geneType = "gene_type"
+        gtfClip.geneName = 'gene_name'
+
+        gtfC = gtfClip(options)
+        gtfC.processGTF()
+        outputTest = open("UnitTestOutput/testProcess/test04.bed", "r")
+        checkTest  = open("testProcess/checkTestProcess/test04_check.bed", "r")
+
+        v1 = []
+        v2 = []
+
+        for line in outputTest:
+            v1.append(line)
+
+        for line in checkTest:
+            v2.append(line)
+
+        outputTest.close()
+        checkTest.close()
+
+        self.assertEqual(v1, v2)
+
+    def test05_process(self):
+
+        options = {}
+
+        gtfCLIP.gtfFile = "testProcess/test.gff3"
+        gtfCLIP.fOutput = "UnitTestOutput/testProcess/test05.bed"
+        gtfCLIP.geneType = "biotype"
+
+        gtfC = gtfCLIP(options)
+        gtfC.processGTF()
+        outputTest = open("UnitTestOutput/testProcess/test05.bed", "r")
+        checkTest  = open("testProcess/checkTestProcess/test05_check.bed", "r")
+
+        v1 = []
+        v2 = []
+
+        for line in outputTest:
+            v1.append(line)
+
+        for line in checkTest:
+            v2.append(line)
+
+        outputTest.close()
+        checkTest.close()
+
+        self.assertEqual(v1, v2)
+
+    def test06_process(self):
+
+        options = {}
+
+        gtfCLIP.gtfFile = "testProcess/test.gff3"
+        gtfCLIP.fOutput = "UnitTestOutput/testProcess/test06.bed"
+        gtfCLIP.geneType = "biotype"
+        gtfCLIP.geneName = 'Name'
+
+        gtfC = gtfCLIP(options)
+        gtfC.processGTF()
+        outputTest = open("UnitTestOutput/testProcess/test06.bed", "r")
+        checkTest  = open("testProcess/checkTestProcess/test06_check.bed", "r")
+
+        v1 = []
+        v2 = []
+
+        for line in outputTest:
+            v1.append(line)
+
+        for line in checkTest:
+            v2.append(line)
+
+        outputTest.close()
+        checkTest.close()
+
+        self.assertEqual(v1, v2)
+
+    def test07_process(self):
+
+        options = {}
+
+        gffClip.gtfFile = "testProcess/test.gff3"
+        gffClip.fOutput = "UnitTestOutput/testProcess/test07.bed"
+        gffClip.geneType = "biotype"
+
+        gtfC = gffClip(options)
+        gtfC.processGFF()
+        outputTest = open("UnitTestOutput/testProcess/test07.bed", "r")
+        checkTest  = open("testProcess/checkTestProcess/test07_check.bed", "r")
+
+        v1 = []
+        v2 = []
+
+        for line in outputTest:
+            v1.append(line)
+
+        for line in checkTest:
+            v2.append(line)
+
+        outputTest.close()
+        checkTest.close()
+
+        self.assertEqual(v1, v2)
+
+    def test08_process(self):
+
+        options = {}
+
+        gffClip.gtfFile = "testProcess/test.gff3"
+        gffClip.fOutput = "UnitTestOutput/testProcess/test08.bed"
+        gffClip.geneType = "biotype"
+        gffClip.geneName = 'Name'
+
+        gtfC = gffClip(options)
+        gtfC.processGFF()
+        outputTest = open("UnitTestOutput/testProcess/test08.bed", "r")
+        checkTest  = open("testProcess/checkTestProcess/test08_check.bed", "r")
+
+        v1 = []
+        v2 = []
+
+        for line in outputTest:
+            v1.append(line)
+
+        for line in checkTest:
+            v2.append(line)
+
+        outputTest.close()
+        checkTest.close()
+
+        self.assertEqual(v1, v2)
+
+    def test_process_empty01(self):
         
         options = {}
         
-        gtfCLIP.gtfCLIP.gtfFile = "testProcess/test_empty.gtf"
-        gtfCLIP.gtfCLIP.fOutput = "UnitTestOutput/testProcess/test_empty.bed"
-        gtfCLIP.gtfCLIP.geneType = "gene_type"
+        gtfCLIP.gtfFile = "testProcess/test_empty.gtf"
+        gtfCLIP.fOutput = "UnitTestOutput/testProcess/test01_empty.bed"
+        gtfCLIP.geneType = "gene_type"
              
-        gtfC = gtfCLIP.gtfCLIP(options)
+        gtfC = gtfCLIP(options)
         gtfC.processGTF()
-        outputTest = open("UnitTestOutput/testProcess/test_empty.bed", "r")
-        checkTest  = open("testProcess/checkTestProcess/test_empty_check.bed", "r")
+        outputTest = open("UnitTestOutput/testProcess/test01_empty.bed", "r")
+        checkTest  = open("testProcess/checkTestProcess/test01_empty_check.bed", "r")
          
         v1 = []
         v2 = []
@@ -480,6 +675,33 @@ class TestProcessMethods(unittest.TestCase):
         outputTest.close()
         checkTest.close()
               
+        self.assertEqual(v1, v2)
+
+    def test_process_empty02(self):
+
+        options = {}
+
+        gtfCLIP.gtfFile = "testProcess/test_empty.gff3"
+        gtfCLIP.fOutput = "UnitTestOutput/testProcess/test02_empty.bed"
+        gtfCLIP.geneType = "biotype"
+
+        gtfC = gtfCLIP(options)
+        gtfC.processGTF()
+        outputTest = open("UnitTestOutput/testProcess/test02_empty.bed", "r")
+        checkTest  = open("testProcess/checkTestProcess/test02_empty_check.bed", "r")
+
+        v1 = []
+        v2 = []
+
+        for line in outputTest:
+            v1.append(line)
+
+        for line in checkTest:
+            v2.append(line)
+
+        outputTest.close()
+        checkTest.close()
+
         self.assertEqual(v1, v2)
          
 ####################################################################################
