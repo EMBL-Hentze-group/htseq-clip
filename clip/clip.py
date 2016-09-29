@@ -7,7 +7,7 @@
 # Date: October 2015
 # --------------------------------------------------
     
-import argparse, traceback, os
+import argparse, traceback, os, sys
 from bamCLIP import bamCLIP
 from bedCLIP import bedCLIP
 from gtfCLIP import gtfCLIP
@@ -23,17 +23,17 @@ VERSION = "0.1.1"
 #======================================================================================
 def usage():
     print '''
-htseq-clip:  A flexible toolset for the analysis of iCLIP sequencing data
+htseq-clip:  A flexible toolset for the analysis of iCLIP and eCLIP sequencing data
 usage:       htseq-clip <command> [options]
     
 The functions include:
     
-[annotation]
+[Annotation]
     annotation              flattens an annotation gtf file
     slidingWindow           creates sliding windows based on given annotation file
     
-[iCLIP]
-    extract                 extracts crosslink, insertion or deletion sites
+[Extraction]
+    extract                 extracts crosslink sites, insertions or deletions
     
 [Counting]
     count                   count sites in annotation
@@ -43,6 +43,7 @@ The functions include:
 [Distances]
     junction                calculates distances to junctions
     dist                    calculates nearest cross link site to a feature
+
 [Visualisation] 
     plot                    visualisation 
     
@@ -60,7 +61,7 @@ The functions include:
     
 def usage_extract():
     print '''
-htseq-clip extract:  extracts crosslink, insertion or deletion sites
+htseq-clip extract:  extracts crosslink sites, insertions or deletions
 usage:               htseq-clip extract [options]
 
 Options:
@@ -72,17 +73,17 @@ Options:
  -c, --choice                     parameter for the choice of the cross-link sites:
 
                                   s for start sites. 
-                                  In addition you can write e.g 
-                                  s-1 then you will get the position 1 before the 
-                                  start site, this is only available for the extraction 
-                                  of the start sites. You can also write s-1i that means 
-                                  if a postion should be below 0 it ignores it to write 
-                                  out otherwise you will get an exception.
+
+                                  s<int>[i] position + offset e.g.
+                                     s-1 start site minus one nucleotide
+                                     s-1i ignore crosslink sites outside of genome
                                   
-                                  m for middle sites
+                                  m for middle sites (center of reads)
                                   
-                                  e for end sites
-                                  
+                                  e<int>[i] for end sites
+                                     e+1 end site plus one nucleotide 
+                                     e+1i ignores crosslink sites outside of genome  
+                                                                 
                                   i for insertion sites
                                   
                                   d for deletion sites
@@ -98,7 +99,6 @@ Options:
  -p, --primary                    set if you want only primary positions of 
                                   multimapping reads (default: False)
   
-                               
  -h, --help                       help
  --version                        version
 '''    
@@ -110,14 +110,13 @@ usage:                  htseq-clip annotation [options]
 
 Options:
 
- -g, --gtf         GTF or GFF file for annotation processing (.gtf)
+ -g, --gtf         GTF or GFF3 file for annotation processing (.gtf[.gz] / .gff[.gz] / .gff3[.gz])
  
- -o, --output      output file (.bed)
+ -o, --output      output file (.bed[.gz])
  
- -t, --type        Gene type for annotation
+ -t, --type        Gene type identifier in gtf / gff file
 
  -r, --region      True if you want exons to be split into cds and utr regions. Default is False.
-  
                                
  -h, --help        help
  --version         version
@@ -130,11 +129,11 @@ usage:             htseq-clip count [options]
 
 Options:
 
- -i, --input         extracted crosslink, insertion or deletion sites (.bed)
+ -i, --input         extracted crosslink, insertion or deletion sites (.bed[.gz])
  
- -o, --output        output file (.txt)
+ -o, --output        output count file (.txt[.gz])
  
- -f, --compare       flattened annotation file (.bed)
+ -f, --compare       flattened annotation file (.bed[.gz])
  
  -c, --choice        parameter for the choice of included counts:
  
@@ -287,7 +286,7 @@ usage:            htseq-clip plot [options]
 
 Options:
 
- -i, --input         input file (.bed, .txt)
+ -i, --input         count or junction input file (.bed[.gz], .txt[.gz])
  
  -o, --output        output file (.html)
  
@@ -525,12 +524,13 @@ def main():
         args = parser.parse_args()
         d = vars(args)
 
-        # check if there are all arguments
+        # Print the default usage when there is no program specified
         if args.command == None:
             usage()
             os._exit(1)
-        else:
 
+        # Print program specific messages  
+        else:
             program = args.command
 
             if program == "extract":
@@ -538,6 +538,7 @@ def main():
                     usage_extract()
                     os._exit(1)
                 else:   
+                    print "______EXTRACT______START_____"
                     checkFileExists(args.input[0], parser)
                     extract(parser, args)
             elif program == 'countSlidingWindows':
