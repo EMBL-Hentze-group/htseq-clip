@@ -503,6 +503,7 @@ def main():
         parser.add_argument('-o', '--output', action='store',nargs = '+', type= str,  default=argparse.SUPPRESS, dest='output', help='output file name')
         parser.add_argument('-f', '--compare', action='store', type= str,  default=argparse.SUPPRESS, dest='compare', help='file which you want to compare with your input file')
         parser.add_argument('-c', '--choice', action='store', type=str,  default=argparse.SUPPRESS, dest='choice', help='option')
+        parser.add_argument('-a', '--mate', action='store', type=int, default=1, dest='mate', help='select first or second read')
         parser.add_argument('-q', '--minAlignmentQuality',   action='store', type=int, default=argparse.SUPPRESS,   dest='minAlignmentQuality', help='minimum alignment quality')
         parser.add_argument('-m', '--minReadLength', action='store', type=int, default=argparse.SUPPRESS, dest='minReadLength', help='minimum read length')
         parser.add_argument('-x', '--maxReadLength', action='store', type=int, default=argparse.SUPPRESS, dest='maxReadLength', help='maximum read length')
@@ -538,7 +539,6 @@ def main():
                     usage_extract()
                     os._exit(1)
                 else:   
-                    print "______EXTRACT______START_____"
                     checkFileExists(args.input[0], parser)
                     extract(parser, args)
             elif program == 'countSlidingWindows':
