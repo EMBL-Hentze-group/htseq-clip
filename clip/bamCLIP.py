@@ -209,7 +209,7 @@ class bamCLIP:
                 yb = 1
                 pass
             
-            seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand, almnt.pe_which)
+            seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
     
             return(str("\t").join(seq))
 	
@@ -248,7 +248,7 @@ class bamCLIP:
                 yb = 1
                 pass
 
-            seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand, almnt.pe_which)
+            seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
 
             return(str("\t").join(seq))
     #=================================================================================
