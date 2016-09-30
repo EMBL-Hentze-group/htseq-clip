@@ -62,9 +62,7 @@ class bamCLIP:
     This method determines if a read fullfills the critera to be included in the analysis.
     '''
     def readFullfillsQualityCriteria(self, almnt):
-        rmate = self.mate
-        
-        if rmate == 's': #select the second read of a pair to extract
+        if self.mate == 2: #select the second read of a pair to extract
             if almnt.paired_end and almnt.pe_which == "second":
                 return(almnt.aligned and almnt.iv.length <= self.data['maxReadIntervalLength'] and
                        almnt.aQual >= self.data['minAlignmentQuality'] and not almnt.failed_platform_qc
@@ -76,7 +74,7 @@ class bamCLIP:
                 raise("Data are not paired end %s" % almnt.paired_end)
                 
                 
-        elif rmate == 'f': #select the first read of a pair to extract
+        elif self.mate == 1: #select the first read of a pair to extract
             if ( not almnt.paired_end ) or (almnt.paired_end and almnt.pe_which =="first"):
                 return(almnt.aligned and
                        almnt.iv.length <= self.data['maxReadIntervalLength'] and
@@ -86,6 +84,8 @@ class bamCLIP:
             elif almnt.paired_end and almnt.pe_which == "second":
                 self.count += 1
                 return False
+        else:
+            raise ValueError("mate argument can only be 1 or 2")
 
     #================================================================================ 
             
@@ -195,7 +195,7 @@ class bamCLIP:
 
         if x < 0:
             if ignore == False:
-                error = "Value Error: Start position cannot be less than zero!! Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". Check your data!"
+                error = "Value Error: Start position cannot be less than zero. Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". Check your data!"
                 raise ValueError(error)
             
             return None
@@ -237,7 +237,7 @@ class bamCLIP:
 
         if x < 0:
             if ignore == False:
-                error = "Value Error: Start position cannot be less than zero!! Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". Check your data!"
+                error = "Value Error: Start position cannot be less than zero. Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". Check your data!"
                 raise ValueError(error)
             return None
         else:
@@ -376,14 +376,13 @@ class bamCLIP:
     Extract start sites
     '''
     def extract_StartSites(self):
-        rmate = self.mate
-		
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
-        if self.fOutput.endswith(".gz"):
-            fOutput = gzip.open(self.fOutput, 'w')
+        almnt_file = HTSeq.BAM_Reader(self.fInput[0])
+        if self.fOutput[0].endswith(".gz"):
+            fOutput = gzip.open(self.fOutput[0], 'w')
         else:
-            fOutput = open(self.fOutput, 'w')
-        if rmate == 'f':
+            fOutput = open(self.fOutput[0], 'w')
+        
+        if self.mate == 1:
             for almnt in almnt_file:
                 if self.readFullfillsQualityCriteria(almnt):
 
@@ -391,22 +390,21 @@ class bamCLIP:
                     if not out == None:
                         fOutput.write(out + "\n")
             fOutput.close()
-            print self.count
 
-        elif rmate == 's':
+        elif self.mate == 2:
             for almnt in almnt_file:
                 if almnt.pe_which=="second" and self.readFullfillsQualityCriteria(almnt):
                     out = self.getStartSiteAsBed_secondread(almnt)
                     if not out == None:
                         fOutput.write(out + "\n")
                 elif not almnt.paired_end:
-                    error = " The data are not paired_end - eg. Read :{0} does not have a pair".format(almnt.read.name)
+                    error = "The data are not paired_end - eg. Read :{0} does not have a pair".format(almnt.read.name)
                     raise Exception(error)
 
 
             fOutput.close()
-            print self.count
-
+        else:
+            raise ValueError("mate argument can only be 1 or 2")
 
     '''
     Extract middle sites
@@ -474,4 +472,10 @@ class bamCLIP:
     #==================================================================================
     
     
-
+    
+    
+    
+    
+    
+    
+        
