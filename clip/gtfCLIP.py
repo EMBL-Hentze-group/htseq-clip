@@ -229,7 +229,7 @@ class gtfCLIP:
 
                     name = name + '@' + gene_name + '@' + attribute
                 else:
-                    name = name+'@'+attribute
+                    name = name+'@'+'NA'+'@'+attribute
                 t = attribute
 
                 start = feature.iv.start
@@ -260,10 +260,6 @@ class gtfCLIP:
         for k in typeFooter:
             output.write("track type "+str(k)+" "+str(typeFooter[k])+"\n")
 
-        if len(self.geneName) != 0:
-            output.write("track"+" "+"gene_name"+"\n")
-        else:
-            output.write("track"+"\n")
         output.close()                 
     #================================================================================= 
        
