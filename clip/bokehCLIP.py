@@ -346,12 +346,7 @@ class bokehCLIP:
                     l = line.split("\n")
                     l = l[0].split(" ")
 
-                    if len(l)==2:
-                        totalField = 18
-                    elif len(l)==1:
-                        totalField = 17
-
-                    elif l[1] == "chr":
+                    if l[1] == "chr":
                         chrNorm[l[2]] = int(l[3])
                     elif l[1] == "type":
                         featureNorm[l[2]] = int(l[3])
@@ -366,9 +361,9 @@ class bokehCLIP:
                     line = line[0].split("\t")
                     
                     if not countsPerType.has_key("intergenic"):
-                        countsPerType["intergenic"] = int(line[totalField-6])
+                        countsPerType["intergenic"] = int(line[12])
                     else:
-                        countsPerType["intergenic"] += int(line[totalField-6])
+                        countsPerType["intergenic"] += int(line[12])
 
 
 
@@ -382,118 +377,117 @@ class bokehCLIP:
                     else:
                         chromosomes[line[0]] += 1
                         
-                    if not counts.has_key(int(line[totalField-6])):
-                        counts[int(line[totalField-6])] = 1
-                        total_counts += int(line[totalField-6])
+                    if not counts.has_key(int(line[12])):
+                        counts[int(line[12])] = 1
+                        total_counts += int(line[12])
                     else:
-                        counts[int(line[totalField-6])] += 1
-                        total_counts += int(line[totalField-6])
+                        counts[int(line[12])] += 1
+                        total_counts += int(line[12])
 
-                    if not density.has_key(float(line[totalField-3])):
-                        density[float(line[totalField-3])] = 1
+                    if not density.has_key(float(line[15])):
+                        density[float(line[15])] = 1
                     else:
-                        density[float(line[totalField-3])] += 1
+                        density[float(line[15])] += 1
                         
-                    if not duplicates.has_key(int(line[totalField-2])):
-                        duplicates[int(line[totalField-2])] = 1
+                    if not duplicates.has_key(int(line[16])):
+                        duplicates[int(line[16])] = 1
                     else:
-                        duplicates[int(line[totalField-2])] += 1
+                        duplicates[int(line[16])] += 1
 
                     if not countsPergene.has_key(line[3]):
-                        countsPergene[line[3]] = int(line[totalField-6])
+                        countsPergene[line[3]] = int(line[12])
                     else:
-                        countsPergene[line[3]] += int(line[totalField-6])
-                    if line[totalField-11] == "exon" and line[totalField-8] == "protein_coding":
-                        line[totalField-8] = "protein_coding_exon"
-                        if not types.has_key(line[totalField-8]):
-                            types[line[totalField-8]] = 1
+                        countsPergene[line[3]] += int(line[12])
+                    if line[7] == "exon" and line[10] == "protein_coding":
+                        line[10] = "protein_coding_exon"
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
                         else:
-                            types[line[totalField-8]] += 1
+                            types[line[10]] += 1
                             
-                        if not dcQC.has_key(line[totalField-8]):
-                            dcQC[line[totalField-8]] = [int(line[totalField-2]), int(line[totalField-6])]
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
                         else:
-                            dcQC[line[totalField-8]][0] += int(line[totalField-2])
-                            dcQC[line[totalField-8]][1] += int(line[totalField-6])
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
                             
                             
-                    elif line[totalField-11] == "intron" and line[totalField-8] == "protein_coding":
-                        line[totalField-8] = "protein_coding_intron"
-                        if not types.has_key(line[totalField-8]):
-                            types[line[totalField-8]] = 1
+                    elif line[7] == "intron" and line[10] == "protein_coding":
+                        line[10] = "protein_coding_intron"
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
                         else:
-                            types[line[totalField-8]] += 1
+                            types[line[10]] += 1
                             
-                        if not dcQC.has_key(line[totalField-8]):
-                            dcQC[line[totalField-8]] = [int(line[totalField-2]), int(line[totalField-6])]
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
                         else:
-                            dcQC[line[totalField-8]][0] += int(line[totalField-2])
-                            dcQC[line[totalField-8]][1] += int(line[totalField-6])
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
 
-                    elif line[totalField-11] == "5UTR" and line[totalField-8] == "protein_coding":
-                        line[totalField-8] = "protein_coding_5UTR"
-                        #line[10] = "5UTR"
+                    elif line[7] == "5UTR" and line[10] == "protein_coding":
+                        line[10] = "protein_coding_5UTR"
 
-                        if not types.has_key(line[totalField-8]):
-                            types[line[totalField-8]] = 1
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
                         else:
-                            types[line[totalField-8]] += 1
+                            types[line[10]] += 1
 
-                        if not dcQC.has_key(line[totalField-8]):
-                            dcQC[line[totalField-8]] = [int(line[totalField-2]), int(line[totalField-6])]
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
                         else:
-                            dcQC[line[totalField-8]][0] += int(line[totalField-2])
-                            dcQC[line[totalField-8]][1] += int(line[totalField-6])
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
 
-                    elif line[totalField-11] == "3UTR" and line[totalField-8] == "protein_coding":
-                        line[totalField-8] = "protein_coding_3UTR"
-                        #line[10] = "3UTR"
-                        if not types.has_key(line[totalField-8]):
-                            types[line[totalField-8]] = 1
-                        else:
-                            types[line[totalField-8]] += 1
-
-                        if not dcQC.has_key(line[totalField-8]):
-                            dcQC[line[totalField-8]] = [int(line[totalField-2]), int(line[totalField-6])]
-                        else:
-                            dcQC[line[totalField-8]][0] += int(line[totalField-2])
-                            dcQC[line[totalField-8]][1] += int(line[totalField-6])
-
-                    elif line[totalField-11] == "CDS" and line[totalField-8] == "protein_coding":
-                        line[totalField-8] = "protein_coding_CDS"
-                        #line[10] = "CDS"
-                        if not types.has_key(line[totalField-8]):
-                            types[line[totalField-8]] = 1
-                        else:
-                            types[line[totalField-8]] += 1
-
-                        if not dcQC.has_key(line[totalField-8]):
-                            dcQC[line[totalField-8]] = [int(line[totalField-2]), int(line[totalField-6])]
-                        else:
-                            dcQC[line[totalField-8]][0] += int(line[totalField-2])
-                            dcQC[line[totalField-8]][1] += int(line[totalField-6])
-
-                    else:
-                        if not types.has_key(line[totalField-8]):
-                            types[line[totalField-8]] = 1
-                        else:
-                            types[line[totalField-8]] += 1
-                            
-                        if not dcQC.has_key(line[totalField-8]):
-                            dcQC[line[totalField-8]] = [int(line[totalField-2]), int(line[totalField-6])]
-                        else:
-                            dcQC[line[totalField-8]][0] += int(line[totalField-2])
-                            dcQC[line[totalField-8]][1] += int(line[totalField-6])
-                            
-                    if not regions.has_key(line[totalField-11]):
-                        regions[line[totalField-11]] = 1
-                    else:
-                        regions[line[totalField-11]] += 1
+                    elif line[7] == "3UTR" and line[10] == "protein_coding":
+                        line[10] = "protein_coding_3UTR"
                         
-                    if not strands.has_key(line[totalField-12]):
-                        strands[line[totalField-12]] = 1
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
+                        else:
+                            types[line[10]] += 1
+
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
+                        else:
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
+
+                    elif line[7] == "CDS" and line[10] == "protein_coding":
+                        line[10] = "protein_coding_CDS"
+                        
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
+                        else:
+                            types[line[10]] += 1
+
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
+                        else:
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
+
                     else:
-                        strands[line[totalField-12]] += 1
+                        if not types.has_key(line[10]):
+                            types[line[10]] = 1
+                        else:
+                            types[line[10]] += 1
+                            
+                        if not dcQC.has_key(line[10]):
+                            dcQC[line[10]] = [int(line[16]), int(line[12])]
+                        else:
+                            dcQC[line[10]][0] += int(line[16])
+                            dcQC[line[10]][1] += int(line[12])
+                            
+                    if not regions.has_key(line[7]):
+                        regions[line[7]] = 1
+                    else:
+                        regions[line[7]] += 1
+                        
+                    if not strands.has_key(line[6]):
+                        strands[line[6]] = 1
+                    else:
+                        strands[line[6]] += 1
                     
                     
             for k in dcQC:
