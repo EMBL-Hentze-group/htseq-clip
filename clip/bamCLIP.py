@@ -25,10 +25,18 @@ class bamCLIP:
     def __init__(self, options):
         
         if hasattr(options, 'input'):
-            self.fInput = options.input
+            # Only first element of list will be used as input
+            if type(options.input) is list:
+                self.fInput = options.input[0]
+            else:
+                self.fInput = options.input
         
         if hasattr(options, 'output'):
-            self.fOutput = options.output
+            # Only first element of list will be used as output
+            if type(options.output) is list:
+                self.fOutput = options.output[0]
+            else:
+                self.fOutput = options.output
             
         if hasattr(options, 'minAlignmentQuality'):
             self.minAlignmentQuality = options.minAlignmentQuality
