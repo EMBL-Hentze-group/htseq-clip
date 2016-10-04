@@ -2,7 +2,7 @@
 Class for output file management
 """
 
-import gzip, os
+import gzip, os, sys
 
 class Output:
     # constructor 
@@ -24,7 +24,7 @@ class Output:
         if self.writeFile:
             self.fileOut.write(s)
         else:
-            print(s)
+            sys.stdout.write(s)
 
     # close
     def close(self):
@@ -33,4 +33,3 @@ class Output:
     # destructor
     def __del__(self):
         self.close()
-    
