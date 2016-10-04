@@ -114,9 +114,6 @@ class bamCLIP:
         else:
             raise ValueError("mate argument can only be 1 or 2")
 
-    #================================================================================ 
-            
-    #================================================================================ 
     '''
     If the primary filter is activated (option primary is set),
     for multimapping reads it will filter out the best location
@@ -127,10 +124,8 @@ class bamCLIP:
             return(almnt.not_primary_alignment)
         else:
             return(True) 
-    #================================================================================ 
-    
-    #================================================================================
-    '''
+
+   '''
     Calculates the read length and stores the min and max length
     '''
     def getSequenceLength(self, almnt):
@@ -145,10 +140,8 @@ class bamCLIP:
             if length < self.data['minReadLength']:
                 self.data['minReadLength'] = length
         return(length)
-    #================================================================================
-    
-    #================================================================================
-    '''
+
+   '''
     Returns a list of Genomic intervals for the positions of deletions/insertions/mutations
     '''
     def parseCigar(self, almnt):
@@ -165,18 +158,15 @@ class bamCLIP:
                 variations['hits'].append(i)
          
         return(variations)
-    #================================================================================
- 
-    #================================================================================    
-    def posCalcStartSite(self, pos_d, strand, x):
+
+   def posCalcStartSite(self, pos_d, strand, x):
         if strand == "+":
             return(pos_d + x)
         elif strand == "-":
             return(pos_d + x)
         else:
             raise("Strand not known %s" % strand)
-    #================================================================================  
-    #================================================================================    
+
     def posCalcMiddleSite(self, pos_d, strand, x):
         if strand == "+":
             return(pos_d + x)
@@ -184,8 +174,7 @@ class bamCLIP:
             return(pos_d - x)
         else:
             raise("Strand not known %s" % strand)
-    #================================================================================   
-    #================================================================================    
+
     def posCalcEndSite(self, pos_d, strand, x):
         if strand == "+":
             return(pos_d + x)
@@ -193,10 +182,8 @@ class bamCLIP:
             return(pos_d + x)
         else:
             raise("Strand not known %s" % strand)
-    #================================================================================
-    
-    #================================================================================   
-    '''
+
+   '''
     Returns GenomicPosition for desired site based on start site
     '''
     def getStartSiteAsBed_firstread(self, almnt):
@@ -278,8 +265,7 @@ class bamCLIP:
             seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
 
             return(str("\t").join(seq))
-    #=================================================================================
-    #=================================================================================
+ 
     '''
     Returns GenomicPosition for middle site and supports Gapped alignments!
     '''
@@ -316,8 +302,7 @@ class bamCLIP:
         seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
         
         return(str("\t").join(seq))
-    #=================================================================================   
-    #=================================================================================
+ 
     '''
     Returns GenomicPosition for end site
     '''
@@ -338,12 +323,11 @@ class bamCLIP:
 
         return(str("\t").join(seq))   
     
-    #=================================================================================
-    #=================================================================================
+
     '''
-    Returns GenomicPosition for deletion site
+    Writes deletions of an alignment parsed by CIGAR string  as bed line
     '''
-    def getDeletionSiteAsBed(self, almnt, fOutput):
+    def writeDeletionSiteAsBed(self, almnt, fOutput):
            
         seq = ()
         deletion = []
@@ -369,12 +353,10 @@ class bamCLIP:
                 seq = (str("\t").join(seq)) 
                 fOutput.write(seq + "\n")    
    
-    #=================================================================================
-    #=================================================================================
     '''
-    Returns GenomicPosition for insertion site
+    Writes insertions of an alignment parsed by CIGAR string as bed line
     '''
-    def getInsertionSiteAsBed(self, almnt, fOutput):
+    def writeInsertionSiteAsBed(self, almnt, fOutput):
            
         seq = ()
         insertion = []
@@ -400,9 +382,17 @@ class bamCLIP:
                 fOutput.write(seq + "\n")     
 
 
-    #=================================================================================
+    '''
+    Returns start site as bed line 
+    '''
+    def getStartSiteAsBed(self, almnt):
+        if self.mate == 1:
+            return(self.getStartSiteAsBed_firstread(almnt))
+        elif self.mate == 2:
+            return(self.getStartSiteAsBed_secondread(almnt))
+        else:
+            raise ValueError("mate argument must be 1 or 2")
 
-    #=================================================================================
     '''
     Extract start sites
     '''
@@ -411,25 +401,10 @@ class bamCLIP:
         fOutput = Output(self.fOutput)
 
         for almnt in almnt_file:
-            if self.mate == 1:
                 if self.readFullfillsQualityCriteria(almnt):
-
-                    out = self.getStartSiteAsBed_firstread(almnt)
+                    out = self.getStartSiteAsBed(almnt)
                     if not out == None:
                         fOutput.write(out + "\n")
-
-            elif self.mate == 2:
-                if almnt.pe_which == "second" and self.readFullfillsQualityCriteria(almnt):
-                    out = self.getStartSiteAsBed_secondread(almnt)
-                    if not out == None:
-                        fOutput.write(out + "\n")
-                    
-                elif not almnt.paired_end:
-                    error = "The data are not paired_end - eg. Read :{0} does not have a pair".format(almnt.read.name)
-                    raise Exception(error)
-
-            else:
-                raise ValueError("mate argument must be 1 or 2")
 
         fOutput.close()
 
@@ -447,7 +422,7 @@ class bamCLIP:
         fOutput.close() 
            
     '''
-    Extract end sites
+    Extract end sites. 
     '''   
     def extract_EndSites(self):
         almnt_file = HTSeq.BAM_Reader(self.fInput)
@@ -460,7 +435,8 @@ class bamCLIP:
         fOutput.close()
         
     '''
-    Extract deletion sites:
+    Extract deletion sites.
+    Deletion sites are determined by parsing the CIGAR string.
     ''' 
     def extract_DeletionSites(self):
         almnt_file = HTSeq.BAM_Reader(self.fInput)
@@ -468,12 +444,13 @@ class bamCLIP:
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                self.getDeletionSiteAsBed(almnt, fOutput)
+                self.writeDeletionSiteAsBed(almnt, fOutput)
        
         fOutput.close()
         
     '''
-    Extract insertion sites:
+    Extract insertion sites.
+    Insertion sites are determined by parsing the CIGAR string.
     ''' 
     def extract_InsertionSites(self):
         almnt_file = HTSeq.BAM_Reader(self.fInput)
@@ -481,16 +458,6 @@ class bamCLIP:
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                self.getInsertionSiteAsBed(almnt, fOutput)
+                self.writeInsertionSiteAsBed(almnt, fOutput)
        
         fOutput.close()      
-    #==================================================================================
-    
-    
-    
-    
-    
-    
-    
-    
-        
