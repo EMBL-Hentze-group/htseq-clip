@@ -405,9 +405,10 @@ def extract(parser,args):
         elif args.choice == 'i':      
             bamC.extract_InsertionSites()
         else:
-            parser.error('Invalid option for extraction')
+            parser.error("""Invalid option for parameter -c (can be s, m, e, d or i).
+Please find a detailed description in the usage (htseq-clip extract --help)""")
     else:
-        parser.error('You need -c option for the correct extraction of your data!')
+        parser.error('You need to specify the -c option for extraction.')
         
 '''
 Processing genome.fa file into fasta format 
@@ -557,14 +558,13 @@ def main():
         parser.add_argument('-h', '--height', action='store', type=int, default=argparse.SUPPRESS, dest='height', help='height of heatmap')
         parser.add_argument('-wd', '--width', action='store', type=int, default=argparse.SUPPRESS, dest='width', help='width of heatmap')
         parser.add_argument('command', nargs = '?', help='name of program to run ')
-        args= parser.parse_args()
+        args = parser.parse_args()
         d = vars(args)
 
         # Print the default usage when there is no program specified
         if args.command == None:
             usage()
             os._exit(1)
-
         # Print program specific messages  
         else:
             program = args.command
