@@ -7,6 +7,7 @@
 # --------------------------------------------------
 
 import gzip, decimal, HTSeq
+from output import Output
 
 class bamCLIP:
     
@@ -32,12 +33,18 @@ class bamCLIP:
                 self.fInput = options.input
         
         if hasattr(options, 'output'):
+            # Write to file
+            self.writeFile = True
+
             # Only first element of list will be used as output
             if type(options.output) is list:
                 self.fOutput = options.output[0]
             else:
                 self.fOutput = options.output
-            
+        # Write to stdout
+        else:
+            self.fOutput = ""
+        
         if hasattr(options, 'minAlignmentQuality'):
             self.minAlignmentQuality = options.minAlignmentQuality
         
@@ -64,6 +71,16 @@ class bamCLIP:
                      'primary': self.primary,
                      'maxReadIntervalLength': self.maxReadIntervalLength,
                      'minAlignmentQuality': self.minAlignmentQuality}
+
+    #================================================================================ 
+    '''
+    Printing function
+    '''
+    def write(self, s):
+        if self.writeFile:
+            self.fOutput.write(s)
+        else:
+            print(s)
               
     #================================================================================ 
     '''
@@ -345,9 +362,10 @@ class bamCLIP:
                     b = x
                     x = y
                     y = b
-                seq = (almnt.iv.chrom, str(x), str(y), almnt.read.name+"|"+str(len(almnt.read.seq)), str(deletion[i].query_from), almnt.iv.strand)
+                seq = (almnt.iv.chrom, str(x), str(y), almnt.read.name + "|" + str(len(almnt.read.seq)), str(deletion[i].query_from), almnt.iv.strand)
                 seq = (str("\t").join(seq)) 
-                fOutput.write(seq + "\n")       
+                fOutput.write(seq)    
+   
     #=================================================================================
     #=================================================================================
     '''
@@ -376,7 +394,9 @@ class bamCLIP:
                     y = b
                 seq = (almnt.iv.chrom, str(x), str(y), almnt.read.name+"|"+str(len(almnt.read.seq)), str(insertion[i].query_from), almnt.iv.strand)
                 seq = (str("\t").join(seq)) 
-                fOutput.write(seq + "\n")      
+                fOutput.write(seq)     
+
+
     #=================================================================================
 
     #=================================================================================
@@ -384,50 +404,42 @@ class bamCLIP:
     Extract start sites
     '''
     def extract_StartSites(self):
-        almnt_file = HTSeq.BAM_Reader(self.fInput[0])
-        if self.fOutput[0].endswith(".gz"):
-            fOutput = gzip.open(self.fOutput[0], 'w')
-        else:
-            fOutput = open(self.fOutput[0], 'w')
-        
-        if self.mate == 1:
-            for almnt in almnt_file:
+        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        fOutput = Output(self.fOutput)
+
+        for almnt in almnt_file:
+            if self.mate == 1:
                 if self.readFullfillsQualityCriteria(almnt):
 
                     out = self.getStartSiteAsBed_firstread(almnt)
                     if not out == None:
-                        fOutput.write(out + "\n")
-            fOutput.close()
+                        fOutput.write(out)
 
-        elif self.mate == 2:
-            for almnt in almnt_file:
-                if almnt.pe_which=="second" and self.readFullfillsQualityCriteria(almnt):
+            elif self.mate == 2:
+                if almnt.pe_which == "second" and self.readFullfillsQualityCriteria(almnt):
                     out = self.getStartSiteAsBed_secondread(almnt)
                     if not out == None:
-                        fOutput.write(out + "\n")
+                        fOutput.write(out)
+                    
                 elif not almnt.paired_end:
                     error = "The data are not paired_end - eg. Read :{0} does not have a pair".format(almnt.read.name)
                     raise Exception(error)
 
+            else:
+                raise ValueError("mate argument must be 1 or 2")
 
-            fOutput.close()
-        else:
-            raise ValueError("mate argument can only be 1 or 2")
+        fOutput.close()
 
     '''
     Extract middle sites
     '''   
     def extract_MiddleSites(self):
-    
         almnt_file = HTSeq.BAM_Reader(self.fInput)
-        if self.fOutput.endswith(".gz"):
-            fOutput = gzip.open(self.fOutput, 'w')
-        else:
-            fOutput = open(self.fOutput, 'w')
+        fOutput = Output(self.fOutput)
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                fOutput.write(self.getMiddleSiteAsBed(almnt) + "\n")
+                fOutput.write(self.getMiddleSiteAsBed(almnt))
        
         fOutput.close() 
            
@@ -436,14 +448,12 @@ class bamCLIP:
     '''   
     def extract_EndSites(self):
         almnt_file = HTSeq.BAM_Reader(self.fInput)
-        if self.fOutput.endswith(".gz"):
-            fOutput = gzip.open(self.fOutput, 'w')
-        else:
-            fOutput = open(self.fOutput, 'w')
+        fOutput = Output(self.fOutput)
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                fOutput.write(self.getEndSiteAsBed(almnt) + "\n")
+                fOutput.write(self.getEndSiteAsBed(almnt))
+
         fOutput.close()
         
     '''
@@ -451,10 +461,7 @@ class bamCLIP:
     ''' 
     def extract_DeletionSites(self):
         almnt_file = HTSeq.BAM_Reader(self.fInput)
-        if self.fOutput.endswith(".gz"):
-            fOutput = gzip.open(self.fOutput, 'w')
-        else:
-            fOutput = open(self.fOutput, 'w')
+        fOutput = Output(self.fOutput)
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
@@ -467,10 +474,7 @@ class bamCLIP:
     ''' 
     def extract_InsertionSites(self):
         almnt_file = HTSeq.BAM_Reader(self.fInput)
-        if self.fOutput.endswith(".gz"):
-            fOutput = gzip.open(self.fOutput, 'w')
-        else:
-            fOutput = open(self.fOutput, 'w')
+        fOutput = Output(self.fOutput)
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
