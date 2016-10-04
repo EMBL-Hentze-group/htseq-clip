@@ -9,11 +9,9 @@ class Output:
     def __init__(self, fileName):
         # if file name is empty, redirect to stdin
         if fileName == "":
-            self.writeFile = False
+            self.fileOut = sys.stdout
         # if file name is given, file is opened 
         else:
-            self.writeFile = True
-
             if fileName.endswith(".gz"):
                 self.fileOut = gzip.open(fileName, 'w')
             else:
@@ -21,15 +19,13 @@ class Output:
 
     # output
     def write(self, s):
-        if self.writeFile:
-            self.fileOut.write(s)
-        else:
-            sys.stdout.write(s)
+        self.fileOut.write(s)
 
     # close
     def close(self):
-        if self.writeFile and not self.fileOut.closed:
+        if not self.fileOut.closed:
             self.fileOut.close()
+    
     # destructor
     def __del__(self):
         self.close()
