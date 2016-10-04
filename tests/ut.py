@@ -181,6 +181,8 @@ class TestExtractMethods(unittest.TestCase):
         bamC.maxReadLength = 0
         bamC.primary = False
         
+        bamC.choice = "e"
+
         bamC.extract_EndSites()
             
         outputTest = open("UnitTestOutput/testExtract/test02_ES.bed", "r")
@@ -341,9 +343,11 @@ class TestExtractMethods(unittest.TestCase):
         bamC.minReadLength = 0
         bamC.maxReadLength = 0
         bamC.primary = False
-        
+        bamC.choice = "e"
         bamC.extract_EndSites()
-            
+        
+
+
         outputTest = open("UnitTestOutput/testExtract/test03_ES.bed", "r")
         checkTest  = open("testExtract/checkTestExtract/test03_ES_check.bed", "r")
         

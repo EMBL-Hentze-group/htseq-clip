@@ -396,9 +396,9 @@ def extract(parser,args):
 				bamC.extract_StartSites()
 			else:
 				parser.error('You need --mate option. Indicate which read to extract cross linking sites from') 
-        elif args.choice == 'm':      
+        elif args.choice.startswith("m"):    
             bamC.extract_MiddleSites()
-        elif args.choice == 'e':      
+        elif args.choice.startswith("e"):   
             bamC.extract_EndSites()
         elif args.choice == 'd':      
             bamC.extract_DeletionSites()

@@ -73,16 +73,6 @@ class bamCLIP:
                      'primary': self.primary,
                      'maxReadIntervalLength': self.maxReadIntervalLength,
                      'minAlignmentQuality': self.minAlignmentQuality}
-
-    #================================================================================ 
-    '''
-    Printing function
-    '''
-    def write(self, s):
-        if self.writeFile:
-            self.fOutput.write(s)
-        else:
-            print(s)
               
     #================================================================================ 
     '''
@@ -125,7 +115,7 @@ class bamCLIP:
         else:
             return(True) 
 
-   '''
+    '''
     Calculates the read length and stores the min and max length
     '''
     def getSequenceLength(self, almnt):
@@ -141,7 +131,7 @@ class bamCLIP:
                 self.data['minReadLength'] = length
         return(length)
 
-   '''
+    '''
     Returns a list of Genomic intervals for the positions of deletions/insertions/mutations
     '''
     def parseCigar(self, almnt):
@@ -159,7 +149,7 @@ class bamCLIP:
          
         return(variations)
 
-   def posCalcStartSite(self, pos_d, strand, x):
+    def posCalcStartSite(self, pos_d, strand, x):
         if strand == "+":
             return(pos_d + x)
         elif strand == "-":
@@ -183,88 +173,32 @@ class bamCLIP:
         else:
             raise("Strand not known %s" % strand)
 
-   '''
-    Returns GenomicPosition for desired site based on start site
     '''
-    def getStartSiteAsBed_firstread(self, almnt):
-        dp = self.choice.split("s")
-        
+    extractOptions
+    extracts the optons ignore and offset from the choice parameter
+    '''
+    def extractOptions(self, option):
         ignore = False
-        if dp[1] == '':
-            dp = 0
+        if len(option) == 1:
+            print option
+            print self.choice
+
+        if len(option) <= 0:
+            return(ignore, 0)
         else:
-            if "i" in dp[1]:
-                ignore = True     
-                dp = dp[1].split("i")
-                dp = int(dp[0])
+            if option[1] == '':
+                offset = 0
             else:
-                dp = int(dp[1])
-
-        if almnt.iv.strand == "+":
-            x = almnt.iv.start_d + dp
-        elif almnt.iv.strand == "-":
-            x = almnt.iv.start_d - dp
-        else:
-            raise("Strand not known %s" % almnt.iv.strand)
-
-        if x < 0:
-            if ignore == False:
-                error = "Value Error: Start position cannot be less than zero. Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". Check your data!"
-                raise ValueError(error)
+                if "i" in option[1]:
+                    ignore = True     
+                    offset = option[1].split("i")
+                    offset = int(offset[0])
+                else:
+                    offset = int(option[1])
             
-            return None
-        else:
-        
-            y = x+1
-            
-            try:
-                yb = almnt.optional_field('YB')
-            except Exception:
-                yb = 1
-                pass
-            
-            seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
-    
-            return(str("\t").join(seq))
-	
+            return((ignore, offset))
 
-    def getStartSiteAsBed_secondread(self, almnt):
-        dp = self.choice.split("s")
-        
-        ignore = False
-        if dp[1] == '':
-            dp = 0
-        else:
-            if "i" in dp[1]:
-                ignore = True
-                dp = dp[1].split("i")
-                dp = int(dp[0])
-            else:
-                dp = int(dp[1])
 
-        if almnt.iv.strand == "+":
-            x = almnt.iv.end_d - 1
-        elif almnt.iv.strand == "-":
-            x = almnt.iv.end_d + 1
-        else:
-            raise("Strand not known %s" % almnt.iv.strand)
-
-        if x < 0:
-            if ignore == False:
-                error = "Value Error: Start position cannot be less than zero. Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". Check your data!"
-                raise ValueError(error)
-            return None
-        else:
-            y = x+1
-            try:
-                yb = almnt.optional_field('YB')
-            except Exception:
-                yb = 1
-                pass
-
-            seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
-
-            return(str("\t").join(seq))
  
     '''
     Returns GenomicPosition for middle site and supports Gapped alignments!
@@ -299,7 +233,7 @@ class bamCLIP:
             yb = 1
             pass
         
-        seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
+        seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name + "|" + str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
         
         return(str("\t").join(seq))
  
@@ -308,21 +242,6 @@ class bamCLIP:
     '''
     def determineEndSite(self, iv):
         return(HTSeq.GenomicPosition(iv.chrom, iv.end_d, iv.strand))
-
-    def getEndSiteAsBed(self, almnt):
-        x = almnt.iv.end_d
-        y = x + 1
-        
-        try:
-            yb = almnt.optional_field('YB')
-        except Exception:
-            yb = 1
-            pass
-        
-        seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name + "|" + str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
-
-        return(str("\t").join(seq))   
-    
 
     '''
     Writes deletions of an alignment parsed by CIGAR string  as bed line
@@ -357,7 +276,6 @@ class bamCLIP:
     Writes insertions of an alignment parsed by CIGAR string as bed line
     '''
     def writeInsertionSiteAsBed(self, almnt, fOutput):
-           
         seq = ()
         insertion = []
         
@@ -383,15 +301,48 @@ class bamCLIP:
 
 
     '''
-    Returns start site as bed line 
+    Returns GenomicPosition for desired site with offset
     '''
-    def getStartSiteAsBed(self, almnt):
-        if self.mate == 1:
-            return(self.getStartSiteAsBed_firstread(almnt))
-        elif self.mate == 2:
-            return(self.getStartSiteAsBed_secondread(almnt))
+    def getOffsetPosition(self, almnt, position, offset, ignore):
+        if almnt.iv.strand == "+":
+            x = position + offset
+        elif almnt.iv.strand == "-":
+            x = position - offset
         else:
-            raise ValueError("mate argument must be 1 or 2")
+            raise("Strand not known %s" % almnt.iv.strand)
+
+        if x < 0:
+            if ignore == False:
+                error = "Value Error: Start position cannot be less than zero. Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". You can use i in your choice option to ignore such cases."
+                raise ValueError(error)
+            
+            return None
+        else:
+        
+            y = x+1
+            
+            try:
+                yb = almnt.optional_field('YB')
+            except Exception:
+                yb = 1
+                pass
+            
+            seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name + "|" + str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
+    
+            return(str("\t").join(seq))
+	
+            
+    '''
+    Returns start site (with offset) as bed line 
+    '''
+    def getStartSiteAsBed(self, almnt, offset, ignore):
+        return(self.getOffsetPosition(almnt, almnt.iv.start_d, offset, ignore))
+
+    '''
+    Returns end site (with offset) as bed line 
+    '''
+    def getEndSiteAsBed(self, almnt, offset, ignore):
+        return(self.getOffsetPosition(almnt, almnt.iv.end_d, offset, ignore))
 
     '''
     Extract start sites
@@ -401,10 +352,11 @@ class bamCLIP:
         fOutput = Output(self.fOutput)
 
         for almnt in almnt_file:
-                if self.readFullfillsQualityCriteria(almnt):
-                    out = self.getStartSiteAsBed(almnt)
-                    if not out == None:
-                        fOutput.write(out + "\n")
+            if self.readFullfillsQualityCriteria(almnt):
+                (ignore, offset) = self.extractOptions(self.choice.split("s"))
+                out = self.getStartSiteAsBed(almnt, ignore, offset)
+                if not out == None:
+                    fOutput.write(out + "\n")
 
         fOutput.close()
 
@@ -430,7 +382,10 @@ class bamCLIP:
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                fOutput.write(self.getEndSiteAsBed(almnt) + "\n")
+                (ignore, offset) = self.extractOptions(self.choice.split("e"))
+                out = self.getEndSiteAsBed(almnt, ignore, offset)
+                if not None:
+                    fOutput.write(out + "\n")
 
         fOutput.close()
         
