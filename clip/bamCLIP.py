@@ -11,6 +11,7 @@ from output import Output
 
 class bamCLIP:
     
+    # default parameters
     data = {}
     fInput = ""
     fOutput = ""
@@ -20,6 +21,7 @@ class bamCLIP:
     minAlignmentQuality = 10
     primary = False
     choice = ''
+    mate = 1
     
     count = 0
     
@@ -332,9 +334,10 @@ class bamCLIP:
             yb = 1
             pass
         
-        seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name+"|"+str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
+        seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name + "|" + str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
 
         return(str("\t").join(seq))   
+    
     #=================================================================================
     #=================================================================================
     '''
@@ -364,7 +367,7 @@ class bamCLIP:
                     y = b
                 seq = (almnt.iv.chrom, str(x), str(y), almnt.read.name + "|" + str(len(almnt.read.seq)), str(deletion[i].query_from), almnt.iv.strand)
                 seq = (str("\t").join(seq)) 
-                fOutput.write(seq)    
+                fOutput.write(seq + "\n")    
    
     #=================================================================================
     #=================================================================================
@@ -394,7 +397,7 @@ class bamCLIP:
                     y = b
                 seq = (almnt.iv.chrom, str(x), str(y), almnt.read.name+"|"+str(len(almnt.read.seq)), str(insertion[i].query_from), almnt.iv.strand)
                 seq = (str("\t").join(seq)) 
-                fOutput.write(seq)     
+                fOutput.write(seq + "\n")     
 
 
     #=================================================================================
@@ -413,13 +416,13 @@ class bamCLIP:
 
                     out = self.getStartSiteAsBed_firstread(almnt)
                     if not out == None:
-                        fOutput.write(out)
+                        fOutput.write(out + "\n")
 
             elif self.mate == 2:
                 if almnt.pe_which == "second" and self.readFullfillsQualityCriteria(almnt):
                     out = self.getStartSiteAsBed_secondread(almnt)
                     if not out == None:
-                        fOutput.write(out)
+                        fOutput.write(out + "\n")
                     
                 elif not almnt.paired_end:
                     error = "The data are not paired_end - eg. Read :{0} does not have a pair".format(almnt.read.name)
@@ -439,7 +442,7 @@ class bamCLIP:
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                fOutput.write(self.getMiddleSiteAsBed(almnt))
+                fOutput.write(self.getMiddleSiteAsBed(almnt) + "\n")
        
         fOutput.close() 
            
@@ -452,7 +455,7 @@ class bamCLIP:
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                fOutput.write(self.getEndSiteAsBed(almnt))
+                fOutput.write(self.getEndSiteAsBed(almnt) + "\n")
 
         fOutput.close()
         
