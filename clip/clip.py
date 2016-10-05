@@ -390,16 +390,19 @@ def extract(parser,args):
     
     bamC = bamCLIP(args)
     
+
     if hasattr(args, 'choice') and args.choice != None:
         if args.choice.startswith("s") :
 			if hasattr(args,'mate') and args.mate != None:
-				bamC.extract_StartSites()
+                (ignore, offset) = bamC.extractOptions(args.choice.split("s"))
+				bamC.extract_StartSites(offset, ignore)
 			else:
 				parser.error('You need --mate option. Indicate which read to extract cross linking sites from') 
-        elif args.choice.startswith("m"):    
+        elif args.choice == 'm': 
             bamC.extract_MiddleSites()
         elif args.choice.startswith("e"):   
-            bamC.extract_EndSites()
+            (ignore, offset) = bamC.extractOptions(args.choice.split("e"))
+            bamC.extract_EndSites(offset, ignore)
         elif args.choice == 'd':      
             bamC.extract_DeletionSites()
         elif args.choice == 'i':      

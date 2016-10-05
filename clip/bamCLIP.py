@@ -347,13 +347,13 @@ class bamCLIP:
     '''
     Extract start sites
     '''
-    def extract_StartSites(self):
+    def extract_StartSites(self, offset = 0, ignore = False):
         almnt_file = HTSeq.BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
 
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                (ignore, offset) = self.extractOptions(self.choice.split("s"))
+                
                 out = self.getStartSiteAsBed(almnt, ignore, offset)
                 if not out == None:
                     fOutput.write(out + "\n")
@@ -369,19 +369,23 @@ class bamCLIP:
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                fOutput.write(self.getMiddleSiteAsBed(almnt) + "\n")
+
+                out = self.getMiddleSiteAsBed(almnt)
+                if not out == None:
+                    fOutput.write(out + "\n")
        
         fOutput.close() 
            
     '''
     Extract end sites. 
     '''   
-    def extract_EndSites(self):
+    def extract_EndSites(self, offset = 0, ignore = False):
         almnt_file = HTSeq.BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
+
                 (ignore, offset) = self.extractOptions(self.choice.split("e"))
                 out = self.getEndSiteAsBed(almnt, ignore, offset)
                 if not None:
