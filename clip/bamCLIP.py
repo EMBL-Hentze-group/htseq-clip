@@ -88,7 +88,7 @@ class bamCLIP:
                 self.count += 1
                 return False
             elif not almnt.paired_end:
-                raise("Data are not paired end %s" % almnt.paired_end)
+                raise Exception("Alignment is not paired end.")
                 
                 
         elif self.mate == 1: #select the first read of a pair to extract
@@ -102,7 +102,7 @@ class bamCLIP:
                 self.count += 1
                 return False
         else:
-            raise ValueError("mate argument can only be 1 or 2")
+            raise ValueError("Mate argument can only be 1 for first read or 2 for second")
 
     '''
     If the primary filter is activated (option primary is set),
@@ -155,7 +155,7 @@ class bamCLIP:
         elif strand == "-":
             return(pos_d + x)
         else:
-            raise("Strand not known %s" % strand)
+            raise Exception("Strand not known %s" % strand)
 
     def posCalcMiddleSite(self, pos_d, strand, x):
         if strand == "+":
@@ -163,7 +163,7 @@ class bamCLIP:
         elif strand == "-":
             return(pos_d - x)
         else:
-            raise("Strand not known %s" % strand)
+            raise Exception("Strand not known %s" % strand)
 
     def posCalcEndSite(self, pos_d, strand, x):
         if strand == "+":
@@ -171,7 +171,7 @@ class bamCLIP:
         elif strand == "-":
             return(pos_d + x)
         else:
-            raise("Strand not known %s" % strand)
+            raise Exception("Strand not known %s" % strand)
 
     '''
     extractOptions
@@ -385,8 +385,6 @@ class bamCLIP:
     
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-
-                (ignore, offset) = self.extractOptions(self.choice.split("e"))
                 out = self.getEndSiteAsBed(almnt, ignore, offset)
                 if not None:
                     fOutput.write(out + "\n")

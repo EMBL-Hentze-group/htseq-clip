@@ -393,11 +393,11 @@ def extract(parser,args):
 
     if hasattr(args, 'choice') and args.choice != None:
         if args.choice.startswith("s") :
-			if hasattr(args,'mate') and args.mate != None:
+            if hasattr(args,'mate') and args.mate != None:
                 (ignore, offset) = bamC.extractOptions(args.choice.split("s"))
-				bamC.extract_StartSites(offset, ignore)
-			else:
-				parser.error('You need --mate option. Indicate which read to extract cross linking sites from') 
+                bamC.extract_StartSites(offset, ignore)
+            else:
+                parser.error('You need --mate option. Indicate which read to extract cross linking sites from') 
         elif args.choice == 'm': 
             bamC.extract_MiddleSites()
         elif args.choice.startswith("e"):   
