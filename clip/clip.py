@@ -531,7 +531,7 @@ def main():
     
     try:
         # get parser and add arguments
-        parser = argparse.ArgumentParser(version="%prog 1.0", conflict_handler='resolve')
+        parser = argparse.ArgumentParser(version="htseq-clip {}".format(VERSION), conflict_handler='resolve')
 
         parser.add_argument('-v', '--verbose', action='store_true', default=argparse.SUPPRESS, help='verbose output')
         parser.add_argument('-i', '--input', action='store',nargs = '+', type= str,  default=argparse.SUPPRESS, dest='input', help='input file')

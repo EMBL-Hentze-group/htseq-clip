@@ -360,11 +360,11 @@ class bedCLIP:
                     #else if bigger than its intergenic region after last gene
                     #else its in a region or in an intergenic region between two genes
                     if a[1] < b_First[0]:
-                        seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, 'intergenic', 'intergenic', str(1))
+                        seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(1))
                         output.write(str("\t").join(seq) + "\n")
                         check = False
                     elif a[0] > b_Last[1]:
-                        seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, 'intergenic', 'intergenic', str(3))
+                        seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(3))
                         output.write(str("\t").join(seq) + "\n")
                         check = False
                     else:
