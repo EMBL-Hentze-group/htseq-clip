@@ -4,7 +4,7 @@ import sys, os
 from codecs import open
 
 if sys.version_info < (2, 7):
-    print "At least Python 2.7 is required. Please install Python 2.7. \n"
+    print ("At least Python 2.7 is required. Please install Python 2.7.")
     exit(1)
 
 try:

@@ -386,17 +386,17 @@ class bedCLIP:
                                 
                                 d1 = a[0] - b_Curr[0]
                                 d2 = a[1] - b_Curr[1]
-                                    
                                 if strand == '-':
                                     d1 = d1 * -1
                                     d2 = d2 * -1
-                                    seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d2), str(d1), str(flag), strand, bn[1], bn[2], bn[3])
-                                    output.write(str("\t").join(seq) + "\n")
-                                    check = False
-                                else:         
-                                    seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d1) , str(d2), str(flag), strand, bn[1], bn[2], bn[3])
-                                    output.write(str("\t").join(seq) + "\n")
-                                    check = False
+                                # modified from the original module to account for 'gene_name' in the annotation tags
+                                seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d2), str(d1), str(flag), strand, bn[1], bn[2], bn[3], bn[4])
+                                output.write(str("\t").join(seq) + "\n")
+                                check = False
+                                # else:         
+                                #     seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d1) , str(d2), str(flag), strand, bn[1], bn[2], bn[3], bn[4])
+                                #     output.write(str("\t").join(seq) + "\n")
+                                #     check = False
                             else:
                                 seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, 'intergenic', 'intergenic', str(2))
                                 output.write(str("\t").join(seq) + "\n")

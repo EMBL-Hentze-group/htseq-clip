@@ -1180,12 +1180,13 @@ class bokehCLIP:
                             
                     dts = int(line[4])
                     dte = int(line[5])
-                    
-                    line[10] = line[10].split("/")
+                    # modified from the original module to account for 'gene_name' in the annotation tags
+                    # line[10] to line[11]
+                    line[11] = line[11].split("/")
                                        
                     if not dts > 200: 
-                        
-                        if line[10][0] == '1' and line[10][1] == '1':
+                        # line[10] to line[11]
+                        if line[11][0] == '1' and line[11][1] == '1':
                             
                             #Unfiltered
                             if not es11Junc.has_key(dts):
@@ -1199,8 +1200,8 @@ class bokehCLIP:
                                     es11JuncF[dts] = 1/float(efl[totalLength])
                                 else:
                                     es11JuncF[dts] += 1/float(efl[totalLength])
-                                     
-                        elif (line[10][0] == '1' and not line[10][1] == '1') or (line[10][0] == line[10][1]):
+                        # line[10] to line[11]         
+                        elif (line[11][0] == '1' and not line[11][1] == '1') or (line[11][0] == line[11][1]):
                             
                             #Unfiltered
                             if not igeJunc.has_key(dts):
@@ -1241,8 +1242,8 @@ class bokehCLIP:
                                     eeJuncF[dts] += 1/float(efl[totalLength])
                                                            
                     if not dte < -200:
-                        
-                        if line[10][0] == '1' and line[10][1] == '1':
+                        # line[10] to line[11]
+                        if line[11][0] == '1' and line[11][1] == '1':
                             
                             #Unfiltered
                             if not ee11Junc.has_key(dte):
@@ -1256,8 +1257,8 @@ class bokehCLIP:
                                     ee11JuncF[dte] = 1/float(efl[totalLength])
                                 else:
                                     ee11JuncF[dte] += 1/float(efl[totalLength])
-                                     
-                        elif (line[10][0] == '1' and not line[10][1] == '1') or (line[10][0] == line[10][1]):
+                        # line[10] to line[11]          
+                        elif (line[11][0] == '1' and not line[11][1] == '1') or (line[11][0] == line[11][1]):
                             
                             #Unfiltered
                             if not eigJunc.has_key(dte):
@@ -1296,16 +1297,24 @@ class bokehCLIP:
                                     eeJuncF[dte] = 1/float(efl[totalLength])
                                 else:
                                     eeJuncF[dte] += 1/float(efl[totalLength])
-                      
-                    if line[8] == "protein_coding":
-                        line[8] = line[8]+"_exon"
-                                
-                    if not regions.has_key("exon"):
-                        regions["exon"] = 1
-                    else:
-                        regions["exon"] += 1
-                            
-                elif line[9] == "intron":
+                    
+                    # modified from the original module to account for 'gene_name' in the annotation tags
+                    # line[8] changed to line[9]
+                    if line[9] == "protein_coding":
+                        line[9] = line[9]+"_exon"
+                    try:
+                        regions["exon"]+=1
+                    except KeyError:
+                        regions["exon"]=1
+
+                    # if not regions.has_key("exon"):
+                    #     regions["exon"] = 1
+                    # else:
+                    #     regions["exon"] += 1
+
+                # modified from the original module to account for 'gene_name' in the annotation tags
+                # line[9] changed to line[10]           
+                elif line[10] == "intron":
                      
                     totalLength = abs(int(line[4])) + abs(int(line[5]))
                             
@@ -1362,24 +1371,42 @@ class bokehCLIP:
                                 iiJuncF[dte] = 1/float(ifl[totalLength])
                             else:
                                 iiJuncF[dte] += 1/float(ifl[totalLength])
-                                      
-                    if line[8] == "protein_coding":
-                        line[8] = line[8]+"_intron"
-                                
-                    if not regions.has_key("intron"):
-                        regions["intron"] = 1
-                    else:
-                        regions["intron"] += 1
+                    # modified from the original module to account for 'gene_name' in the annotation tags
+                    # line[8] changed to line[9]                  
+                    if line[9] == "protein_coding":
+                        line[9] = line[9]+"_intron"
+                    try:
+                        regions["intron"]+=1
+                    except KeyError:
+                        regions["intron"]=1
+
+                    # if not regions.has_key("intron"):
+                    #     regions["intron"] = 1
+                    # else:
+                    #     regions["intron"] += 1
+                    
                 else:
-                    if not regions.has_key("intergenic"):
-                        regions["intergenic"] = 1
-                    else:
-                        regions["intergenic"] += 1
+                    try:
+                        regions["intergenic"]+=1
+                    except KeyError:
+                        regions["intergenic"]=1
+
+                    # if not regions.has_key("intergenic"):
+                    #     regions["intergenic"] = 1
+                    # else:
+                    #     regions["intergenic"] += 1
                         
-                if not types.has_key(line[8]):
-                    types[line[8]] = 1
-                else:
-                    types[line[8]] += 1
+                # modified from the original module to account for 'gene_name' in the annotation tags
+                # line[8] changed to line[9]
+                try:
+                    types[line[9]]+=1
+                except KeyError:
+                    types[line[9]]=1
+
+                # if not types.has_key(line[8]):
+                #     types[line[8]] = 1
+                # else:
+                #     types[line[8]] += 1
                 
             #Filling up dicts with 0 counts if for some distances no values are available        
             for i in range(-200, 200):
