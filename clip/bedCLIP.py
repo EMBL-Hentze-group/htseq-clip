@@ -398,7 +398,7 @@ class bedCLIP:
                                 #     output.write(str("\t").join(seq) + "\n")
                                 #     check = False
                             else:
-                                seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, 'intergenic', 'intergenic', str(2))
+                                seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(2))
                                 output.write(str("\t").join(seq) + "\n")
                                 check = False                              
     #===================================================================================
