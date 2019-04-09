@@ -312,7 +312,7 @@ class gtfCLIP:
             else:
                 while pos2 < end:
 
-                    seq = (line[0], str(pos1), str(pos2), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)
+                    seq = (line[0], str(pos1), str(pos2), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3]+"@"+name[4], line[4], strand)
                     output.write(str('\t').join(seq) + "\n")
                     
                     pos1 = pos1 + self.windowStep
@@ -322,7 +322,7 @@ class gtfCLIP:
                           
                     if pos2 > end:
                         pos2 = end
-                        seq = (line[0], str(pos1), str(pos2), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)
+                        seq = (line[0], str(pos1), str(pos2), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3]+"@"+name[4], line[4], strand)
                         output.write(str('\t').join(seq) + "\n")
                         
                         windowCount = windowCount + 1
