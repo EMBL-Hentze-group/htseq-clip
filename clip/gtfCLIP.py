@@ -305,7 +305,7 @@ class gtfCLIP:
             #if length shorter than given windowsize then the whole feature is one window
             #else split the current feature up by the given options
             if pos2 >= end:
-                seq = (line[0], str(start), str(end), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)     
+                seq = (line[0], str(start), str(end), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3]+"@"+name[4], line[4], strand)     
                 output.write(str('\t').join(seq) + "\n")
                 
                 windowCount = windowCount + 1

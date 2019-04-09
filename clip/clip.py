@@ -21,6 +21,7 @@ from heatmap import HeatMap
 VERSION = "0.1.1"
 
 #======================================================================================
+# changed function description from slidingWindows to createSlidingWindows
 def usage():
     print '''
 htseq-clip:  A flexible toolset for the analysis of iCLIP and eCLIP sequencing data
@@ -30,7 +31,7 @@ The functions include:
     
 [Annotation]
     annotation              flattens an annotation gtf file
-    slidingWindow           creates sliding windows based on given annotation file
+    createSlidingWindows           creates sliding windows based on given annotation file
     
 [Extraction]
     extract                 extracts crosslink sites, insertions or deletions
@@ -377,8 +378,9 @@ def count(program, parser, args):
         
 '''
 Sliding window counts
+updated function name to countSlidingWindows to match with the rest of the main module
 '''            
-def countSlidingWindow(args):
+def countSlidingWindows(args):
     
     bedC = bedCLIP(args)
     bedC.countSlidingWindow()
@@ -586,7 +588,7 @@ def main():
                 else:
                     checkFileExists(args.input[0], parser)
                     checkFileExists(args.compare, parser)
-                    countSlidingWindow(args)
+                    countSlidingWindows(args)
             elif program == 'junction':
                 if len(d) < 3:
                     usage_junction()
