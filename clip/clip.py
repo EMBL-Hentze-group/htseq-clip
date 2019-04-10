@@ -565,7 +565,7 @@ def main():
         parser.add_argument('command', nargs = '?', help='name of program to run ')
         args = parser.parse_args()
         d = vars(args)
-
+        print(d)
         # Print the default usage when there is no program specified
         if args.command == None:
             usage()
