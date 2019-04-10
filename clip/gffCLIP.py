@@ -8,7 +8,7 @@
 # --------------------------------------------------
 
 import gzip, HTSeq
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict
 
 
 class gffClip:
@@ -356,7 +356,7 @@ class gffClip:
             output = open(self.fOutput, 'w')
 
         currentName = None
-        windowidMap = defaultdict(dict)
+        windowidMap = {}
 
         for line in almnt_file:
             if line.startswith("track"):
@@ -373,9 +373,10 @@ class gffClip:
             #     currentName = name[0]
             #     windowCount = 1
             try:
-                windowCount = windowidMap[name[0]][name[2]]+1
+                windowCount = windowidMap[name[0]]
+                windowCount +=1
             except KeyError:
-                windowidMap[name[0]][name[2]] = 1
+                windowidMap[name[0]] = 1
                 windowCount = 1
             strand = line[5]
 
@@ -391,7 +392,7 @@ class gffClip:
                 seq = (line[0], str(start), str(end), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)
                 output.write(str('\t').join(seq) + "\n")
 
-                windowCount = windowCount + 1
+                windowCount+=1
             else:
                 while pos2 < end:
 
@@ -401,15 +402,15 @@ class gffClip:
                     pos1 = pos1 + self.windowStep
                     pos2 = pos2 + self.windowStep
 
-                    windowCount = windowCount + 1
+                    windowCount+=1
 
                     if pos2 > end:
                         pos2 = end
                         seq = (line[0], str(pos1), str(pos2), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)
                         output.write(str('\t').join(seq) + "\n")
 
-                        windowCount = windowCount + 1
-            windowidMap[name[0]][name[2]] = windowCount
+                        windowCount+=1
+            windowidMap[name[0]] = windowCount
         output.close()
     #==================================================================================
 
