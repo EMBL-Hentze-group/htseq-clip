@@ -280,7 +280,7 @@ class gtfCLIP:
             output = open(self.fOutput, 'w')
         
         currentName = None
-        
+        windowidMap = {}
         for line in almnt_file:
             if line.startswith("track"):
                 continue
@@ -290,8 +290,15 @@ class gtfCLIP:
             
             name = line[3].split('@')
             
-            if currentName == None or currentName != name[0]:
-                currentName = name[0]
+            # this will creaet duplicate windowCount if there are multiple genes annotated to the same chromosomal locations
+            # this needs to be reimplemented
+            # if currentName == None or currentName != name[0]:
+            #     currentName = name[0]
+            #     windowCount = 1
+            try:
+                windowCount = windowidMap[name[0]]+1
+            except KeyError:
+                windowidMap[name[0]] = 1
                 windowCount = 1
             
             strand = line[5]
@@ -308,7 +315,7 @@ class gtfCLIP:
                 seq = (line[0], str(start), str(end), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3]+"@"+name[4], line[4], strand)     
                 output.write(str('\t').join(seq) + "\n")
                 
-                windowCount = windowCount + 1
+                windowCount+=1
             else:
                 while pos2 < end:
 
@@ -318,14 +325,15 @@ class gtfCLIP:
                     pos1 = pos1 + self.windowStep
                     pos2 = pos2 + self.windowStep
                     
-                    windowCount = windowCount + 1
+                    windowCount+=1
                           
                     if pos2 > end:
                         pos2 = end
                         seq = (line[0], str(pos1), str(pos2), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3]+"@"+name[4], line[4], strand)
                         output.write(str('\t').join(seq) + "\n")
                         
-                        windowCount = windowCount + 1
+                        windowCount+=1
+            windowidMap[name[0]] = windowCount
                 
         output.close()          
     #==================================================================================
