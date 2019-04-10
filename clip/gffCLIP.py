@@ -8,7 +8,7 @@
 # --------------------------------------------------
 
 import gzip, HTSeq
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 
 class gffClip:
@@ -356,6 +356,7 @@ class gffClip:
             output = open(self.fOutput, 'w')
 
         currentName = None
+        windowidMap = defaultdict(dict)
 
         for line in almnt_file:
             if line.startswith("track"):
@@ -366,10 +367,16 @@ class gffClip:
 
             name = line[3].split('@')
 
-            if currentName == None or currentName != name[0]:
-                currentName = name[0]
+            # this will creaet duplicate windowCount if there are multiple genes annotated to the same chromosomal locations
+            # this needs to be reimplemented
+            # if currentName == None or currentName != name[0]:
+            #     currentName = name[0]
+            #     windowCount = 1
+            try:
+                windowCount = windowidMap[name[0]][name[2]]+1
+            except KeyError:
+                windowidMap[name[0]][name[2]] = 1
                 windowCount = 1
-
             strand = line[5]
 
             start = int(line[1])
@@ -402,7 +409,7 @@ class gffClip:
                         output.write(str('\t').join(seq) + "\n")
 
                         windowCount = windowCount + 1
-
+            windowidMap[name[0]][name[2]] = windowCount
         output.close()
     #==================================================================================
 
