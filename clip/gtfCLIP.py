@@ -8,7 +8,7 @@
 
 
 import gzip, HTSeq
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
     
 class gtfCLIP:
@@ -279,8 +279,8 @@ class gtfCLIP:
         else:        
             output = open(self.fOutput, 'w')
         
-        currentName = None
-        windowidMap = {}
+        # currentName = None
+        windowidMap = defaultdict(dict)
         for line in almnt_file:
             if line.startswith("track"):
                 continue
@@ -296,9 +296,9 @@ class gtfCLIP:
             #     currentName = name[0]
             #     windowCount = 1
             try:
-                windowCount = windowidMap[name[0]]+1
+                windowCount = windowidMap[name[0]][name[3]]
             except KeyError:
-                windowidMap[name[0]] = 1
+                windowidMap[name[0]][name[3]] = 1
                 windowCount = 1
             
             strand = line[5]
