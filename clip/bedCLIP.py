@@ -533,8 +533,8 @@ class bedCLIP:
             idx = line[3]
             feature = line[7] # changed from line[6] to line[7]
             featureNr = line[8].zfill(3) # changed from line[7] to line[8]
-            windowNr = line[3].zfill(4) # changed from line[9] to line[3]
-            counts = line[11]            
+            windowNr = line[4].zfill(4) # changed from line[9] to line[4]
+            counts = line[12] # changed from line[11] to line[12]            
             if feature in self.rtypes:
                 letter = self.rtypes[feature]
             else:
