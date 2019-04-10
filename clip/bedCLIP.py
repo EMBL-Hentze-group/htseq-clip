@@ -37,7 +37,7 @@ class bedCLIP:
                            
         self.data = {'dist': self.dist}
         # region types and encoding letters
-        self.rtypes = {'exon':'E','intron':'I','CDS':'C','3UTR':'U3','5UTR':'U5'}
+        self.rtypes = {'exon':'E','intron':'I','CDS':'CDS','3UTR':'3U','5UTR':'5U'}
          
     #=================================================================================
     '''
