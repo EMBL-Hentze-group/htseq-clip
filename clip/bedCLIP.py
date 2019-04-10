@@ -8,7 +8,7 @@
 # --------------------------------------------------
 
 import gzip, HTSeq
-    
+import sys
 class bedCLIP:
     
     data = {}
@@ -36,6 +36,8 @@ class bedCLIP:
             self.dist = options.dist
                            
         self.data = {'dist': self.dist}
+        # region types and encoding letters
+        self.rtypes = {'exon':'E','intron':'I','CDS':'C','3UTR':'U3','5UTR':'U5'}
          
     #=================================================================================
     '''
@@ -528,26 +530,19 @@ class bedCLIP:
         
         for line in almnt_file:
             line = line.split('\t')
-            
             idx = line[3]
-            feature = line[6]
-            featureNr = line[7].zfill(3)
-            windowNr = line[9].zfill(4)
-            counts = line[11]
-            
-            letter = ""
-            
-            if feature == "exon":
-                letter = "E"
-            elif feature == "intron":
-                letter = "I"
+            feature = line[7] # changed from line[6] to line[7]
+            featureNr = line[8].zfill(3) # changed from line[7] to line[8]
+            windowNr = line[3].zfill(4) # changed from line[9] to line[3]
+            counts = line[11]            
+            if feature in self.rtypes:
+                letter = self.rtypes[feature]
             else:
-                raise ValueError("Wrong feature detected! Check your data!")
-                   
+                # adhoc warning, should be changed to proper logging module
+                sys.stderr.write('WARNING! Skipping {}, found uknown region type: {}\n'.format(line.strip('\n'),feature))
+                continue
             seq = (idx+":"+letter+featureNr+"W"+windowNr, counts)
             output.write(str("\t").join(seq) + "\n")
-            
-        
         output.close()
     #===================================================================================
     
