@@ -333,7 +333,7 @@ class gtfCLIP:
                         output.write(str('\t').join(seq) + "\n")
                         
                         windowCount+=1
-            windowidMap[name[0]] = windowCount
+            windowidMap[name[0]][name[3]] = windowCount
                 
         output.close()          
     #==================================================================================
