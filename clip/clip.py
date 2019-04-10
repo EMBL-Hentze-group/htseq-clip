@@ -565,7 +565,6 @@ def main():
         parser.add_argument('command', nargs = '?', help='name of program to run ')
         args = parser.parse_args()
         d = vars(args)
-        print(d)
         # Print the default usage when there is no program specified
         if args.command == None:
             usage()
@@ -573,16 +572,17 @@ def main():
         # Print program specific messages  
         else:
             program = args.command
-
+            # changed all occurences of len(d) <3 to len(d) <=4, by default d = {'region': False, 'mate': 1, 'command': 'slidingWindowsToDEXSeq', 'element': False}
+            # so, len(d)<3 never statisfies for missing inputs of any sub parsers
             if program == "extract":
-                if len(d) < 3:
+                if len(d) <= 4:
                     usage_extract()
                     os._exit(1)
                 else:   
                     checkFileExists(args.input[0], parser)
                     extract(parser, args)
             elif program == 'countSlidingWindows':
-                if len(d) < 3:
+                if len(d) <= 4:
                     usage_countSlidingWindows()
                     os._exit(1)
                 else:
@@ -590,7 +590,7 @@ def main():
                     checkFileExists(args.compare, parser)
                     countSlidingWindows(args)
             elif program == 'junction':
-                if len(d) < 3:
+                if len(d) <= 4:
                     usage_junction()
                     os._exit(1)
                 else: 
@@ -598,7 +598,7 @@ def main():
                     checkFileExists(args.compare, parser)
                     junction(program, args)
             elif program == 'count':
-                if len(d) < 3:
+                if len(d) <= 4:
                     usage_count()
                     os._exit(1)
                 else: 
@@ -606,28 +606,28 @@ def main():
                     checkFileExists(args.compare, parser)
                     count(program, parser, args)
             elif program == 'annotation':
-                if len(d) < 3:
+                if len(d) <= 4:
                     usage_annotation()
                     os._exit(1)
                 else:
                     checkFileExists(args.gtf, parser)
                     process(args)
             elif program == 'plot':
-                if len(d) < 3:
+                if len(d) <= 4:
                     usage_plot()
                     os._exit(1)
                 else:
                     checkFileExists(args.input[0], parser)
                     plot(parser, args)
             elif program =='createSlidingWindows':
-                if len(d) < 3:
+                if len(d) <= 4:
                     usage_createSlidingWindows()
                     os._exit(1)
                 else: 
                     checkFileExists(args.input[0], parser)
                     slidingWindow(args)
             elif program =='slidingWindowsToDEXSeq':
-                if len(d) < 3:
+                if len(d) <= 4:
                     usage_slidingWindowsToDEXSeq()
                     os._exit(1)
                 else:
@@ -637,7 +637,7 @@ def main():
                 checkFileExists(args.input[0], parser)
                 genomeToReads(args)
             elif program == 'feature':
-                if len(d) < 3:
+                if len(d) <= 4:
                     usage_feature()
                     os._exit(1)
                 else:
@@ -645,7 +645,7 @@ def main():
                     checkFileExists(args.compare, parser)
                     features(parser,args)
             elif program == 'dist':
-                if len(d) < 3:
+                if len(d) <= 4:
                     usage_dist()
                     os._exit(1)
                 else:
