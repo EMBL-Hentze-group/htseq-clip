@@ -6,7 +6,7 @@
 # Date: October 2015
 # --------------------------------------------------
 
-import gzip, decimal, HTSeq
+import gzip, decimal, HTSeq, sys
 from output import Output
 
 class bamCLIP:
@@ -304,6 +304,8 @@ class bamCLIP:
     Returns GenomicPosition for desired site with offset
     '''
     def getOffsetPosition(self, almnt, position, offset, ignore):
+        # @TODO: trace error and rewrite
+        ignore = True
         if almnt.iv.strand == "+":
             x = position + offset
         elif almnt.iv.strand == "-":
@@ -314,7 +316,8 @@ class bamCLIP:
         if x < 0:
             if ignore == False:
                 error = "Value Error: Start position cannot be less than zero. Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". You can use i in your choice option to ignore such cases."
-                raise ValueError(error)
+                sys.stderr.write(error+'\n')
+                # raise ValueError(error)
             
             return None
         else:
