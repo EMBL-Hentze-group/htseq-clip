@@ -49,7 +49,7 @@ The functions include:
     plot                    visualisation 
     
 [Transformation]
-    slidingWindowToDEXSeq  transform sliding window counts to DEXSeq format
+    slidingWindowsToDEXSeq  transform sliding window counts to DEXSeq format
     
 [In development]
     genomeToReads           splits up an genome fasta to reads for mappability tests 
@@ -574,7 +574,8 @@ def main():
             program = args.command
             # changed all occurences of len(d) <3 to len(d) <=4, by default d = {'region': False, 'mate': 1, 'command': 'slidingWindowsToDEXSeq', 'element': False}
             # so, len(d)<3 never statisfies for missing inputs of any sub parsers
-            if program == "extract":
+            subpars = ['extract','countSlidingWindows','junction','count','annotation','plot','createSlidingWindows','slidingWindowsToDEXSeq','genomeToReads','feature','dist','heatmap']
+            if program == 'extract':
                 if len(d) <= 4:
                     usage_extract()
                     os._exit(1)
@@ -663,7 +664,7 @@ def main():
                     heatmap(parser,args)
 
             else:
-                parser.error ('Incorrect argument for execution')
+                parser.error ('Incorrect function argument "{0}". Function must be one of: {1}'.format(program,", ".join(subpars)))
 
     # Exception Handling: Interruption / Errors
     except KeyboardInterrupt, exception: # Control - C
