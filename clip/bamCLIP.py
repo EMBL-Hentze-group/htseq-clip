@@ -386,7 +386,7 @@ class bamCLIP:
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
                 out = self.getEndSiteAsBed(almnt, ignore, offset)
-                if not None:
+                if not out == None:
                     fOutput.write(out + "\n")
 
         fOutput.close()
