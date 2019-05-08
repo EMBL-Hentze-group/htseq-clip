@@ -13,7 +13,7 @@ from bedCLIP import bedCLIP
 from gtfCLIP import gtfCLIP
 from gtf import gtfClip
 from bokehCLIP import bokehCLIP
-from fastaCLIP import fastaCLIP
+#from fastaCLIP import fastaCLIP
 from featureCLIP import feature
 from gffCLIP import gffClip
 from heatmap import HeatMap
@@ -417,6 +417,7 @@ Please find a detailed description in the usage (htseq-clip extract --help)""")
         
 '''
 Processing genome.fa file into fasta format 
+@TODO: this function needs biopython!
 '''    
 def genomeToReads(args):
     
@@ -529,6 +530,37 @@ def checkFileExists(filename, parser):
 def notEmpty(filename):
     return filename == False or filename == ''
 
+'''
+        test_parser = argparse.ArgumentParser(version="htseq-clip", conflict_handler='resolve')
+        test_parser.add_argument('-v', '--verbose', action='store_true', default=argparse.SUPPRESS, help='verbose output')
+        test_parser.add_argument('-o', '--output', action='store',nargs = '+', type= str,  default='/tmp/test_count.csv', dest='output', help='output file name')
+        test_parser.add_argument('-f', '--compare', action='store', type= str,  default=argparse.SUPPRESS, dest='compare', help='file which you want to compare with your input file')
+        test_parser.add_argument('-c', '--choice', action='store', type=str,  default='', dest='choice', help='option')
+        test_parser.add_argument('-a', '--mate', action='store', type=int, default=1, dest='mate', help='select first or second read')
+        test_parser.add_argument('-q', '--minAlignmentQuality',   action='store', type=int, default=argparse.SUPPRESS,   dest='minAlignmentQuality', help='minimum alignment quality')
+        test_parser.add_argument('-m', '--minReadLength', action='store', type=int, default=argparse.SUPPRESS, dest='minReadLength', help='minimum read length')
+        test_parser.add_argument('-x', '--maxReadLength', action='store', type=int, default=argparse.SUPPRESS, dest='maxReadLength', help='maximum read length')
+        test_parser.add_argument('-h', '--height', action='store', type=int, default=argparse.SUPPRESS, dest='height', help='height of heatmap')
+        test_parser.add_argument('-wd', '--width', action='store', type=int, default=argparse.SUPPRESS, dest='width', help='width of heatmap')
+        test_parser.add_argument('-l', '--maxReadIntervalLength', action='store', type=int, default=argparse.SUPPRESS, dest='maxReadIntervalLength', help='maximum read interval length')
+        test_parser.add_argument('-p', '--primary', action='store_true', default=argparse.SUPPRESS,  dest='primary', help='set if you want to use only primary positions of multimapping reads')
+        test_parser.add_argument('-d', '--dist', action='store', type=int, default=argparse.SUPPRESS, dest='dist', help='Maximum distance between two sites of a read if its higher than this value it will be count as this value')
+        test_parser.add_argument('-g', '--gtf', action='store', type=str, default=argparse.SUPPRESS, dest='gtf', help='gtf file for annotation')
+        test_parser.add_argument('-t', '--type', action='store', type=str, default=argparse.SUPPRESS, dest='type', help='gene type for annotation')
+        test_parser.add_argument('-n', '--name', action='store', type=str, default=argparse.SUPPRESS, dest='name', help='gene name for annotation')
+        test_parser.add_argument('-sc', '--score', action='store', type=str, default=argparse.SUPPRESS, dest='score', help='alignment score')
+        test_parser.add_argument('-st', '--strand', action='store', type=str, default=argparse.SUPPRESS, dest='strand', help='region strand')
+        test_parser.add_argument('-w', '--windowSize', action='store', type=int, default=argparse.SUPPRESS, dest='windowSize', help='window size for sliding window')
+        test_parser.add_argument('-s', '--windowStep', action='store', type=int, default=argparse.SUPPRESS, dest='windowStep', help='window step for sliding window')
+        test_parser.add_argument('-r', '--region', action='store_true', dest='region', help='set if you want exons to be split into cds and utr regions. Default is False.')
+        test_parser.add_argument('-sc', '--score', action='store', type=str, default=argparse.SUPPRESS, dest='score', help='alignment score')
+        test_parser.add_argument('-st', '--strand', action='store', type=str, default=argparse.SUPPRESS, dest='strand', help='region strand')
+        test_parser.add_argument('-e', '--element', action='store_true', dest='element', help='Region for heatmap e.g. Alu.')
+        test_parser.add_argument('-h', '--height', action='store', type=int, default=argparse.SUPPRESS, dest='height', help='height of heatmap')
+        test_parser.add_argument('-wd', '--width', action='store', type=int, default=argparse.SUPPRESS, dest='width', help='width of heatmap')
+        test_parser.add_argument('command', nargs = '?', help='name of program to run ')
+        test_parser.add_argument('-i', '--input', action='store',nargs = '+', type= str,  default='/home/sahadeva/hentze/projects/Meta-Analysis/CLIPRNAlength/clip_encode_bam/input/ENCFF027WDY.bam', dest='input', help='input file')
+'''
 def main():
     
     try:

@@ -26,48 +26,16 @@ class bamCLIP:
     count = 0
     
     def __init__(self, options):
-        
-        if hasattr(options, 'input'):
-            # Only first element of list will be used as input
-            if type(options.input) is list:
-                self.fInput = options.input[0]
-            else:
-                self.fInput = options.input
-        
-        if hasattr(options, 'output'):
-            # Write to file
-            self.writeFile = True
-
-            # Only first element of list will be used as output
-            if type(options.output) is list:
-                self.fOutput = options.output[0]
-            else:
-                self.fOutput = options.output
-        # Write to stdout
-        else:
-            self.fOutput = ""
-        
-        if hasattr(options, 'minAlignmentQuality'):
-            self.minAlignmentQuality = options.minAlignmentQuality
-        
-        if hasattr(options, 'minReadLength'):
-            self.minReadLength = options.minReadLength
-            
-        if hasattr(options, 'maxReadLength'):
-            self.maxReadLength = options.maxReadLength
-        
-        if hasattr(options, 'maxReadIntervalLength'):
-            self.maxReadIntervalLength = options.maxReadIntervalLength
-            
-        if hasattr(options, 'primary'):
-            self.primary = options.primary
-            
-        if hasattr(options, 'choice'):
-            self.choice = options.choice
-		
-        if hasattr(options, 'mate'):
-			self.mate = options.mate
-           
+        self.fInput = options.input
+        self.writeFile = True
+        self.fOutput = options.output
+        self.minAlignmentQuality = options.minAlignmentQuality
+        self.minReadLength = options.minReadLength
+        self.maxReadLength = options.maxReadLength
+        self.maxReadIntervalLength = options.maxReadIntervalLength
+        self.primary = options.primary
+        self.choice = options.choice
+        self.mate = options.mate           
         self.data = {'maxReadLength' : self.maxReadLength,
                      'minReadLength' : self.minReadLength,
                      'primary': self.primary,
@@ -178,6 +146,7 @@ class bamCLIP:
     extracts the optons ignore and offset from the choice parameter
     '''
     def extractOptions(self, option):
+        # option gets ['', '1i'], for eg
         ignore = False
         if len(option) == 1:
             print option
@@ -303,9 +272,8 @@ class bamCLIP:
     '''
     Returns GenomicPosition for desired site with offset
     '''
-    def getOffsetPosition(self, almnt, position, offset, ignore):
+    def getOffsetPosition(self, almnt, position, offset = 0, ignore = True):
         # @TODO: trace error and rewrite
-        ignore = True
         if almnt.iv.strand == "+":
             x = position + offset
         elif almnt.iv.strand == "-":
@@ -314,11 +282,12 @@ class bamCLIP:
             raise("Strand not known %s" % almnt.iv.strand)
 
         if x < 0:
-            if ignore == False:
-                error = "Value Error: Start position cannot be less than zero. Alignment: " + str(almnt.iv) + ", Read: " + almnt.read.name +  ". You can use i in your choice option to ignore such cases."
-                sys.stderr.write(error+'\n')
-                # raise ValueError(error)
-            
+            msg = 'Start position cannot be less than zero. Alignment:{} , Read: '.format(str(almnt.iv),almnt.read.name)
+            if ignore:
+                sys.stderr.write('Skipping {}'.format(almnt.read.name)+'\n')
+                sys.stderr.write(msg+'\n')
+            else:
+                raise ValueError(msg)
             return None
         else:
         

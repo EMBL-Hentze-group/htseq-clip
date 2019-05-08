@@ -40,9 +40,11 @@ class gffClip:
             self.windowStep = options.windowStep
 
         if hasattr(options, 'type'):
+            # not used
             self.geneType = options.type
 
         if hasattr (options,'name'):
+            # not used
             self.geneName = options.name
 
     '''

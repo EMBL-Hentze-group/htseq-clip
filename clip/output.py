@@ -8,7 +8,7 @@ class Output:
     # constructor 
     def __init__(self, fileName):
         # if file name is empty, redirect to stdin
-        if fileName == "":
+        if (fileName == "") or (fileName is None):
             self.fileOut = sys.stdout
         # if file name is given, file is opened 
         else:

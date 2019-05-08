@@ -9,6 +9,8 @@
 
 import gzip, HTSeq
 import sys
+
+from output import Output
 class bedCLIP:
     
     data = {}
@@ -20,21 +22,12 @@ class bedCLIP:
     
     def __init__(self, options):
         
-        if hasattr(options, 'input'):
-            self.fInput = options.input[0]
-        
-        if hasattr(options, 'output'):
-            self.fOutput = options.output[0]
-            
-        if hasattr(options, 'compare'):
-            self.fCompare = options.compare
-            
-        if hasattr(options, 'choice'):
-            self.choice = options.choice
-            
-        if hasattr(options, 'dist'):
-            self.dist = options.dist
-                           
+        self.fInput = options.input
+        self.fOutput = options.output
+        self.output = Output(self.fOutput)
+        self.fCompare = options.compare
+        self.choice = options.choice
+        self.dist = options.dist                           
         self.data = {'dist': self.dist}
         # region types and encoding letters
         self.rtypes = {'exon':'E','intron':'I','CDS':'CDS','3UTR':'3U','5UTR':'5U'}
@@ -77,11 +70,6 @@ class bedCLIP:
     given reference
     ''' 
     def count_all(self):
-        
-        if self.fOutput.endswith(".gz"):
-            output = gzip.open(self.fOutput, 'w') 
-        else:        
-            output = open(self.fOutput, 'w')
 
         #Get the information for normalisation of the plots  
         if self.fCompare.endswith(".gz"):
@@ -92,11 +80,11 @@ class bedCLIP:
         seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
                 'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
                 'Density','Total before duplication removal','Max height before duplication removal ')
-        output.write(str("\t").join(seq)+'\n')
+        self.output.write(str("\t").join(seq)+'\n')
         for line in fn:
             if line.startswith("track"):
-                output.write('#'+line)
-        output.write('\n')
+                self.output.write('#'+line)
+        self.output.write('\n')
         f.close()
         
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
@@ -124,7 +112,7 @@ class bedCLIP:
                         name = b[2].split("@")
                         posi = name[4].split("/")
                         seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], name[1], str(1), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
-                        output.write(str("\t").join(seq) + "\n")
+                        self.output.write(str("\t").join(seq) + "\n")
                     
                     continue
                 
@@ -138,14 +126,14 @@ class bedCLIP:
                         name = b[2].split("@")
                         posi = name[4].split("/")
                         seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], name[1], str(1), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
-                        output.write(str("\t").join(seq) + "\n")
+                        self.output.write(str("\t").join(seq) + "\n")
                     continue
                          
                 A = d1[chrom][strand]
       
-                self.calculateCount(A, B, chrom, strand, output)
+                self.calculateCount(A, B, chrom, strand)
                                    
-        output.close()     
+        self.output.close()     
     #===================================================================================
     #===================================================================================
     '''
@@ -153,11 +141,6 @@ class bedCLIP:
     if there are counts in a region of the reference annotation
     ''' 
     def count_only(self):
-       
-        if self.fOutput.endswith(".gz"):
-            output = gzip.open(self.fOutput, 'w') 
-        else:        
-            output = open(self.fOutput, 'w')
 
         #Get the information for normalisation of the plots  
         if self.fCompare.endswith(".gz"):
@@ -168,11 +151,11 @@ class bedCLIP:
         seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
                 'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
                 'Density','Total before duplication removal','Max height before duplication removal ')
-        output.write(str("\t").join(seq)+'\n')
+        self.output.write(str("\t").join(seq)+'\n')
         for line in fn:
             if line.startswith("track"):
-                output.write('#'+line)
-        output.write('\n')
+                self.output.write('#'+line)
+        self.output.write('\n')
         f.close()
         
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
@@ -193,15 +176,15 @@ class bedCLIP:
                 A = d1[chrom][strand]
                 B = d2[chrom][strand]
       
-                self.calculateCount(A, B, chrom, strand, output)
+                self.calculateCount(A, B, chrom, strand)
                                    
-        output.close()     
+        self.output.close()     
     #===================================================================================
     #===================================================================================
     '''
     This method calculates the counts of cross-link sites
     '''    
-    def calculateCount(self, A, B, chrom, strand, output):
+    def calculateCount(self, A, B, chrom, strand):
         
         if len(B) > 0:
             
@@ -251,9 +234,9 @@ class bedCLIP:
                             length = b_Curr[1] - b_Curr[0] 
                             
                             if not self.choice == "o":
-                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output)
+                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length)
                             elif self.choice == "o" and len(d_count) != 0:
-                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output)
+                                self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length)
 
                             
                             if not b_Curr == b_Last:
@@ -282,7 +265,7 @@ class bedCLIP:
                                     
                                     length = b_Curr[1] - b_Curr[0] 
                                     
-                                    self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length, output)
+                                    self.writeOut(chrom, strand, b_Curr, d_count, d_dup, length)
                             
                                     if not b_Curr == b_Last:
                                         bi = bi + 1
@@ -299,7 +282,7 @@ class bedCLIP:
                                 
             if not intergenicCounts == 0:
                 seq = (chrom, '~', '~', '~', '~','~', strand, 'intergenic', '~', '~', 'intergenic', '~', str(intergenicCounts), '~', '~', '~', '~', '~')
-                output.write(str("\t").join(seq) + "\n")
+                self.output.write(str("\t").join(seq) + "\n")
                                 
                     
     #===================================================================================
@@ -310,12 +293,7 @@ class bedCLIP:
     Method that calculates the distances from cross-link sites to exon/intron regions
     '''
     def junction(self):
-        
-        if self.fOutput.endswith(".gz"):
-            output = gzip.open(self.fOutput, 'w') 
-        else:        
-            output = open(self.fOutput, 'w')
-                
+           
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
         almnt_file2 = HTSeq.BED_Reader(self.fCompare)
         
@@ -332,15 +310,15 @@ class bedCLIP:
                 A = d1[chrom][strand]
                 B = d2[chrom][strand]
             
-                self.calculateJunction(A, B, chrom, strand, output)
+                self.calculateJunction(A, B, chrom, strand, self.output)
           
-        output.close()
+        self.output.close()
     #===================================================================================
     #=================================================================================== 
     '''
     Calculate the distances to the junction
     '''
-    def calculateJunction(self, A, B, chrom, strand, output):
+    def calculateJunction(self, A, B, chrom, strand):
          
         if len(B) > 0:
               
@@ -363,11 +341,11 @@ class bedCLIP:
                     #else its in a region or in an intergenic region between two genes
                     if a[1] < b_First[0]:
                         seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(1))
-                        output.write(str("\t").join(seq) + "\n")
+                        self.output.write(str("\t").join(seq) + "\n")
                         check = False
                     elif a[0] > b_Last[1]:
                         seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(3))
-                        output.write(str("\t").join(seq) + "\n")
+                        self.output.write(str("\t").join(seq) + "\n")
                         check = False
                     else:
                           
@@ -393,7 +371,7 @@ class bedCLIP:
                                     d2 = d2 * -1
                                 # modified from the original module to account for 'gene_name' in the annotation tags
                                 seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d2), str(d1), str(flag), strand, bn[1], bn[2], bn[3], bn[4])
-                                output.write(str("\t").join(seq) + "\n")
+                                self.output.write(str("\t").join(seq) + "\n")
                                 check = False
                                 # else:         
                                 #     seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d1) , str(d2), str(flag), strand, bn[1], bn[2], bn[3], bn[4])
@@ -401,7 +379,7 @@ class bedCLIP:
                                 #     check = False
                             else:
                                 seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(2))
-                                output.write(str("\t").join(seq) + "\n")
+                                self.output.write(str("\t").join(seq) + "\n")
                                 check = False                              
     #===================================================================================
     
@@ -442,7 +420,7 @@ class bedCLIP:
     This method calculates the counts and density of cross-link sites
     in a given window of an exon/intron
     ''' 
-    def countSW(self, A, B, chrom, strand, output):
+    def countSW(self, A, B, chrom, strand):
         
         if len(A) > 0 and len(B) > 0:
                
@@ -485,7 +463,7 @@ class bedCLIP:
                         #else count in the current region where the cross-link site lies
                         if a_curr[0] > b[1] or a_curr == A[-1]:
                             
-                            self.writeOut(chrom, strand, b, d_count, d_dup, length, output)
+                            self.writeOut(chrom, strand, b, d_count, d_dup, length)
                             
                             ai = ai - stepCount
                             stepCount = 0
@@ -523,11 +501,6 @@ class bedCLIP:
         else:        
             almnt_file = open(self.fInput, 'r')
         
-        if self.fOutput.endswith(".gz"):
-            output = gzip.open(self.fOutput, 'w') 
-        else:        
-            output = open(self.fOutput, 'w')
-        
         for line in almnt_file:
             line = line.split('\t')
             idx = line[3]
@@ -542,15 +515,15 @@ class bedCLIP:
                 sys.stderr.write('WARNING! Skipping {}, found uknown region type: {}\n'.format(line.strip('\n'),feature))
                 continue
             seq = (idx+":"+letter+featureNr+"W"+windowNr, counts)
-            output.write(str("\t").join(seq) + "\n")
-        output.close()
+            self.output.write(str("\t").join(seq) + "\n")
+        self.output.close()
     #===================================================================================
     
     #===================================================================================
     '''
     Write in output file
     '''
-    def writeOut(self, chrom, strand, b, d_count, d_dup, length, output):
+    def writeOut(self, chrom, strand, b, d_count, d_dup, length):
 
         name = b[2].split("@")
 
@@ -573,11 +546,11 @@ class bedCLIP:
             
             posi = name[4].split("/")
             seq = (chrom, str(b[0]+1), str(b[1]+1), name[0],name[1], str(b[3]), strand, name[3], posi[0], posi[1], name[2], str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]), str(density), str(dup_counts), str(d_dup[m_dup]))
-            output.write(str("\t").join(seq) + "\n")
+            self.output.write(str("\t").join(seq) + "\n")
         else:
             posi = name[4].split("/")
             seq = (chrom, str(b[0]+1), str(b[1]+1), name[0],name[1], str(b[3]), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
-            output.write(str("\t").join(seq) + "\n")
+            self.output.write(str("\t").join(seq) + "\n")
 
     #===================================================================================
     
@@ -676,7 +649,7 @@ class bedCLIP:
     '''
     This method calculates the minimum distances between the sites in the same file
     '''
-    def calcDistofSite(self, almnt_file, output):
+    def calcDistofSite(self, almnt_file):
         
         d = {}
         
@@ -689,15 +662,15 @@ class bedCLIP:
                 else:
                     if almnt.iv.strand == '+':
                         if  almnt.iv.start_d - d[almnt.iv.chrom][almnt.iv.strand][-1] > self.data['Dist']:
-                            output.write(str(self.data['Dist']) + "\n")
+                            self.output.write(str(self.data['Dist']) + "\n")
                         else:
-                            output.write(str(almnt.iv.start_d - d[almnt.iv.chrom][almnt.iv.strand][-1]) + "\n")
+                            self.output.write(str(almnt.iv.start_d - d[almnt.iv.chrom][almnt.iv.strand][-1]) + "\n")
                         d[almnt.iv.chrom][almnt.iv.strand].append(almnt.iv.start_d)
                     elif almnt.iv.strand == '-':
                         if d[almnt.iv.chrom][almnt.iv.strand][-1] - almnt.iv.start_d < self.data['Dist']*(-1):
-                            output.write(str(self.data['Dist']*(-1)) + "\n")
+                            self.output.write(str(self.data['Dist']*(-1)) + "\n")
                         else:
-                            output.write(str(d[almnt.iv.chrom][almnt.iv.strand][-1] - almnt.iv.start_d) + "\n")
+                            self.output.write(str(d[almnt.iv.chrom][almnt.iv.strand][-1] - almnt.iv.start_d) + "\n")
                         d[almnt.iv.chrom][almnt.iv.strand].append(almnt.iv.start_d)
                         
     #===================================================================================         
@@ -708,14 +681,8 @@ class bedCLIP:
     '''
     def calcDistancesFromSite(self):
         
-        almnt_file = HTSeq.BED_Reader(self.fInput)
-          
-        if self.fOutput.endswith(".gz"):
-            output = gzip.open(self.fOutput, 'w') 
-        else:        
-            output = open(self.fOutput, 'w')     
-        
-        self.calcDistofSite(almnt_file, output)
+        almnt_file = HTSeq.BED_Reader(self.fInput)   
+        self.calcDistofSite(almnt_file)
 
         output.close()
       
