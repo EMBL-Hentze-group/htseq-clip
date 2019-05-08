@@ -154,7 +154,7 @@ class bamCLIP:
         # option gets ['', '1i'], for eg
         ignore = False
         if len(option) == 1:
-            print option
+            # print option
             print self.choice
 
         if len(option) <= 0:

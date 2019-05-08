@@ -75,7 +75,7 @@ def _slidingWindowsToDEXSeq(args):
     bedC = bedCLIP(args)
     bedC.toDEXSeq()
 
-def main(argv):
+def main():
     prog = 'htseq-clip'
     description = '''
     {0}:  A flexible toolset for the analysis of iCLIP and eCLIP sequencing data
@@ -218,4 +218,4 @@ def main(argv):
     sys.exit(0)
 
 if __name__=='__main__':
-    main(sys.argv)
+    main()
