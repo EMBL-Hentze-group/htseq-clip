@@ -7,10 +7,12 @@
 # Date: October 2015
 # --------------------------------------------------
 
-import gzip, HTSeq
+import gzip
 import sys
 
+import HTSeq
 from output import Output
+
 class bedCLIP:
     
     data = {}
@@ -25,10 +27,12 @@ class bedCLIP:
         self.fInput = options.input
         self.fOutput = options.output
         self.output = Output(self.fOutput)
-        self.fCompare = options.compare
-        self.choice = options.choice
-        self.dist = options.dist                           
-        self.data = {'dist': self.dist}
+        if hasattr(options,'compare'):
+            self.fCompare = options.compare
+        if hasattr(options,'choice'):
+            self.choice = options.choice
+        # self.dist = options.dist                           
+        # self.data = {'dist': self.dist}
         # region types and encoding letters
         self.rtypes = {'exon':'E','intron':'I','CDS':'CDS','3UTR':'3U','5UTR':'5U'}
          
@@ -389,31 +393,20 @@ class bedCLIP:
     This method is used counting the sliding window counts
     '''
     def countSlidingWindow(self):
-        
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
         almnt_file2 = HTSeq.BED_Reader(self.fCompare)
-        
         d1 = self.buildDictForComparison(almnt_file1)
         d2 = self.buildDictForComparison(almnt_file2)      
-        
-        if self.fOutput.endswith(".gz"):
-            output = gzip.open(self.fOutput, 'w') 
-        else:        
-            output = open(self.fOutput, 'w')  
-        
         for chrom in d1:
-            if not d2.has_key(chrom):
+            if chrom not in d2:
                 continue
             for strand in d1[chrom]:
-                if not d2[chrom].has_key(strand):
+                if strand not in d2[chrom]:
                     continue
-                
                 A = d1[chrom][strand]
                 B = d2[chrom][strand]  
-                
-                self.countSW(A, B, chrom, strand, output)
-                                   
-        output.close() 
+                self.countSW(A, B, chrom, strand)        
+        self.output.close()
     #===================================================================================
     #===================================================================================
     '''
@@ -687,14 +680,3 @@ class bedCLIP:
         output.close()
       
     #===================================================================================
-      
-    
-    
-     
-    
-    
-    
-    
-    
-    
-    

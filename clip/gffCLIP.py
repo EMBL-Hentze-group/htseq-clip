@@ -1,9 +1,10 @@
-# --------------------------------------------------
+
 # --------------------------------------------------
 # gffCLIP class
 # Authors: Thomas Schwarzl, schwarzl@embl.de
 #          Nadia Ashraf, nadia.ashraf@embl.de
 #          Marko Fritz, marko.fritz@embl.de
+# Modified by: Sudeep Sahadevan, sudeep.sahadevan@embl.de
 # EMBL Heidelberg
 # --------------------------------------------------
 
@@ -80,18 +81,19 @@ class GeneInfo(object):
 
 
 class gffCLIP:
-    features = {}
-    inputFile  = ''
-    gtfFile    = ''
-    outputFile = ''
-    geneTypeAttrib = ''
-    geneNameAttrib = ''
-    geneIdAttrib = ''
+    # @TODO: probably remove these
+    # features = {}
+    # inputFile  = ''
+    # gtfFile    = ''
+    # outputFile = ''
+    # geneTypeAttrib = ''
+    # geneNameAttrib = ''
+    # geneIdAttrib = ''
     windowSize = 50
     windowStep = 20
     detailed   = True
     splitExons = True
-    processGeneOnlyInformation = False
+    processGeneOnlyInformation = True
     geneDefinitions = ["tRNA", "gene", "tRNAscan", "tRNA_gene"] 
     
     logger    = logging.getLogger(__name__) 
@@ -100,10 +102,9 @@ class gffCLIP:
     gffCLIP: Init
     """
     def __init__(self, options):
-        # @TODO: add gene ID option
-        if hasattr(options, 'gtf'):
-            self.gtfFile = options.gtf
-            self.logger.debug("set gtf")
+        if hasattr(options, 'gff'):
+            self.gtfFile = options.gff
+            self.logger.debug("set gff")
 
         if hasattr(options, 'windowSize'):
             self.windowSize = options.windowSize
@@ -120,12 +121,11 @@ class gffCLIP:
         if hasattr(options,'id'):
             self.geneId = options.id
         
-        if hasattr(options,'geneOnly'):
-            self.processGeneOnlyInformation = options.geneOnly
-        
-        #TODO:
-        if hasattr(options, 'detailed'):
-            self.detailed = options.detailed
+        #@TODO: do these options complicate things
+        # if hasattr(options,'geneOnly'):
+        #     self.processGeneOnlyInformation = options.geneOnly
+        # if hasattr(options, 'detailed'):
+        #     self.detailed = options.detailed
         self.fOutput = Output(options.output)
         self._geneMap = None # for unsorted GFF files
         self.summary = None # GeneSummary
@@ -152,72 +152,15 @@ class gffCLIP:
         self.summary.splitExons = self.splitExons
         
         # initializing field identifiers
-        # @TODO: change ID to Attrib and add geneIdAttrib
         GTxFeature.geneTypeAttrib = self.geneType
         GTxFeature.geneNameAttrib = self.geneName
         GTxFeature.geneIdAttrib = self.geneId
         if unsorted:
             self._process_unsorted(gtf)
         else:
-            gene = self._process_sorted(gtf)
+            self._process_sorted(gtf)
         self._write_summary()
         self.fOutput.close()
-        # for f in gtf:
-        #     if self.geneName not in f.attr:
-        #         continue
-        #     try:
-        #         self._geneMap[f.attr[self.geneName]].add_feature(f)
-        #     except KeyError:
-        #         self._geneMap[f.attr[self.geneName]] = GeneInfo()
-        #         self._geneMap[f.attr[self.geneName]].add_feature(f)
-        # # sanity check
-        # if len(self._geneMap)==0:
-        #     raise ValueError('Cannot parse gene features from {}! Please check this input file'.format(self.gtfFile))
-        
-        # sys.stderr.write('Found info for{} genes\n'.format(len(self._geneMap)))
-        # # for each feature in gtf file
-        # # for each feature in geneMap 
-        # for _, geneObj in self._geneMap.items():
-        #     if geneObj.gene is None:
-        #         continue
-        #     gene = Gene(GTxFeature(geneObj.gene))
-        #     gene.splitExons = self.splitExons
-        #     gene.processGeneOnlyInformation = self.processGeneOnlyInformation
-        #     for f in geneObj.features:
-        #         if f.type in set(self.geneDefinitions):
-        #             continue
-        #         gene.add(GTxFeature(f))
-        #     self.processGene(gene,summary)
-        # print(summary)
-            
-        # for f in gtf:
-        #     # initialize a new feature object
-        #     feature = GTxFeature(f)
-            
-        #     # if this feature is a gene (which is specified as certain ids in the gff field)
-        #     if feature.isGene():
-        #         # if new gene info is found, annotation the gene info
-        #         self.processGene(gene, summary)
-                
-        #         # then create a new Gene object
-        #         gene = Gene(feature)
-        #         gene.splitExons = self.splitExons
-        #         gene.processGeneOnlyInformation = self.processGeneOnlyInformation
-                
-        #     # else add the gene region info  
-        #     else:
-        #         # if there was no gene definition provided, raise an exception
-        #         if gene is None:
-        #             raise Exception("GTF/GFF file provides gene feature info before the actual gene definition.")
-        #         # else add the gene info to the genes
-        #         else:
-        #             gene.add(feature)
-        
-        # # annotation the last gene
-        # self.processGene(gene)
-        
-        # print(summary)
-        # return gene
     
     def _process_sorted(self,gtf):
         '''
@@ -346,26 +289,20 @@ class gffCLIP:
             #if length shorter than given windowsize then the whole feature is one window
             #else split the current feature up by the given options
             if pos2 >= end:
-                seq = (line[0], str(start), str(end), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)
+                seq = (line[0], str(start), str(end), "@".join((name[0],str(windowCount),name[2],name[3],name[4])), line[4], strand)
                 self.fOutput.write(str('\t').join(seq) + "\n")
-
                 windowCount+=1
             else:
                 while pos2 < end:
-
-                    seq = (line[0], str(pos1), str(pos2), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)
+                    seq = (line[0], str(pos1), str(pos2), "@".join((name[0],str(windowCount),name[2],name[3],name[4])), line[4], strand)
                     self.fOutput.write(str('\t').join(seq) + "\n")
-
                     pos1 = pos1 + self.windowStep
                     pos2 = pos2 + self.windowStep
-
                     windowCount+=1
-
                     if pos2 > end:
                         pos2 = end
-                        seq = (line[0], str(pos1), str(pos2), name[0]+"@"+str(windowCount)+"@"+name[2]+"@"+name[3], line[4], strand)
+                        seq = (line[0], str(pos1), str(pos2), "@".join((name[0],str(windowCount),name[2],name[3],name[4])), line[4], strand)
                         self.fOutput.write(str('\t').join(seq) + "\n")
-
                         windowCount+=1
             windowidMap[name[0]] = windowCount
         almnt_file.close()

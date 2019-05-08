@@ -6,8 +6,13 @@
 # Date: October 2015
 # --------------------------------------------------
 
-import gzip, decimal, HTSeq, sys
+import decimal
+import gzip
+import sys
+
+import HTSeq
 from output import Output
+
 
 class bamCLIP:
     
@@ -354,7 +359,6 @@ class bamCLIP:
     def extract_EndSites(self, offset = 0, ignore = False):
         almnt_file = HTSeq.BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
-    
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
                 out = self.getEndSiteAsBed(almnt, ignore, offset)
