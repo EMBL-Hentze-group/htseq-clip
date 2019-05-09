@@ -33,7 +33,8 @@ class GeneInfo(object):
     class for all gene feature related info, such as gene, intron, exon...
     '''
 
-    def __init__(self, geneDefinitions = ["tRNA", "gene", "tRNAscan", "tRNA_gene"]):
+    def __init__(self, id, geneDefinitions = ["tRNA", "gene", "tRNAscan", "tRNA_gene"]):
+        self.id  = id
         self._featList = []
         self._geneDefinitions = set(geneDefinitions)
         self._typeMap = {} # feature type to list index map
@@ -58,15 +59,15 @@ class GeneInfo(object):
         '''
         geneDef = list(self._geneDefinitions & set(self._typeMap.keys()))
         if len(geneDef)==0:
-            sys.stderr.write('No gene definitions found!...Skipping\n')
+            sys.stderr.write('{}: No gene definitions found!...Skipping\n'.format(self.id))
             return None
         elif len(geneDef)>1:
-            sys.stderr.write('Multiple gene definitions found!...Skipping\n')
+            sys.stderr.write('{}: Multiple gene definitions found!...Skipping\n'.format(self.id))
             return None
         else:
             geneInd = self._typeMap[geneDef[0]]
             if len(geneInd)>1:
-                sys.stderr.write('Multiple gene features found!...Skipping\n')
+                sys.stderr.write('{}: Multiple gene features found!...Skipping\n'.format(self.id))
                 return None
             else:
                 return self._featList[geneInd[0]]
@@ -201,13 +202,13 @@ class gffCLIP:
         '''
         self._geneMap = {}
         for f in gtf:
-            if self.geneName not in f.attr:
+            if self.geneId not in f.attr:
                 continue
             try:
-                self._geneMap[f.attr[self.geneName]].add_feature(f)
+                self._geneMap[f.attr[self.geneId]].add_feature(f)
             except KeyError:
-                self._geneMap[f.attr[self.geneName]] = GeneInfo()
-                self._geneMap[f.attr[self.geneName]].add_feature(f)
+                self._geneMap[f.attr[self.geneId]] = GeneInfo(f.attr[self.geneId])
+                self._geneMap[f.attr[self.geneId]].add_feature(f)
         # sanity check
         if len(self._geneMap)==0:
             raise ValueError('Cannot parse gene features from {}! Please check this input file'.format(self.gtfFile))

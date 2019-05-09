@@ -375,10 +375,12 @@ class bedCLIP:
     
     
     #===================================================================================
-    '''
-    This method is used counting the sliding window counts
-    '''
+    
     def countSlidingWindow(self):
+        '''
+        This method is used counting the sliding window counts
+        @TODO: needs improvement
+        '''
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
         almnt_file2 = HTSeq.BED_Reader(self.fCompare)
         d1 = self.buildDictForComparison(almnt_file1)

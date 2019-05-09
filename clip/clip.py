@@ -29,7 +29,16 @@ def _annotation(args):
     @TODO catch the exception thrown with unsorted files and re call gffc.process(unsoted=True)
     '''
     gffc = gffCLIP(args)
-    gffc.process(args.unsorted)
+    try:
+        gffc.process(args.unsorted)
+    except SyntaxError as se:
+        if args.unsorted:
+            raise(se)
+        else:
+            sys.stderr.write(str(se)+'\n')
+            sys.stderr.write('Trying to parse {} with "--unsorted" option.\n'.format(args.gff))
+            sys.stderr.write('Warning! this step is memory hungry\n')
+            gffc.process(True)
 
 def _createSlidingWindows(args):
     '''
@@ -146,7 +155,7 @@ def main():
     # annotation
     ahelp = 'annotation: flattens (to BED format) the given annotation file (in GFF format)'
     annotation = subps.add_parser('annotation',description=ahelp, formatter_class=argparse.RawTextHelpFormatter) # help='flatten annotation',
-    annotation.add_argument('-g','--gff',metavar='annotation',dest='gff',help='GFF3 file for annotation processing, supports gzipped (.gz) files',required=True)
+    annotation.add_argument('-g','--gff',metavar='annotation',dest='gff',help='GFF formatted annotation file, supports gzipped (.gz) files',required=True)
     annotation.add_argument('-o','--output',metavar = 'output file',dest='output',help='output file (.bed[.gz], default: print to console)',default=None,type=str)
     annotation.add_argument('-u','--geneid',metavar='gene id',dest='id',help='Gene id attribute in GFF file (default: gene_id for gencode gff files)',default='gene_id',type=str)
     annotation.add_argument('-n','--genename',metavar='gene name',dest='name',help='Gene name attribute in GFF file (default: gene_name for gencode gff files)',default='gene_name',type=str)
@@ -155,9 +164,9 @@ def main():
     # createSlidingWindows
     cshelp = 'createSlidingWindows: creates sliding windows out of the flattened annotation file'
     createSlidingWindows = subps.add_parser('createSlidingWindows',description=cshelp, formatter_class=argparse.RawTextHelpFormatter) # help='create sliding windows',
-    createSlidingWindows.add_argument('-i','--input',metavar='input file',dest='input',help='input flattend annotation file, see "{} annotation -h"'.format(prog),required=True)
-    createSlidingWindows.add_argument('-o','--output',metavar = 'output file',dest='output',help='output annotation sliding windows file (.bed[.gz], default: print to console)',default=None,type=str)
-    createSlidingWindows.add_argument('-w','--windowSize',metavar = 'window size',dest='windowSize',help='window size for sliding window (default: 50)',default=50,type=int)
+    createSlidingWindows.add_argument('-i','--input',metavar='input file',dest='input',help='flattend annotation file, see "{} annotation -h"'.format(prog),required=True)
+    createSlidingWindows.add_argument('-o','--output',metavar = 'output file',dest='output',help='annotation sliding windows file (.bed[.gz], default: print to console)',default=None,type=str)
+    createSlidingWindows.add_argument('-w','--windowSize',metavar = 'window size',dest='windowSize',help='window size (in number of base pairs) for sliding window (default: 50)',default=50,type=int)
     createSlidingWindows.add_argument('-s','--windowStep',metavar = 'step size',dest='windowStep',help='window step size for sliding window (default: 20)',default=20,type=int)
     ''' ____________________ [Extraction] ___________________ '''
     # extract

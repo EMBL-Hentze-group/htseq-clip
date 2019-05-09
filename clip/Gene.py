@@ -357,7 +357,7 @@ class Gene:
     """
     def assertFeatureBelongsToGene(self, feature):
         if not self.feature.getGeneName() == feature.getGeneName():
-            raise Exception("feature does not belong to the gene.")
+            raise SyntaxError("The order of gene and gene features in the input file are incorrect. The current feature does not belong to the gene being processed.")
 
     """
     Gene: Adds a region to genes and adds the corresponding
