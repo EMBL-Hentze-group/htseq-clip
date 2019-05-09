@@ -293,29 +293,23 @@ class bedCLIP:
      
     #===================================================================================
 
-    '''
-    Method that calculates the distances from cross-link sites to exon/intron regions
-    '''
     def junction(self):
-           
-        almnt_file1 = HTSeq.BED_Reader(self.fInput)
-        almnt_file2 = HTSeq.BED_Reader(self.fCompare)
-        
-        d1 = self.buildDictForComparison(almnt_file1)
-        d2 = self.buildDictForComparison(almnt_file2)
-         
+        '''
+        Method that calculates the distances from cross-link sites to exon/intron regions
+        '''
+        d1 = self.buildDictForComparison(HTSeq.BED_Reader(self.fInput))
+        d2 = self.buildDictForComparison(HTSeq.BED_Reader(self.fCompare))
         for chrom in d1:
-            if not d2.has_key(chrom):
+            if chrom not in d2:
                 continue
             for strand in d1[chrom]:
-                if not d2[chrom].has_key(strand):
+                if strand not in d2[chrom]:
                     continue
-                
                 A = d1[chrom][strand]
                 B = d2[chrom][strand]
-            
-                self.calculateJunction(A, B, chrom, strand, self.output)
-          
+                if (len(A)==0) or (len(B)==0):
+                    continue
+                self.calculateJunction(A, B, chrom, strand)
         self.output.close()
     #===================================================================================
     #=================================================================================== 
@@ -323,68 +317,60 @@ class bedCLIP:
     Calculate the distances to the junction
     '''
     def calculateJunction(self, A, B, chrom, strand):
-         
-        if len(B) > 0:
-              
-            #first exon position in chromosome
-            b_First = B[0]
-            #last exon position in chromosome
-            b_Last = B[-1]
-              
-            bi = 0
-                
-            #for each cl
-            for a in A:
-                  
-                check = True
-                  
-                while check:
-                              
-                    #if smaller than first its intergenic region before first gene
-                    #else if bigger than its intergenic region after last gene
-                    #else its in a region or in an intergenic region between two genes
-                    if a[1] < b_First[0]:
-                        seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(1))
-                        self.output.write(str("\t").join(seq) + "\n")
-                        check = False
-                    elif a[0] > b_Last[1]:
-                        seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(3))
-                        self.output.write(str("\t").join(seq) + "\n")
-                        check = False
-                    else:
-                          
-                        #current exon/intron position
-                        b_Curr = B[bi]
-                        #name of current position
-                        bn = b_Curr[2].split('@')
+        #first exon position in chromosome
+        b_First = B[0]
+        #last exon position in chromosome
+        b_Last = B[-1]
+        bi = 0
+        #for each cl
+        for a in A:
+            check = True
+            while check:
+                #if smaller than first its intergenic region before first gene
+                #else if bigger than its intergenic region after last gene
+                #else its in a region or in an intergenic region between two genes
+                if a[1] < b_First[0]:
+                    seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(1))
+                    self.output.write(str("\t").join(seq) + "\n")
+                    check = False
+                elif a[0] > b_Last[1]:
+                    seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(3))
+                    self.output.write(str("\t").join(seq) + "\n")
+                    check = False
+                else:
                         
-                        flag = b_Curr[3]
-      
-                        #if bigger than count until the region where it is is found
-                        if a[0] > b_Curr[1]:
-                            bi = bi + 1
+                    #current exon/intron position
+                    b_Curr = B[bi]
+                    #name of current position
+                    bn = b_Curr[2].split('@')
+                    
+                    flag = b_Curr[3]
+    
+                    #if bigger than count until the region where it is is found
+                    if a[0] > b_Curr[1]:
+                        bi = bi + 1
+                    else:
+                    #if between calculate the distance to the current feature
+                    #else its in an intergenic region between 2 genes
+                        if a[0] >= b_Curr[0] and a[1] <= b_Curr[1]:
+                            
+                            d1 = a[0] - b_Curr[0]
+                            d2 = a[1] - b_Curr[1]
+                            if strand == '-':
+                                d1 = d1 * -1
+                                d2 = d2 * -1
+                            # modified from the original module to account for 'gene_name' in the annotation tags
+                            seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d2), str(d1), str(flag), strand, bn[1], bn[2], bn[3], bn[4])
+                            self.output.write(str("\t").join(seq) + "\n")
+                            check = False
+                            # else:         
+                            #     seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d1) , str(d2), str(flag), strand, bn[1], bn[2], bn[3], bn[4])
+                            #     output.write(str("\t").join(seq) + "\n")
+                            #     check = False
                         else:
-                        #if between calculate the distance to the current feature
-                        #else its in an intergenic region between 2 genes
-                            if a[0] >= b_Curr[0] and a[1] <= b_Curr[1]:
-                                
-                                d1 = a[0] - b_Curr[0]
-                                d2 = a[1] - b_Curr[1]
-                                if strand == '-':
-                                    d1 = d1 * -1
-                                    d2 = d2 * -1
-                                # modified from the original module to account for 'gene_name' in the annotation tags
-                                seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d2), str(d1), str(flag), strand, bn[1], bn[2], bn[3], bn[4])
-                                self.output.write(str("\t").join(seq) + "\n")
-                                check = False
-                                # else:         
-                                #     seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d1) , str(d2), str(flag), strand, bn[1], bn[2], bn[3], bn[4])
-                                #     output.write(str("\t").join(seq) + "\n")
-                                #     check = False
-                            else:
-                                seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(2))
-                                self.output.write(str("\t").join(seq) + "\n")
-                                check = False                              
+                            seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(2))
+                            self.output.write(str("\t").join(seq) + "\n")
+                            check = False                              
     #===================================================================================
     
     
