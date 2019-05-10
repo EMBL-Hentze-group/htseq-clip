@@ -9,6 +9,7 @@
 
 import gzip
 import sys
+import numpy as np
 from collections import defaultdict
 
 import HTSeq
@@ -72,8 +73,10 @@ class bedCLIP:
         for almnt in almnt_file:
             if almnt.iv.strand == '+':
                 almntInfo = [almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]
-            else:
+            elif almnt.iv.strand == '-':
                 almntInfo = [almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]
+            else:
+                raise ValueError('Missing strand information, strand column must be "+" or "-", found: {}'.format(almnt.iv.strand))
             try:
                 d[almnt.iv.chrom][almnt.iv.strand].append(almntInfo)
             except KeyError:
@@ -388,8 +391,12 @@ class bedCLIP:
                 if strand not in d2[chrom]:
                     continue
                 A = d1[chrom][strand]
-                B = d2[chrom][strand]  
-                self.countSW(A, B, chrom, strand)        
+                B = d2[chrom][strand]
+                if len(A)==0 or len(B)==0:
+                    continue
+                # self.countSW(A, B, chrom, strand)
+                # testing sliding window count function      
+                self._countSW(A,B,chrom,strand)  
         self.output.close()
     #===================================================================================
     #===================================================================================
@@ -398,76 +405,92 @@ class bedCLIP:
     in a given window of an exon/intron
     ''' 
     def countSW(self, A, B, chrom, strand):
-        
-        if len(A) > 0 and len(B) > 0:
                
-            #first window
-            b_First = B[0]
-            #last window
-            b_Last  = B[-1]
-         
-            #data structure for analysis
-            d_count = {}
-            d_dup = {}
-                  
-            ai = 0
-            stepCount = 0         
-                 
-            for b in B:  
-                 
-                check = True
+        #first window
+        b_First = B[0]
+        #last window
+        b_Last  = B[-1]
+        
+        #data structure for analysis
+        d_count = {}
+        d_dup = {}
                 
-                #length of sliding window
-                length = b[1]-b[0]
-                         
-                while check:
-                    
-                    #current CL
-                    if not ai > len(A)-1:
-                        a_curr = A[ai]
-                    
-                    #if smaller then intergenic region before first region
-                    #if bigger intergenic region after last region
-                    #else its in the regions         
-                    if a_curr[1] < b_First[0]:            
-                        check = False
-                    elif a_curr[0] > b_Last[1]:
-                        check = False
-                    else:              
+        ai = 0
+        stepCount = 0         
+                
+        for b in B:  
+                
+            check = True
+            
+            #length of sliding window
+            length = b[1]-b[0]
                         
-                        #if bigger search go for the next region and write out
-                        #the last region if zero nothing is found if not zero there are positions found
-                        #else count in the current region where the cross-link site lies
-                        if a_curr[0] > b[1] or a_curr == A[-1]:
-                            
-                            self.writeOut(chrom, strand, b, d_count, d_dup, length)
-                            
-                            ai = ai - stepCount
-                            stepCount = 0
-                            d_count = {}
-                            d_dup = {}
-                            check = False
-                                 
-                        else:
-                                 
-                            if a_curr[0] >= b[0] and a_curr[1] <= b[1]:
-                                #if nothing is counted in the feature yet, generate the data structures
-                                if len(d_count) == 0:
-             
-                                    for i in range(length+1):
-                                        d_count[i+b[0]] = 0
-                                        d_dup[i+b[0]] = 0
-                                                                                             
-                                d_count[a_curr[0]] += 1
-                                d_dup[a_curr[0]] += a_curr[3]
+            while check:
+                
+                #current CL
+                if not ai > len(A)-1:
+                    a_curr = A[ai]
+                
+                #if smaller then intergenic region before first region
+                #if bigger intergenic region after last region
+                #else its in the regions         
+                if a_curr[1] < b_First[0]:            
+                    check = False
+                elif a_curr[0] > b_Last[1]:
+                    check = False
+                else:              
+                    
+                    #if bigger search go for the next region and write out
+                    #the last region if zero nothing is found if not zero there are positions found
+                    #else count in the current region where the cross-link site lies
+                    if a_curr[0] > b[1] or a_curr == A[-1]:
+                        
+                        self.writeOut(chrom, strand, b, d_count, d_dup, length)
+                        
+                        ai = ai - stepCount
+                        stepCount = 0
+                        d_count = {}
+                        d_dup = {}
+                        check = False
                                 
-                                ai = ai + 1 
-                                stepCount = stepCount + 1                                       
-                            else:
-                                ai = ai + 1
-                                     
+                    else:
+                                
+                        if a_curr[0] >= b[0] and a_curr[1] <= b[1]:
+                            #if nothing is counted in the feature yet, generate the data structures
+                            if len(d_count) == 0:
+            
+                                for i in range(length+1):
+                                    d_count[i+b[0]] = 0
+                                    d_dup[i+b[0]] = 0
+                                                                                            
+                            d_count[a_curr[0]] += 1
+                            d_dup[a_curr[0]] += a_curr[3]
+                            
+                            ai = ai + 1 
+                            stepCount = stepCount + 1                                       
+                        else:
+                            ai = ai + 1
+                                    
     #=================================================================================== 
     #===================================================================================
+    def _countSW(self, A, B, chrom, strand):
+        '''
+        testing sliding window count function
+        Arguments:
+         A: list of input positions
+         B: list of window positions
+         chrom: chromosome name
+         strand: strand name
+        '''
+        npA = np.core.records.fromarrays(np.array(A).transpose(),names='begin, end, name, score',formats='i32, i32, S70, i32')
+        for b in B:
+            countInd = np.intersect1d( np.where(npA['end']>b[0]),np.where(npA['end']<=b[1]) )
+            if countInd.shape[0]==0:
+                continue
+            readIdCount = set(npA[countInd]['name'])
+            self.writeOut(chrom, strand, b, countInd.shape[0], len(readIdCount), b[1]-b[0])
+
+
     '''
     This functions converts the sliding window counts into DEXSeq format
     '''
