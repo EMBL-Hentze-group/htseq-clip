@@ -385,19 +385,19 @@ class bedCLIP:
         d1 = self.buildDictForComparison(almnt_file1)
         d2 = self.buildDictForComparison(almnt_file2)      
         for chrom in d1:
-            print(chrom)
             if chrom not in d2:
                 continue
-            print("{} found".format(chrom))
             for strand in d1[chrom]:
                 if strand not in d2[chrom]:
                     continue
+                
                 A = d1[chrom][strand]
                 B = d2[chrom][strand]
                 if len(A)==0 or len(B)==0:
                     continue
                 # self.countSW(A, B, chrom, strand)
                 # testing sliding window count function      
+                print("{} {} found".format(chrom,strand))
                 self._countSW(A,B,chrom,strand)  
         self.output.close()
     #===================================================================================
@@ -490,6 +490,7 @@ class bedCLIP:
             countInd = np.intersect1d( np.where(npA['end']>b[0]),np.where(npA['end']<=b[1]) )
             if countInd.shape[0]==0:
                 continue
+            print(b)
             readPosMap = {} # read to position map
             posReadMap = {} # position to read map
             for ci in countInd:
