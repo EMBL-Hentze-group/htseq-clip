@@ -528,7 +528,7 @@ class bedCLIP:
         featInd,featCount = names[4].split('/')
         wlen = windowData[1]-windowData[0]
         outDat = [chrom,str(windowData[0]+1),str(windowData[1]+1),names[0],names[1],str(windowData[3]),strand,names[3],featInd,featCount,names[2],str(wlen),str(crosslinkCount),str(crosslinkPosCount),str(maxPosCount),str(density),str(dupCount),str(maxDupCountPos)]
-        self.output.write("\t"+outDat+"\n")
+        self.output.write("\t".join(outDat)+"\n")
     '''
     This functions converts the sliding window counts into DEXSeq format
     '''
