@@ -10,7 +10,7 @@
 import gzip
 import sys
 import numpy as np
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 import HTSeq
 from output import Output
@@ -483,14 +483,52 @@ class bedCLIP:
          strand: strand name
         '''
         npA = np.core.records.fromarrays(np.array(A).transpose(),names='begin, end, name, score',formats='i8, i8, S70, i8')
+        multiMappers = set()
         for b in B:
             countInd = np.intersect1d( np.where(npA['end']>b[0]),np.where(npA['end']<=b[1]) )
             if countInd.shape[0]==0:
                 continue
-            readIdCount = set(npA[countInd]['name'])
-            self.writeOut(chrom, strand, b, countInd.shape[0], len(readIdCount), b[1]-b[0])
-
-
+            readPosMap = {} # read to position map
+            posReadMap = {} # position to read map
+            for ci in countInd:
+                if npA[ci]['name'] in multiMappers:
+                    continue
+                try:
+                    readPosMap[npA[ci]['name']].add(npA[ci]['end'])
+                except KeyError:
+                    readPosMap[npA[ci]['name']] = set([npA[ci]['end']])
+                try:
+                    posReadMap[npA[ci]['end']].add(npA[ci]['name'])
+                except KeyError:
+                    posReadMap[npA[ci]['end']] = set([npA[ci]['name']])
+            for readId, pos in readPosMap.items():
+                # collect read id of all multimappers in this strand
+                if len(pos)==1:
+                    continue
+                multiMappers.add(readId)
+            del readPosMap # save some space
+            crosslinkCount = 0 # crosslink count
+            for pos in posReadMap.keys():
+                # iterate through all positions and remove multimappers
+                readIds = posReadMap[pos] - multiMappers
+                crosslinkCount += len(readIds)
+                posReadMap[pos] = readIds
+            density = float(crosslinkCount)/float(b[1]-b[0])
+            clMax = max([ len(reads) for reads in posReadMap.values()]) # max number of crosslink sites in one pos
+            dupCount = npA[countInd]['name'].shape[0] - crosslinkCount
+            self._outWriter(chrom=chrom,strand=strand,windowData=b,crosslinkCount=crosslinkCount,crosslinkPosCount=len(posReadMap),maxPosCount=clMax,density=density,
+            dupCount=dupCount,maxDupCountPos=0)
+            # self.writeOut(chrom, strand, b, countInd.shape[0], len(readIdCount), b[1]-b[0])
+    
+    def _outWriter(self,chrom,strand,windowData,crosslinkCount,crosslinkPosCount,maxPosCount,density,dupCount,maxDupCountPos):
+        '''
+        Helper function, write outputs
+        '''
+        names = windowData[2].split('@')
+        featInd,featCount = names[4].split('/')
+        wlen = windowData[1]-windowData[0]
+        outDat = [chrom,str(windowData[0]+1),str(windowData[1]+1),names[0],names[1],str(windowData[3]),strand,names[3],featInd,featCount,names[2],str(wlen),str(crosslinkCount),str(crosslinkPosCount),str(maxPosCount),str(density),str(dupCount),str(maxDupCountPos)]
+        self.output.write("\t"+outDat+"\n")
     '''
     This functions converts the sliding window counts into DEXSeq format
     '''
