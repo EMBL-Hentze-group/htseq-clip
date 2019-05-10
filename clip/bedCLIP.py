@@ -482,7 +482,7 @@ class bedCLIP:
          chrom: chromosome name
          strand: strand name
         '''
-        npA = np.core.records.fromarrays(np.array(A).transpose(),names='begin, end, name, score',formats='i32, i32, S70, i32')
+        npA = np.core.records.fromarrays(np.array(A).transpose(),names='begin, end, name, score',formats='i8, i8, S70, i8')
         for b in B:
             countInd = np.intersect1d( np.where(npA['end']>b[0]),np.where(npA['end']<=b[1]) )
             if countInd.shape[0]==0:
