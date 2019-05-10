@@ -385,8 +385,10 @@ class bedCLIP:
         d1 = self.buildDictForComparison(almnt_file1)
         d2 = self.buildDictForComparison(almnt_file2)      
         for chrom in d1:
+            print(chrom)
             if chrom not in d2:
                 continue
+            print("{} found".format(chrom))
             for strand in d1[chrom]:
                 if strand not in d2[chrom]:
                     continue
@@ -517,7 +519,7 @@ class bedCLIP:
             clMax = max([ len(reads) for reads in posReadMap.values()]) # max number of crosslink sites in one pos
             dupCount = npA[countInd]['name'].shape[0] - crosslinkCount
             self._outWriter(chrom=chrom,strand=strand,windowData=b,crosslinkCount=crosslinkCount,crosslinkPosCount=len(posReadMap),maxPosCount=clMax,density=density,
-            dupCount=dupCount,maxDupCountPos=0)
+                dupCount=dupCount,maxDupCountPos=0)
             # self.writeOut(chrom, strand, b, countInd.shape[0], len(readIdCount), b[1]-b[0])
     
     def _outWriter(self,chrom,strand,windowData,crosslinkCount,crosslinkPosCount,maxPosCount,density,dupCount,maxDupCountPos):
@@ -527,7 +529,8 @@ class bedCLIP:
         names = windowData[2].split('@')
         featInd,featCount = names[4].split('/')
         wlen = windowData[1]-windowData[0]
-        outDat = [chrom,str(windowData[0]+1),str(windowData[1]+1),names[0],names[1],str(windowData[3]),strand,names[3],featInd,featCount,names[2],str(wlen),str(crosslinkCount),str(crosslinkPosCount),str(maxPosCount),str(density),str(dupCount),str(maxDupCountPos)]
+        outDat = [chrom,str(windowData[0]+1),str(windowData[1]+1),names[0],names[1],str(windowData[3]),strand,names[3],featInd,featCount,names[2],str(wlen),
+            str(crosslinkCount),str(crosslinkPosCount),str(maxPosCount),str(density),str(dupCount),str(maxDupCountPos)]
         self.output.write("\t".join(outDat)+"\n")
     '''
     This functions converts the sliding window counts into DEXSeq format
