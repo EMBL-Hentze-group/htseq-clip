@@ -9,6 +9,7 @@
 
 import gzip
 import sys
+from collections import defaultdict
 
 import HTSeq
 from output import Output
@@ -37,35 +38,47 @@ class bedCLIP:
         self.rtypes = {'exon':'E','intron':'I','CDS':'CDS','3UTR':'3U','5UTR':'5U'}
          
     #=================================================================================
-    '''
-    This method builds up a dictionary for comparison analysis
-    The Dictionary looks like: { chromosome : { strand : [(Start postion, end postion, name, alignment score), (...), ...] }}
-    On Assumption that the read name is unique
-    '''
+    
+    # def buildDictForComparison(self, almnt_file):
+        
+    #     d = {}
+    #     for almnt in almnt_file:
+    #         if almnt.iv.strand == '+':
+    #             if not d.has_key(almnt.iv.chrom):
+    #                 d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]}
+    #             else:
+    #                 if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
+    #                     d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]
+    #                 else:
+    #                     d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)])
+    #         else:
+    #             if not d.has_key(almnt.iv.chrom):
+    #                 d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]}
+    #             else:
+    #                 if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
+    #                     d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]
+    #                 else:
+    #                     d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)])
+    #     return d
+    
     def buildDictForComparison(self, almnt_file):
-        
-        d = {}
-        
+        '''
+        This method builds up a dictionary for comparison analysis
+        The Dictionary looks like: { chromosome : { strand : [(Start postion, end postion, name, alignment score), (...), ...] }}
+        On Assumption that the read name is unique
+        @TODO: needs revision, most likely a bottleneck
+        '''
+        d = defaultdict(dict)
         for almnt in almnt_file:
-
             if almnt.iv.strand == '+':
-                if not d.has_key(almnt.iv.chrom):
-                    d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]}
-                else:
-                    if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
-                        d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]
-                    else:
-                        d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)])
+                almntInfo = [almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]
             else:
-                if not d.has_key(almnt.iv.chrom):
-                    d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]}
-                else:
-                    if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
-                        d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]
-                    else:
-                        d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)])
-                        
-        return d       
+                almntInfo = [almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]
+            try:
+                d[almnt.iv.chrom][almnt.iv.strand].append(almntInfo)
+            except KeyError:
+                d[almnt.iv.chrom][almnt.iv.strand] = [almntInfo]
+        return d
     #===================================================================================
             
     #===================================================================================
@@ -74,7 +87,6 @@ class bedCLIP:
     given reference
     ''' 
     def count_all(self):
-
         #Get the information for normalisation of the plots  
         if self.fCompare.endswith(".gz"):
             f = gzip.open(self.fCompare, 'r') 
@@ -98,46 +110,35 @@ class bedCLIP:
         d2 = self.buildDictForComparison(almnt_file2)      
         
         for chrom in d2:
-            
-            if not d1.has_key(chrom):
-                if self.choice == None:
+            if chrom not in d1:
+                if self.choice is None:
                     continue
-            for strand in d2[chrom]:
-                
-                B = d2[chrom][strand] 
-                
-                #if the input file does not contain reads 
-                #on the current chromosome, then write out all positions with zero
-                if not d1.has_key(chrom):
-                    for b in B:
-                        
-                        length = b[1] - b[0]
-                        
-                        name = b[2].split("@")
-                        posi = name[4].split("/")
-                        seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], name[1], str(1), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
-                        self.output.write(str("\t").join(seq) + "\n")
-                    
-                    continue
-                
-                #if the input file contains reads on the current chromosome but not on the same
-                #strand, the write out all positons with zero
-                elif not d1[chrom].has_key(strand):          
-                    for b in B:
-                        
-                        length = b[1] - b[0]
-
-                        name = b[2].split("@")
-                        posi = name[4].split("/")
-                        seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], name[1], str(1), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
-                        self.output.write(str("\t").join(seq) + "\n")
-                    continue
-                         
+                for strand, B in d2[chrom].items():
+                    # if the input file does not contain reads on the current chromosome, then write out all positions with zero
+                    self._writeZeroCount(chrom,strand,B)
+            for strand, B in d2[chrom].items():
+                if strand not in d1[chrom]:
+                    #if the input file contains reads on the current chromosome but not on the same strand, the write out all positons with zero
+                    self._writeZeroCount(chrom,strand,B)
                 A = d1[chrom][strand]
-      
-                self.calculateCount(A, B, chrom, strand)
-                                   
-        self.output.close()     
+                self.calculateCount(A, B, chrom, strand)                                   
+        self.output.close()
+
+    def _writeZeroCount(self,chrom,strand,iv):
+        '''
+        Helper function: for intervals in annotion file, write those with zero reads in the input count file
+        Arguments:
+         chrom: chromosome name
+         strand: strand info
+         iv: list of intervals
+        '''
+        for b in iv:
+            length = b[1] - b[0]
+            name = b[2].split("@")
+            posi = name[4].split("/")
+            seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], name[1], str(1), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
+            self.output.write(str("\t").join(seq) + "\n")
+
     #===================================================================================
     #===================================================================================
     '''
@@ -167,21 +168,16 @@ class bedCLIP:
              
         d1 = self.buildDictForComparison(almnt_file1)
         d2 = self.buildDictForComparison(almnt_file2)     
-        
-        #only if there are reads on the current chromsome
-        #and on the same strand, the counting is performed
+        # count reads in the commmon chromosome, common strand
         for chrom in d1:  
-            if not d2.has_key(chrom):
+            if chrom not in d2:
                 continue
             for strand in d1[chrom]:          
-                if not d2[chrom].has_key(strand):       
+                if strand not in d2[chrom]:       
                     continue
-                         
                 A = d1[chrom][strand]
                 B = d2[chrom][strand]
-      
                 self.calculateCount(A, B, chrom, strand)
-                                   
         self.output.close()     
     #===================================================================================
     #===================================================================================

@@ -26,7 +26,7 @@ Date: October 2015
 def _annotation(args):
     '''
     Parse annotations from given GFF file
-    @TODO catch the exception thrown with unsorted files and re call gffc.process(unsoted=True)
+    @TODO use logging module
     '''
     gffc = gffCLIP(args)
     try:
