@@ -89,26 +89,6 @@ def _count(args):
         stranded = False
     countC.count(stranded)
 
-# def _countSlidingWindows(args):
-#     '''
-#     Count crosslink sites per sliding window
-#     '''
-#     bedC = bedCLIP(args)
-#     bedC.countSlidingWindow()
-
-def _countSlidingWindows(args):
-    '''
-    Count crosslink sites per sliding window
-    '''
-    _count(args)
-
-# def _slidingWindowsToDEXSeq(args):
-#     '''
-#     Convert sliding window crosslink sites to DEXSeq format
-#     '''
-#     bedC = bedCLIP(args)
-#     bedC.toDEXSeq()
-
 def _junction(args):
     bedC = bedCLIP(args)
     bedC.junction()
@@ -129,7 +109,6 @@ Given below is should be the completed help file, functions with a '*' needs to 
     
     [Counting]
         count                   count sites in annotation
-        countSlidingWindows     count sites in sliding windows
         feature*                count sites in repeated regions
             
     [Distances]
@@ -160,7 +139,6 @@ def main():
     
     [Counting]
         count                   count sites in annotation
-        countSlidingWindows     count sites in sliding windows
         
     [Distances]
         junction                calculates distances to junctions
@@ -217,24 +195,8 @@ def main():
     count = subps.add_parser('count',description=chelp,formatter_class=argparse.RawTextHelpFormatter) #help='count crosslinks',
     count.add_argument('-i','--input',metavar='input bed',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
     count.add_argument('-o','--output',metavar = 'output file',dest='output',help='output count file (.txt[.gz], default: print to console)',default=None,type=str)
-    count.add_argument('-a','--ann',metavar = 'annotation',dest='annotation',help='flattened annotation file (.bed[.gz]), see "{} annotation -h"'.format(prog),required=True)
+    count.add_argument('-a','--ann',metavar = 'annotation',dest='annotation',help='flattened annotation file (.bed[.gz]), see "{0} annotation -h" OR sliding window annotation file (.bed[.gz]), see "{0} createSlidingWindows -h"'.format(prog),required=True)
     count.add_argument('--unstranded',dest='unstranded', help='by default, crosslink site counting is strand specific. Use this flag for non strand specific crosslink site counting',action='store_true')
-    # countSlidingWindows
-    # this is just a wrapper around the function _count to make things easier for the user
-    cswhelp = 'countSlidingWindows: counts the number of crosslink/deletion/insertion sites in a certain sliding window'
-    countSlidingWindows = subps.add_parser('countSlidingWindows', description=cswhelp, formatter_class=argparse.RawTextHelpFormatter) # help='count sliding windows',
-    countSlidingWindows.add_argument('-i','--input',metavar='input bed',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
-    countSlidingWindows.add_argument('-o','--output',metavar = 'output file',dest='output',help='output count file (.txt[.gz], default: print to console)',default=None,type=str)
-    countSlidingWindows.add_argument('-s','--sw',metavar = 'sliding window',dest='annotation',help='sliding window annotation file (.bed[.gz]), see "{} createSlidingWindows -h"'.format(prog),required=True)
-    countSlidingWindows.add_argument('--unstranded',dest='unstranded', help='by default, crosslink site counting is strand specific. Use this flag for non strand specific crosslink site counting',action='store_true')
-    # @TODO: finish counting part
-    ''' ____________________ [Transformation] ___________________ '''
-    # slidingWindowsToDEXSeq
-    # @TODO: create a wrapper for countSlidingWindows and slidingWindowsToDEXSeq
-    swhelp = 'slidingWindowsToDEXSeq: transforms the sliding window counts into DEXSeq format'
-    slidingWindowsToDEXSeq = subps.add_parser('slidingWindowsToDEXSeq',description=swhelp, formatter_class=argparse.RawTextHelpFormatter) # help='to DEXSeq format',
-    slidingWindowsToDEXSeq.add_argument('-i','--input',metavar='input counts',help='sliding window count data file [.gz], see "{} countSlidingWindows -h"'.format(prog),required=True)
-    slidingWindowsToDEXSeq.add_argument('-o','--output',metavar = 'output file',dest='output',help='output DEXSeq formatted count (.txt[.gz], default: print to console)',default=None,type=str)
     ''' ____________________ [Distances] ___________________ '''
     # junction 
     jhelp = 'junction: calculates the distance from crosslink/deletion/insertion sites to the junction'
@@ -272,16 +234,16 @@ def main():
         elif args.subparser == 'count':
             # count extracted crosslink sites
             _count(args)
-        elif args.subparser == 'countSlidingWindows':
-            # count sliding window from extracted crosslink sites
-            _countSlidingWindows(args)
         elif args.subparser == 'junction':
             # generate junction info from extracted crosslink sites
             _junction(args)
     except KeyboardInterrupt:
         sys.stderr.write('Keyboard interrupt... good bye\n')
+        sys.exit(1)
     except Exception:
         traceback.print_exc(file=sys.stdout)
+        sys.exit(1)
+
     sys.exit(0)
 
 if __name__=='__main__':
