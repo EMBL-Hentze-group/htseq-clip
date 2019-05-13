@@ -7,9 +7,11 @@ import traceback
 from bamCLIP import bamCLIP
 from bedCLIP import bedCLIP
 from bokehCLIP import bokehCLIP
+from countCLIP import countCLIP
 from featureCLIP import feature
 from gffCLIP import gffCLIP
 from heatmap import HeatMap
+
 
 '''
 --------------------------------------------------
@@ -47,6 +49,10 @@ def _createSlidingWindows(args):
     gffc = gffCLIP(args)
     gffc.slidingWindow(args.input)
 
+def _mapToId(args):
+    mapC = countCLIP(args)
+    mapC.annotationToIDs()
+
 def _extract(args):
     '''
     Extract cross-link sites
@@ -63,29 +69,45 @@ def _extract(args):
     elif args.choice == 'e':
         bamC.extract_EndSites(offset=args.offset,ignore=args.ignore)
 
+# def _count(args):
+#     '''
+#     Count crosslink sites per feature
+#     '''
+#     bedC = bedCLIP(args)
+#     if args.choice == 'a':
+#         bedC.count_all()
+#     elif args.choice == 'o':
+#         bedC.count_only()
+
 def _count(args):
     '''
-    Count crosslink sites per feature
+    Count crosslink sites per sliding window
     '''
-    bedC = bedCLIP(args)
-    if args.choice == 'a':
-        bedC.count_all()
-    elif args.choice == 'o':
-        bedC.count_only()
+    countC = countCLIP(args)
+    stranded = True
+    if args.unstranded:
+        stranded = False
+    countC.count(stranded)
+
+# def _countSlidingWindows(args):
+#     '''
+#     Count crosslink sites per sliding window
+#     '''
+#     bedC = bedCLIP(args)
+#     bedC.countSlidingWindow()
 
 def _countSlidingWindows(args):
     '''
     Count crosslink sites per sliding window
     '''
-    bedC = bedCLIP(args)
-    bedC.countSlidingWindow()
+    _count(args)
 
-def _slidingWindowsToDEXSeq(args):
-    '''
-    Convert sliding window crosslink sites to DEXSeq format
-    '''
-    bedC = bedCLIP(args)
-    bedC.toDEXSeq()
+# def _slidingWindowsToDEXSeq(args):
+#     '''
+#     Convert sliding window crosslink sites to DEXSeq format
+#     '''
+#     bedC = bedCLIP(args)
+#     bedC.toDEXSeq()
 
 def _junction(args):
     bedC = bedCLIP(args)
@@ -100,6 +122,7 @@ Given below is should be the completed help file, functions with a '*' needs to 
     [Annotation]
         annotation              flattens an annotation gtf file
         createSlidingWindows    creates sliding windows based on given annotation file
+        mapToIds                map entries in "name" column to unique ids and write in tab separated format 
     
     [Extraction]
         extract                 extracts crosslink sites, insertions or deletions
@@ -107,11 +130,8 @@ Given below is should be the completed help file, functions with a '*' needs to 
     [Counting]
         count                   count sites in annotation
         countSlidingWindows     count sites in sliding windows
-        feature*                 count sites in repeated regions
-    
-    [Transformation]
-        slidingWindowsToDEXSeq  transform sliding window counts to DEXSeq format
-        
+        feature*                count sites in repeated regions
+            
     [Distances]
         junction                calculates distances to junctions
         dist*                    calculates nearest cross link site to a feature
@@ -133,6 +153,7 @@ def main():
     [Annotation]
         annotation              flattens a gff formatted annotation file
         createSlidingWindows    creates sliding windows based on given annotation file
+        mapToId                 map entries in "name" column to unique ids and write in tab separated format
     
     [Extraction]
         extract                 extracts crosslink sites, insertions or deletions
@@ -140,9 +161,6 @@ def main():
     [Counting]
         count                   count sites in annotation
         countSlidingWindows     count sites in sliding windows
-    
-    [Transformation]
-        slidingWindowsToDEXSeq  transform sliding window counts to DEXSeq format
         
     [Distances]
         junction                calculates distances to junctions
@@ -168,6 +186,12 @@ def main():
     createSlidingWindows.add_argument('-o','--output',metavar = 'output file',dest='output',help='annotation sliding windows file (.bed[.gz], default: print to console)',default=None,type=str)
     createSlidingWindows.add_argument('-w','--windowSize',metavar = 'window size',dest='windowSize',help='window size (in number of base pairs) for sliding window (default: 50)',default=50,type=int)
     createSlidingWindows.add_argument('-s','--windowStep',metavar = 'step size',dest='windowStep',help='window step size for sliding window (default: 20)',default=20,type=int)
+    # mapToIds
+    maphelp = 'mapToIds: extract "name" column from the annotation file and map the entries to unique id and print out in tab separated format'
+    mapToId = subps.add_parser('mapToId',description=maphelp, formatter_class = argparse.RawTextHelpFormatter)
+    mapToId.add_argument('-a','--annotation',metavar= 'annotation file', help = 'flattened annotation file from "{0} annotation -h" or sliding window file from "{0} createSlidingWindows -h"'.format(prog),required=True)
+    mapToId.add_argument('-o','--output',metavar = 'output file',dest='output',help='region/window annotation mapped to a unique id (.txt[.gz], default: print to console)',default=None,type=str)
+
     ''' ____________________ [Extraction] ___________________ '''
     # extract
     ehelp = 'extract:  extracts crosslink sites, insertions or deletions'
@@ -188,20 +212,20 @@ def main():
     extract.add_argument('--primary',dest='primary',help='flag to use only primary positions of multimapping reads',action='store_true')
     ''' ____________________ [Counting] ___________________ '''
     # count
-    cchoices = ['o','a']
     chelp = 'count: counts the number of crosslink/deletion/insertion sites'
     count = subps.add_parser('count',description=chelp,formatter_class=argparse.RawTextHelpFormatter) #help='count crosslinks',
     count.add_argument('-i','--input',metavar='input bed',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
     count.add_argument('-o','--output',metavar = 'output file',dest='output',help='output count file (.txt[.gz], default: print to console)',default=None,type=str)
-    count.add_argument('-a','--ann',metavar = 'annotation',dest='compare',help='flattened annotation file (.bed[.gz]), see "{} annotation -h"'.format(prog),required=True)
-    count.add_argument('-c','--count',dest='choice',
-        help='Crosslink site count choices, must be one of: {0} \n o: only include features (exons/introns) with crosslink site \n a: include all features, even with 0 crosslink sites. (default: o).'.format(', '.join(cchoices)),choices=cchoices,default='o')
+    count.add_argument('-a','--ann',metavar = 'annotation',dest='annotation',help='flattened annotation file (.bed[.gz]), see "{} annotation -h"'.format(prog),required=True)
+    count.add_argument('-u','--unstranded',dest='unstranded', help='by default, crosslink site counting is strand specific. Use this flag for non strand specific crosslink site counting',action='store_true')
     # countSlidingWindows
+    # this is just a wrapper around the function _count to make things easier for the user
     cswhelp = 'countSlidingWindows: counts the number of crosslink/deletion/insertion sites in a certain sliding window'
     countSlidingWindows = subps.add_parser('countSlidingWindows', description=cswhelp, formatter_class=argparse.RawTextHelpFormatter) # help='count sliding windows',
     countSlidingWindows.add_argument('-i','--input',metavar='input bed',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
     countSlidingWindows.add_argument('-o','--output',metavar = 'output file',dest='output',help='output count file (.txt[.gz], default: print to console)',default=None,type=str)
-    countSlidingWindows.add_argument('-s','--sw',metavar = 'sliding window',dest='compare',help='sliding window annotation file (.bed[.gz]), see "{} createSlidingWindows -h"'.format(prog),required=True)
+    countSlidingWindows.add_argument('-s','--sw',metavar = 'sliding window',dest='annotation',help='sliding window annotation file (.bed[.gz]), see "{} createSlidingWindows -h"'.format(prog),required=True)
+    countSlidingWindows.add_argument('-u','--unstranded',dest='unstranded', help='by default, crosslink site counting is strand specific. Use this flag for non strand specific crosslink site counting',action='store_true')
     # @TODO: finish counting part
     ''' ____________________ [Transformation] ___________________ '''
     # slidingWindowsToDEXSeq
@@ -239,6 +263,8 @@ def main():
         elif args.subparser == 'createSlidingWindows':
             # create sliding windows
             _createSlidingWindows(args)
+        elif args.subparser == 'mapToId':
+            _mapToId(args)
         elif args.subparser == 'extract':
             # extract crosslink sites based on annotations
             _extract(args)
@@ -248,9 +274,6 @@ def main():
         elif args.subparser == 'countSlidingWindows':
             # count sliding window from extracted crosslink sites
             _countSlidingWindows(args)
-        elif args.subparser == 'slidingWindowsToDEXSeq':
-            # convert sliding window counts to DEXSeq format
-            _slidingWindowsToDEXSeq(args)
         elif args.subparser == 'junction':
             # generate junction info from extracted crosslink sites
             _junction(args)

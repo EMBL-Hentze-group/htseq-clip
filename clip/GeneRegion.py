@@ -74,17 +74,17 @@ class GeneRegion:
     returns a .bed format style output string
     """
     def toBed(self):
-
+        '''
+        ouput format:
+        chr begin   end Id@Name@GeneType@FeatureType@FeatureNumber/TotalFeatures@Id:FeatureType00FeatureNumber  confidence  strand
+        '''
         return("\t".join( ( str(self.interval.chrom),
                    str(self.interval.start),
                    str(self.interval.end),
-                   "@".join((self.gene.getName(),
-                             self.gene.getGeneName(),
-                             self.gene.getGeneType(),
-                             self.type,
-                             str(self.index) + "/" + str(self.total))),
-                   str(self.getFlag()),
-                   self.interval.strand )))
+                   "@".join((self.gene.getId(), self.gene.getGeneName(),
+                             self.gene.getGeneType(), self.type, "{}/{}".format(self.index,self.total),
+                             "{0}:{1}{2:0>4}".format(self.gene.getId(),self.type,self.index))),
+                    str(self.getFlag()), self.interval.strand)))
 
     def __str__(self):
         return self.toBed()

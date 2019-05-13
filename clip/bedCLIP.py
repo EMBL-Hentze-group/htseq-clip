@@ -372,6 +372,31 @@ class bedCLIP:
                             check = False                              
     #===================================================================================
     
+    def _countCrosslinks(self,almnt_file):
+        '''
+        test function for counting crosslink sites
+        '''
+        clMap = defaultdict(dict)
+        d = defaultdict(dict)
+        for almnt in almnt_file:
+            if almnt.iv.strand == '+':
+                almntInfo = almnt.iv.end_d
+            elif almnt.iv.strand == '-':
+                almntInfo = almnt.iv.start_d
+            else:
+                raise ValueError('Missing strand information, strand column must be "+" or "-", found: {}'.format(almnt.iv.strand))
+            try:
+                d[almnt.iv.chrom][almnt.iv.strand].append(almntInfo)
+            except KeyError:
+                d[almnt.iv.chrom][almnt.iv.strand] = [almntInfo]
+        for chrom, strandDict in d.items():
+            for strand, pos in strandDict.items():
+                countPos = Counter(pos)
+                countarray = np.zeros(shape=max(countPos.keys()))
+                for pos, clCount in countPos.items():
+                    countarray[pos] = clCount
+                    clMap[chrom][strand] = countarray
+        return clMap
     
     #===================================================================================
     
@@ -382,7 +407,7 @@ class bedCLIP:
         '''
         almnt_file1 = HTSeq.BED_Reader(self.fInput)
         almnt_file2 = HTSeq.BED_Reader(self.fCompare)
-        d1 = self.buildDictForComparison(almnt_file1)
+        d1 = self._countCrosslinks(almnt_file1)
         d2 = self.buildDictForComparison(almnt_file2)      
         for chrom in d1:
             if chrom not in d2:
@@ -397,8 +422,8 @@ class bedCLIP:
                     continue
                 # self.countSW(A, B, chrom, strand)
                 # testing sliding window count function      
-                print("{} {} found".format(chrom,strand))
-                self._countSW(A,B,chrom,strand)  
+                # print("{} {} found".format(chrom,strand))
+                self.countSW(A,B,chrom,strand)  
         self.output.close()
     #===================================================================================
     #===================================================================================
@@ -475,6 +500,17 @@ class bedCLIP:
                                     
     #=================================================================================== 
     #===================================================================================
+    # def _countSW_numpy(self,A,B,chrom,strand):
+    #     for b in B:
+    #         if b[0] > A.shape[0]:
+    #             # window start pos bigger than max pos in the crosslink site array
+    #             continue
+    #         if b[1]+1 > A.shape[0]:
+    #             crosslinks = B[b[0]+1:len(A)]
+    #         else:
+    #             pass
+
+
     def _countSW(self, A, B, chrom, strand):
         '''
         testing sliding window count function
@@ -508,7 +544,7 @@ class bedCLIP:
                 # collect read id of all multimappers in this strand
                 if len(pos)==1:
                     continue
-                multiMappers.add(readId)
+                # multiMappers.add(readId)
             del readPosMap # save some space
             crosslinkCount = 0 # crosslink count
             for pos in posReadMap.keys():

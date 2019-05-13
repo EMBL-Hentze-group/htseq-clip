@@ -113,7 +113,7 @@ class Gene:
     def getStrand(self):
         return self.feature.getStrand()
 
-    def getName(self):
+    def getId(self):
         return self.feature.getName()
 
     """
