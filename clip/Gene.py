@@ -37,9 +37,9 @@ class Gene:
     """
     'Gene': init
     """
-    def __init__(self, feature):
+    def __init__(self, feature,splitExons=True):
         self.logger.debug("Initializing new gene")
-
+        self.splitExons = splitExons
         self.stranded = True
         self.forwardSymbol = "+"
         self.reverseSymbol = "-"
@@ -93,7 +93,7 @@ class Gene:
         self.geneType = "NA"
         
         # Determines if Exons should be split into CDS and UTR regions
-        self.splitExons    = True
+        
         
         self.feature = feature
         

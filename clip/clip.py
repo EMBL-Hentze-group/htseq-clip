@@ -178,6 +178,7 @@ def main():
     annotation.add_argument('-u','--geneid',metavar='gene id',dest='id',help='Gene id attribute in GFF file (default: gene_id for gencode gff files)',default='gene_id',type=str)
     annotation.add_argument('-n','--genename',metavar='gene name',dest='name',help='Gene name attribute in GFF file (default: gene_name for gencode gff files)',default='gene_name',type=str)
     annotation.add_argument('-t','--genetype',metavar='gene type',dest='type',help='Gene type attribute in GFF file (default: gene_type for gencode gff files)',default='gene_type',type=str)
+    annotation.add_argument('--splitExons',dest='splitExons',help='use this flag to split exons into exonic features such as 5\'UTR, CDS and 3\' UTR',action='store_true')
     annotation.add_argument('--unsorted',dest='unsorted',help='use this flag if the GFF file is unsorted',action='store_true')
     # createSlidingWindows
     cshelp = 'createSlidingWindows: creates sliding windows out of the flattened annotation file'
@@ -217,7 +218,7 @@ def main():
     count.add_argument('-i','--input',metavar='input bed',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
     count.add_argument('-o','--output',metavar = 'output file',dest='output',help='output count file (.txt[.gz], default: print to console)',default=None,type=str)
     count.add_argument('-a','--ann',metavar = 'annotation',dest='annotation',help='flattened annotation file (.bed[.gz]), see "{} annotation -h"'.format(prog),required=True)
-    count.add_argument('-u','--unstranded',dest='unstranded', help='by default, crosslink site counting is strand specific. Use this flag for non strand specific crosslink site counting',action='store_true')
+    count.add_argument('--unstranded',dest='unstranded', help='by default, crosslink site counting is strand specific. Use this flag for non strand specific crosslink site counting',action='store_true')
     # countSlidingWindows
     # this is just a wrapper around the function _count to make things easier for the user
     cswhelp = 'countSlidingWindows: counts the number of crosslink/deletion/insertion sites in a certain sliding window'
@@ -225,7 +226,7 @@ def main():
     countSlidingWindows.add_argument('-i','--input',metavar='input bed',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
     countSlidingWindows.add_argument('-o','--output',metavar = 'output file',dest='output',help='output count file (.txt[.gz], default: print to console)',default=None,type=str)
     countSlidingWindows.add_argument('-s','--sw',metavar = 'sliding window',dest='annotation',help='sliding window annotation file (.bed[.gz]), see "{} createSlidingWindows -h"'.format(prog),required=True)
-    countSlidingWindows.add_argument('-u','--unstranded',dest='unstranded', help='by default, crosslink site counting is strand specific. Use this flag for non strand specific crosslink site counting',action='store_true')
+    countSlidingWindows.add_argument('--unstranded',dest='unstranded', help='by default, crosslink site counting is strand specific. Use this flag for non strand specific crosslink site counting',action='store_true')
     # @TODO: finish counting part
     ''' ____________________ [Transformation] ___________________ '''
     # slidingWindowsToDEXSeq

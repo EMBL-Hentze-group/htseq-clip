@@ -118,6 +118,9 @@ class gffCLIP:
 
         if hasattr(options,'name'):
             self.geneName = options.name
+
+        if hasattr(options,'splitExons'):
+            self.splitExons =  options.splitExons
         
         if hasattr(options,'id'):
             self.geneId = options.id
@@ -178,7 +181,7 @@ class gffCLIP:
                 self.processGene(gene)
                 
                 # then create a new Gene object
-                gene = Gene(feature)
+                gene = Gene(feature,self.splitExons)
                 gene.splitExons = self.splitExons
                 gene.processGeneOnlyInformation = self.processGeneOnlyInformation
                 

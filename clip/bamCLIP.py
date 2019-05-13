@@ -331,7 +331,7 @@ class bamCLIP:
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
                 
-                out = self.getStartSiteAsBed(almnt, ignore, offset)
+                out = self.getStartSiteAsBed(almnt = almnt, ignore = ignore, offset = offset)
                 if not out == None:
                     fOutput.write(out + "\n")
 
@@ -361,7 +361,7 @@ class bamCLIP:
         fOutput = Output(self.fOutput)
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
-                out = self.getEndSiteAsBed(almnt, ignore, offset)
+                out = self.getEndSiteAsBed(almnt = almnt, ignore = ignore, offset = offset)
                 if not out == None:
                     fOutput.write(out + "\n")
 
