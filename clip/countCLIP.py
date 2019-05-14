@@ -36,6 +36,7 @@ class countCLIP(object):
             self.sites = options.input
         self.output = Output(options.output)
         self._annotationSanityCheck()
+    
         
     def _annotationSanityCheck(self):
         '''
@@ -44,12 +45,12 @@ class countCLIP(object):
         '''
         nameCountSet = set()
         i = 0
-        with open(self.annotation,'r') as _ann:
-            for be in _ann:
-                nameCountSet.add(len(be.split('\t')[3].split(self.__dividerName__)))
-                i+=1
-                if i>=self.__iMax__:
-                    break
+        _ann = HTSeq.BED_Reader(self.annotation)
+        for be in _ann:
+            nameCountSet.add(len(be.name.split(self.__dividerName__)))
+            i+=1
+            if i>=self.__iMax__:
+                break
         nameCountSet = list(nameCountSet)
         if len(nameCountSet)!=1:
             raise ValueError("The 'name' column in {} is incorrectly formatted. The number of 'name' entries must be equal in all rows of the file".format(self.annotation))
