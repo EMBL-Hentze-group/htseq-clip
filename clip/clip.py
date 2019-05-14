@@ -102,7 +102,7 @@ Given below is should be the completed help file, functions with a '*' needs to 
     [Annotation]
         annotation              flattens an annotation gtf file
         createSlidingWindows    creates sliding windows based on given annotation file
-        mapToIds                map entries in "name" column to unique ids and write in tab separated format 
+        mapToId               map entries in "name" column to unique ids and write in tab separated format 
     
     [Extraction]
         extract                 extracts crosslink sites, insertions or deletions
@@ -166,7 +166,7 @@ def main():
     createSlidingWindows.add_argument('-w','--windowSize',metavar = 'window size',dest='windowSize',help='window size (in number of base pairs) for sliding window (default: 50)',default=50,type=int)
     createSlidingWindows.add_argument('-s','--windowStep',metavar = 'step size',dest='windowStep',help='window step size for sliding window (default: 20)',default=20,type=int)
     # mapToIds
-    maphelp = 'mapToIds: extract "name" column from the annotation file and map the entries to unique id and print out in tab separated format'
+    maphelp = 'mapToId: extract "name" column from the annotation file and map the entries to unique id and print out in tab separated format'
     mapToId = subps.add_parser('mapToId',description=maphelp, formatter_class = argparse.RawTextHelpFormatter)
     mapToId.add_argument('-a','--annotation',metavar= 'annotation file', help = 'flattened annotation file from "{0} annotation -h" or sliding window file from "{0} createSlidingWindows -h"'.format(prog),required=True)
     mapToId.add_argument('-o','--output',metavar = 'output file',dest='output',help='region/window annotation mapped to a unique id (.txt[.gz], default: print to console)',default=None,type=str)
