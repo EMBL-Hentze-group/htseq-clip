@@ -173,7 +173,6 @@ class gffCLIP:
         gene = None
         for f in gtf:
             # initialize a new feature object
-            print(f)
             feature = GTxFeature(f)
             
             # if this feature is a gene (which is specified as certain ids in the gff field)
