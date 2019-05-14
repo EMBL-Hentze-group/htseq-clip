@@ -113,13 +113,14 @@ class countCLIP(object):
             return (UID, geneID, geneSymbol, geneType, geneRegion, genePositionNumber, genePositionTotal)
     
     def annotationToIDs(self):
-        colHeader = ['unique_id','gene_id','gene_name','gene_type','gene_region','Nr_of_region','Total_nr_of_region']
+        colHeader = ['unique_id','chromosome','begin','end','strand','gene_id','gene_name','gene_type','gene_region','Nr_of_region','Total_nr_of_region']
         if self._isWindowed:
             colHeader.append('window_number')
         self.output.write("\t".join(colHeader)+"\n")
         for anno in HTSeq.BED_Reader(self.annotation):
-            nameAnns = self._splitName(anno.name)
-            self.output.write("\t".join(nameAnns)+"\n")
+            # annData = (anno.iv.chrom,str(anno.iv.start),str(anno.iv.end),anno.iv.strand)
+            nameAnn = self._splitName(anno.name)
+            self.output.write("\t".join((nameAnn[0],anno.iv.chrom,str(anno.iv.start),str(anno.iv.end),anno.iv.strand)+nameAnn[1:])+"\n")
         self.output.close()
 
     def count(self, strandedCounting = True):
