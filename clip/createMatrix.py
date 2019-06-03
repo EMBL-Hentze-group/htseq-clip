@@ -39,7 +39,7 @@ class MatrixConverter:
         if not filename:
             return False
         filename = filename.strip()
-        return(filename.startswith(prefix) or filename.endswith(postfix))
+        return(filename.startswith(prefix) and filename.endswith(postfix))
     
     """
     Helper function
