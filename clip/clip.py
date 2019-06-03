@@ -252,7 +252,7 @@ def main():
         elif args.subparser == 'createMatrix':
             # collect output files from count function and generate an R friendly matrix
             if args.prefix == '' and args.postfix == '':
-                args.print_help()
+                createMatrix.print_help()
                 raise argparse.ArgumentTypeError('Input values for both arguments "--prefix" and "--postfix" cannot be empty! Either one of the values MUST be given')
             _countMatrix(args)
     except KeyboardInterrupt:
