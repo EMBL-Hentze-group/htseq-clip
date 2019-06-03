@@ -1,16 +1,18 @@
 __author__ = 'Tom'
 
+import gzip
 import os
 import re
-import gzip
 import sys
-import argparse
 
-"""
-Class to convert count files into count matrixes.
-"""
+from output import Output
+
 class MatrixConverter:
 
+    """
+    Class to convert count files into count matrixes.
+    """
+    
     def __init__(self, inputDir, inputPrefix, inputPostfix, outputFilename):
         # input files
         self.inputFilenames  = self._dir_filter(inputDir, prefix = inputPrefix, postfix = inputPostfix)
@@ -18,7 +20,7 @@ class MatrixConverter:
         self.inputDir = inputDir
 
         # output file
-        self.outputFilename  = outputFilename
+        self.out  = Output(outputFilename)
         
         # dict to store the counts
         self.countDict = {}
@@ -31,14 +33,13 @@ class MatrixConverter:
         
     """
     Helper function
-    check if a filename matches a prefix and postfix
+    check if a filename matches a prefix or a postfix
     """
     def _file_filter(self, filename, prefix = "", postfix = ""):
         if not filename:
             return False
         filename = filename.strip()
-        return(filename.startswith(prefix) and filename.endswith(postfix))
-    
+        return(filename.startswith(prefix) or filename.endswith(postfix))
     
     """
     Helper function
@@ -80,7 +81,6 @@ class MatrixConverter:
         else:
             return open(fn,'r')
 
-
     """
     Helper function
     getter for sample names
@@ -95,27 +95,26 @@ class MatrixConverter:
     def _get_header(self):
         return("\t".join(["ID"] + self.samplenamesList))
     
-    
     """
     write matrix to output file
     """
     def write_matrix(self):
-    	# open output file
-        with open(self.outputFilename, 'w') as out:
-            # write header
-            out.write(self._get_header() + "\n")
-            # write rows
-            for uid, sample_count_dict in self.countDict.items():
-                outList = [uid]
-                # write column
-                for sample_name in self.samplenamesList:
-                    try:
-                        outList.append(sample_count_dict[sample_name])  
-                    except KeyError:
-                        outList.append('0')
-                out.write('\t'.join(outList) + "\n")
+        # write header
+        self.out.write(self._get_header() + "\n")
+        # write rows
+        for uid, sample_count_dict in self.countDict.items():
+            outList = [uid]
+            # write column
+            for sample_name in self.samplenamesList:
+                try:
+                    outList.append(sample_count_dict[sample_name])  
+                except KeyError:
+                    outList.append('0')
+            self.out.write('\t'.join(outList) + "\n")
+        self.out.close()
 
 
+'''
 parser = argparse.ArgumentParser(description = 'Creating a count matrix from htseq-clip count files.')
 
 
@@ -166,3 +165,5 @@ m1.read_samples()
 #print m1.samplenames_list
 
 m1.write_matrix()
+'''
+

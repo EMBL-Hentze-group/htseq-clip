@@ -8,6 +8,7 @@ from bamCLIP import bamCLIP
 from bedCLIP import bedCLIP
 from bokehCLIP import bokehCLIP
 from countCLIP import countCLIP
+from createMatrix import MatrixConverter
 from featureCLIP import feature
 from gffCLIP import gffCLIP
 from heatmap import HeatMap
@@ -69,16 +70,6 @@ def _extract(args):
     elif args.choice == 'e':
         bamC.extract_EndSites(offset=args.offset,ignore=args.ignore)
 
-# def _count(args):
-#     '''
-#     Count crosslink sites per feature
-#     '''
-#     bedC = bedCLIP(args)
-#     if args.choice == 'a':
-#         bedC.count_all()
-#     elif args.choice == 'o':
-#         bedC.count_only()
-
 def _count(args):
     '''
     Count crosslink sites per sliding window
@@ -92,6 +83,11 @@ def _count(args):
 def _junction(args):
     bedC = bedCLIP(args)
     bedC.junction()
+
+def _countMatrix(args):
+    mC = MatrixConverter(args.inputDir,args.prefix,args.postfix,args.output)
+    mC.read_samples()
+    mC.write_matrix()
 
 '''
 Given below is should be the completed help file, functions with a '*' needs to be reworked extensively
@@ -117,7 +113,10 @@ Given below is should be the completed help file, functions with a '*' needs to 
 
     [Visualisation] 
         plot*                   visualisation 
-           
+
+    [Helpers]
+        createMatrix            create R friendly matrix from count function output files
+
     [General help]
         -h, --help               help
     '''
@@ -142,6 +141,10 @@ def main():
         
     [Distances]
         junction                calculates distances to junctions
+    
+    [Helpers]
+        createMatrix            create R friendly matrix from count function output files
+
     '''.format(prog)
     epilog = "For command line options of each argument, use: {} <positional argument> -h".format(prog)
     # @TODO: some of the argument names are confusing, needs fixing
@@ -204,6 +207,15 @@ def main():
     junction.add_argument('-i','--input',metavar='input bed',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
     junction.add_argument('-a','--ann',metavar = 'annotation',dest='compare',help='flattened annotation file (.bed[.gz]), see "{} annotation -h"'.format(prog),required=True)
     junction.add_argument('-o','--output',metavar = 'output file',dest='output',help='output junction file (.txt[.gz], default: print to console)',default=None,type=str)
+    ''' ____________________ [Helpers] ___________________ '''
+    # createMatrix
+    cmhelp = 'createMatrix: create R friendly output matrix file from count functionoutptu files'
+    createMatrix = subps.add_parser('createMatrix',description=cmhelp,formatter_class = argparse.RawTextHelpFormatter)
+    createMatrix.add_argument('-i','--inputFolder', dest='input', metavar = 'input folder', help='Folder name with output files from count function, see "{} count -h ", supports .gz (gzipped files)'.format(prog), required = True)
+    createMatrix.add_argument('-b','--prefix', dest='prefix', metavar = 'file name prefix', help='Use files only with this given file name prefix (default: None)', default="", types=str)
+    createMatrix.add_argument('-e','--postfix', dest='postfix', metavar = 'file name postfix', help='Use files only with this given file name postfix (default: None). WARNING! either "--prefix" or "--postfix" argument must be given!', default="", types=str)
+    createMatrix.add_argument('-o','--output',metavar = 'output file',dest='output',help='output junction file (.txt[.gz], default: print to console)',default=None,type=str)
+
     # # distance
     # dhelp = 'distance: calculates the nearest crosslink site to a region/feature'
     # distance = subps.add_parser('distance',description=dhelp) # help='nearest crosslink site',
@@ -237,6 +249,12 @@ def main():
         elif args.subparser == 'junction':
             # generate junction info from extracted crosslink sites
             _junction(args)
+        elif args.subparser == 'createMatrix':
+            # collect output files from count function and generate an R friendly matrix
+            if args.prefix == '' and args.postfix == '':
+                args.print_help()
+                raise argparse.ArgumentTypeError('Input values for both arguments "--prefix" and "--postfix" cannot be empty! Either one of the values MUST be given')
+            _countMatrix(args)
     except KeyboardInterrupt:
         sys.stderr.write('Keyboard interrupt... good bye\n')
         sys.exit(1)
