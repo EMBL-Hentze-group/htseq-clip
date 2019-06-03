@@ -85,7 +85,7 @@ def _junction(args):
     bedC.junction()
 
 def _countMatrix(args):
-    mC = MatrixConverter(args.inputDir,args.prefix,args.postfix,args.output)
+    mC = MatrixConverter(args.input,args.prefix,args.postfix,args.output)
     mC.read_samples()
     mC.write_matrix()
 
