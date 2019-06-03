@@ -12,7 +12,7 @@ class MatrixConverter:
     """
     Class to convert count files into count matrixes.
     """
-    
+
     def __init__(self, inputDir, inputPrefix, inputPostfix, outputFilename):
         # input files
         self.inputFilenames  = self._dir_filter(inputDir, prefix = inputPrefix, postfix = inputPostfix)
@@ -57,7 +57,7 @@ class MatrixConverter:
         for file in self.inputFilenames:
             samplename = file.split(".")[0]
             self.allSamples.add(samplename)
-            sys.stderr.write('Reading file {}'.format(file))
+            sys.stderr.write('Reading file {}\n'.format(file))
             # @TODO:  use logging module for all messages
             # open file and read in the content and store the results 
             with self._file_reader(os.path.join(self.inputDir, file)) as f:
