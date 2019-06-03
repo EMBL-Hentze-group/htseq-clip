@@ -209,7 +209,7 @@ def main():
     junction.add_argument('-o','--output',metavar = 'output file',dest='output',help='output junction file (.txt[.gz], default: print to console)',default=None,type=str)
     ''' ____________________ [Helpers] ___________________ '''
     # createMatrix
-    cmhelp = 'createMatrix: create R friendly output matrix file from count functionoutptu files'
+    cmhelp = 'createMatrix: create R friendly output matrix file from count function output files'
     createMatrix = subps.add_parser('createMatrix',description=cmhelp,formatter_class = argparse.RawTextHelpFormatter)
     createMatrix.add_argument('-i','--inputFolder', dest='input', metavar = 'input folder', help='Folder name with output files from count function, see "{} count -h ", supports .gz (gzipped files)'.format(prog), required = True)
     createMatrix.add_argument('-b','--prefix', dest='prefix', metavar = 'file name prefix', help='Use files only with this given file name prefix (default: None)', default="", type=str)
