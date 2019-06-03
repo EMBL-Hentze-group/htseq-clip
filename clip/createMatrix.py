@@ -56,6 +56,8 @@ class MatrixConverter:
         for file in self.inputFilenames:
             samplename = file.split(".")[0]
             self.allSamples.add(samplename)
+            sys.stderr.write('Reading file {}'.format(file))
+            # @TODO:  use logging module for all messages
             # open file and read in the content and store the results 
             with self._file_reader(os.path.join(self.inputDir, file)) as f:
                 for linecount, line in enumerate(f):
