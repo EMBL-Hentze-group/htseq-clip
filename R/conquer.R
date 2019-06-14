@@ -26,7 +26,8 @@ protein <- args[1]
 
 #for(protein in list.files(path = "results")) {
     project_dir <- file.path("results", protein)
-    
+    tmp_dir <- file.path("results",protein,'_tmp_dir')
+    dir.create(tmp_dir)
  #   if(!file.exists(file.path(project_dir, "hits.txt"))) {
         cat(paste0("processing ", protein, "\n"))
 
@@ -53,12 +54,14 @@ protein <- args[1]
         dds <- dds[ selection, ]
         
         #ANNOTATION <- ANNOTATION[ selection, ]
-        
+        message("Running DESeq2")
         dds <- dds %>% DESeq(betaPrior = T)
-        
+        message("Running DEWSeq")
         res <- results_DEWSeq(dds, contrast = c("type", "IP", "SMI"), tidy = T)
         resAnn <- merge(res,ANNOTATION_WINDOWS,by='unique_id')
+        message("Merging windows")
         resWindows <- mergeWindows(annRes=resAnn,minDist=0,padjWindow='bonferroni',ncores=5)
+        message("Running IHW")
         resIHW <- ihw(pBonferroni ~ baseMean, data =  resWindows, alpha=0.05, nfolds=10)
         resIHW <- as.data.frame(resIHW)
         colnames(resIHW) <- paste('IHW',colnames(resIHW),sep='.')
@@ -69,17 +72,17 @@ protein <- args[1]
             dplyr::left_join( y = (counts(dds) %>% as.data.frame %>% rownames_to_column(var = "unique_id")), by = "unique_id")
         
         write_tsv(SIG %>% dplyr::select(gene_name, gene_type) %>% distinct() %>% .["gene_type"] %>% table %>% as.data.frame,
-                        path = file.path(project_dir, "_tmp_hits_type_table.txt")) 
+                        path = file.path(tmp_dir, "_tmp_hits_type_table.txt")) 
             
         #res <- res %>% left_join(y = ANNOTATION, by = "featureID")
                                      
-        write_tsv(SIG, path = file.path(project_dir, "_tmp_hits.txt"), col_names = F)
+        write_tsv(SIG, path = file.path(tmp_dir, "_tmp_hits.txt"), col_names = F)
         
         write_tsv(SIG %>% dplyr::select(gene_id, gene_name) %>% distinct(),
-                  path = file.path(project_dir, "_tmp_hits_id_name.txt"), col_names = F) 
+                  path = file.path(tmp_dir, "_tmp_hits_id_name.txt"), col_names = F) 
         
         write_tsv(SIG %>% .["gene_id"] %>% table %>% as.data.frame,
-                  path = file.path(project_dir, "_tmp_hits_id_table.txt")) 
+                  path = file.path(tmp_dir, "_tmp_hits_id_table.txt")) 
         
         
         save(list = c("dds", "res", "project_dir", "protein", "SIG"), file = file.path(project_dir, "_tmp_Workspace.Rdata"))
