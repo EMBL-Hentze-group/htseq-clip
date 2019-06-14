@@ -26,7 +26,7 @@ protein <- args[1]
 
 #for(protein in list.files(path = "results")) {
     project_dir <- file.path("results", protein)
-    tmp_dir <- file.path("results",protein,'_tmp_dir')
+    tmp_dir <- file.path('/tmp',protein)
     dir.create(tmp_dir)
  #   if(!file.exists(file.path(project_dir, "hits.txt"))) {
         cat(paste0("processing ", protein, "\n"))
