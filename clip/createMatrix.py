@@ -13,7 +13,15 @@ class MatrixConverter:
     Class to convert count files into count matrixes.
     """
 
-    def __init__(self, inputDir, inputPrefix, inputPostfix, outputFilename):
+    def __init__(self, inputDir, inputPrefix, inputPostfix, outputFilename, annotation=None):
+        '''
+        Arguments:
+         inputDir: input directory
+         inputPrefix: prefix for input file(s)
+         inputPostfix: postfix for input file(s)
+         ouputFilename: output file name
+         annotation: annotation file name
+        '''
         # input files
         self.inputFilenames  = self._dir_filter(inputDir, prefix = inputPrefix, postfix = inputPostfix)
         # input dir
@@ -62,12 +70,13 @@ class MatrixConverter:
             # open file and read in the content and store the results 
             with self._file_reader(os.path.join(self.inputDir, file)) as f:
                 for linecount, line in enumerate(f):
-                    if(linecount > 0):
-                        linesplit = line.strip().split("\t")
-                        try:
-                            self.countDict[ linesplit[0] ][ samplename ] = linesplit[3]
-                        except KeyError:
-                            self.countDict[ linesplit[0] ] = { samplename : linesplit[3] }
+                    if(linecount == 0):
+                        continue
+                    linesplit = line.strip().split("\t")
+                    try:
+                        self.countDict[ linesplit[0] ][ samplename ] = linesplit[3]
+                    except KeyError:
+                        self.countDict[ linesplit[0] ] = { samplename : linesplit[3] }
         self._init_samplenames_list()
     
     def _file_reader(self,fn):
@@ -93,7 +102,7 @@ class MatrixConverter:
     getter for header
     """
     def _get_header(self):
-        return("\t".join(["ID"] + self.samplenamesList))
+        return("\t".join(["unique_id"] + self.samplenamesList))
     
     """
     write matrix to output file
