@@ -32,7 +32,8 @@ cat(paste0("processing ", protein, "\n"))
 proj_files <- list.files(file.path("results",protein))
 if(!"windows_countmatrix.txt.gz" %in% proj_files){
   stop("Cannot find count data file windows_countmatrix.txt.gz in project folder")
-}else if(!"samples.txt" %in% proj_files){
+}
+if(!"samples.txt" %in% proj_files){
   stop("Cannot find sample information file samples.txt in project folder")
 }
 WINDOWCOUNTS <- read_tsv(file.path(project_dir, "windows_countmatrix.txt.gz")) %>% column_to_rownames("ID")
@@ -86,4 +87,4 @@ write_tsv(SIG %>% dplyr::select(gene_id, gene_name) %>% distinct(),
 write_tsv(SIG %>% .["gene_id"] %>% table %>% as.data.frame,
           path = file.path(tmp_dir, "_tmp_hits_id_table.txt")) 
 
-save(list = c("dds", "res", "project_dir", "protein", "SIG"), file = file.path(project_dir, "_tmp_Workspace.Rdata"))
+save(list = c("dds", "res", "project_dir", "protein", "SIG"), file = file.path(tmp_dir, "_tmp_Workspace.Rdata"))
