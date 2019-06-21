@@ -98,8 +98,6 @@ class GeneInfo(object):
         '''
         return self._featList
 
-
-
 class gffCLIP:
     # @TODO: probably remove these
     # features = {}
@@ -268,7 +266,6 @@ class gffCLIP:
             self.fOutput.write('track chr {} {}\n'.format(chrom,length))
         for gtype,length in self.summary.genetypes.items():
             self.fOutput.write('track type {} {}\n'.format(gtype,length))
-
 
     """
     This functions calculates the sliding window positions
