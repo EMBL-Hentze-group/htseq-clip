@@ -67,10 +67,29 @@ class GeneInfo(object):
         else:
             geneInd = self._typeMap[geneDef[0]]
             if len(geneInd)>1:
-                sys.stderr.write('{}: Multiple gene features found!...Skipping\n'.format(self.id))
-                return None
+                if self._checkGeneFeature(geneInd):
+                    sys.stderr.write('{}: Found multiple attributes for the same gene co-ordinates, using one at random\n'.format(self.id))
+                    return self._featList[geneInd[0]]
+                else:
+                    sys.stderr.write('{}: Multiple gene features found!...Skipping\n'.format(self.id))
+                    return None
             else:
                 return self._featList[geneInd[0]]
+    
+    def _checkGeneFeature(self,geneInd):
+        '''
+        Helper function, if multiple gene features are found, 
+        return true all the co-oridnates are same
+        '''
+        start_pos,end_pos,strand = set(),set(),set()
+        for gi in geneInd:
+            start_pos.add(self._featList[gi].iv.start)
+            end_pos.add(self._featList[gi].iv.end)
+            strand.add(self._featList[gi].iv.strand)
+        if len(start_pos)==1 and len(end_pos)==1 and len(strand)==1:
+            return True
+        else:
+            return False
     
     @property
     def features(self):
@@ -174,7 +193,6 @@ class gffCLIP:
         for f in gtf:
             # initialize a new feature object
             feature = GTxFeature(f)
-            
             # if this feature is a gene (which is specified as certain ids in the gff field)
             if feature.isGene():
                 # if new gene info is found, annotation the gene info
@@ -215,13 +233,12 @@ class gffCLIP:
         # sanity check
         if len(self._geneMap)==0:
             raise ValueError('Cannot parse gene features from {}! Please check this input file'.format(self.gtfFile))
-        
-        # sys.stderr.write('Found info for {} gene(s)\n'.format(len(self._geneMap)))
         # for each feature in geneMap 
         for _, geneObj in self._geneMap.items():
-            if geneObj.gene is None:
+            _gene = geneObj.gene
+            if _gene is None:
                 continue
-            gene = Gene(GTxFeature(geneObj.gene))
+            gene = Gene(GTxFeature(_gene))
             gene.splitExons = self.splitExons
             gene.processGeneOnlyInformation = self.processGeneOnlyInformation
             for f in geneObj.features:

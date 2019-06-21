@@ -227,7 +227,6 @@ class Gene:
             self.logger.debug("processing region %s - %s" % (str(regionInterval), str(regionInfo)))
             
             region = GeneRegion(self, regionInterval)
-
             # if exon
             if len(regionInfo) > 0: # == "exon":
                 self.logger.debug("processing exon")
@@ -260,8 +259,26 @@ class Gene:
             regionIndex += 1
         
         # calculate all intron flags
+        self._regionListSanityCheck()
         self.calculateIntronFlags()
 
+    def _regionListSanityCheck(self):
+        '''
+        Sanity check for region list, make sure that the first and last indices are always exons and
+        two regions of the same type are never next to each other
+        '''
+        removeIndices = list() # indices to remove from the region list
+        prevType = None
+        for i,rd in enumerate(self.regionList):
+            if (i==0 or i==len(self.regionList)-1) and rd.type != self.__EXON__:
+                removeIndices.append(i)
+            elif prevType == rd.type:
+                removeIndices.append(i)
+            prevType = rd.type
+        if len(removeIndices)>0:
+            for ri in removeIndices:
+                del self.regionList[ri]
+    
     """
     Calculates flags for Introns by retrieving flags from the neighboring regions.
     """
@@ -269,11 +286,9 @@ class Gene:
         self.logger.debug("calculating intron flags directional")
 
         regionIndex = 1
-        
         while regionIndex < len(self.regionList):
             self.regionList[ regionIndex ].upstreamFlag   = self.regionList[ self.previousIndex(regionIndex) ].downstreamFlag
             self.regionList[ regionIndex ].downstreamFlag = self.regionList[ self.previousIndex(regionIndex) ].upstreamFlag
-
             regionIndex += 2
     
    
