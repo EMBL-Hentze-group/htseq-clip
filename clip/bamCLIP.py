@@ -84,7 +84,7 @@ class bamCLIP:
     '''
     def primaryFilter(self, almnt):
         if self.data['primary']:
-            return(almnt.not_primary_alignment)
+            return(not almnt.not_primary_alignment)
         else:
             return(True) 
 

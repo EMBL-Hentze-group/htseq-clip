@@ -7,7 +7,7 @@ if (length(args) != 1) {
 } 
 
 # read in annotation file
-load("../annotation/gencode27ns_flattenedwindows_width50_steps20.Rda")
+#load("../annotation/gencode27ns_flattenedwindows_width50_steps20.Rda")
 
 suppressPackageStartupMessages({
       require(tidyverse)
@@ -57,21 +57,21 @@ res <- results_DEWSeq(dds, contrast = c("type", "IP", "SMI"), tidy = T)
 resAnn <- merge(res,ANNOTATION_WINDOWS,by='unique_id')
 message("Merging windows")
 resWindows <- mergeWindows(annRes=resAnn,minDist=0,padjWindow='bonferroni',ncores=5)
-message("Running IHW")
-resIHW <- ihw(pBonferroni ~ baseMean, data =  resWindows, alpha=0.05, nfolds=10)
-# save IHW figures
-# cross validation
-pdf(file.path(fig_dir,'IHW_cross_validation.pdf'),width=10,height=9,title='IHW cross validation')
-plot(resIHW)
-dev.off()
-# decision boundary
-pdf(file.path(fig_dir,'IHW_decision_boundary.pdf'),width=10,height=9,title='IHW decision boundary')
-plot(resIHW,what='decisionboundary')
-dev.off()
-resIHW <- as.data.frame(resIHW)
-colnames(resIHW) <- paste('IHW',colnames(resIHW),sep='.')
-res <- cbind(resWindows,resIHW[,c('IHW.adj_pvalue','IHW.weight','IHW.weighted_pvalue')]) %>%  
-  mutate(significant = !is.na(IHW.adj_pvalue) & IHW.adj_pvalue < 0.05 & log2FoldChange > 1)
+# message("Running IHW")
+# resIHW <- ihw(pBonferroni ~ baseMean, data =  resWindows, alpha=0.05, nfolds=10)
+# # save IHW figures
+# # cross validation
+# pdf(file.path(fig_dir,'IHW_cross_validation.pdf'),width=10,height=9,title='IHW cross validation')
+# plot(resIHW)
+# dev.off()
+# # decision boundary
+# pdf(file.path(fig_dir,'IHW_decision_boundary.pdf'),width=10,height=9,title='IHW decision boundary')
+# plot(resIHW,what='decisionboundary')
+# dev.off()
+# resIHW <- as.data.frame(resIHW)
+# colnames(resIHW) <- paste('IHW',colnames(resIHW),sep='.')
+res <- resWindows %>%  mutate(significant = !is.na(pBonferroni.adj) & pBonferroni.adj < 0.05 & log2FoldChange > 1)
+resRegions <- createRegions(mergeDat=resWindows)
 
 SIG <- res %>% dplyr::filter(significant) %>% arrange(desc(log2FoldChange)) %>%
     dplyr::left_join( y = (counts(dds) %>% as.data.frame %>% rownames_to_column(var = "unique_id")), by = "unique_id")
@@ -87,4 +87,4 @@ write_tsv(SIG %>% dplyr::select(gene_id, gene_name) %>% distinct(),
 write_tsv(SIG %>% .["gene_id"] %>% table %>% as.data.frame,
           path = file.path(tmp_dir, "_tmp_hits_id_table.txt")) 
 
-save(list = c("dds", "res", "project_dir", "protein", "SIG"), file = file.path(tmp_dir, "_tmp_Workspace.Rdata"))
+save(list = c("dds", "res","resRegions", "project_dir", "protein", "SIG"), file = file.path(tmp_dir, "_tmp_Workspace.Rdata"))
