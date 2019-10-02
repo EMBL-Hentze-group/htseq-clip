@@ -158,7 +158,7 @@ class countCLIP(object):
             for line in _ah:
                 if line.startswith( "track" ):
                     continue
-                fields = line.split("\t")
+                fields = line.strip('\n').split("\t")
                 if len(fields) < 3:
                     raise ValueError("BED file line contains less than 3 fields")
                 if len(fields) > 9:
