@@ -35,8 +35,14 @@ class countCLIP(object):
         if hasattr(options,'input'):
             self.sites = options.input
         self.output = Output(options.output)
+        self.fo = self._annotationParser()
         self._annotationSanityCheck()
     
+    def _annotationParser(self):
+        if self.annotation.lower().endswith((".gz",".gzip")):
+            return gzip.open
+        else:
+            return open
         
     def _annotationSanityCheck(self):
         '''
@@ -45,12 +51,19 @@ class countCLIP(object):
         '''
         nameCountSet = set()
         i = 0
-        _ann = HTSeq.BED_Reader(self.annotation)
-        for be in _ann:
-            nameCountSet.add(len(be.name.split(self.__dividerName__)))
-            i+=1
-            if i>=self.__iMax__:
-                break
+        with self.fo(self.annotation) as _ah:
+            for line in _ah:
+                if line.startswith( "track" ):
+                    continue
+                fields = line.strip("\n").split("\t")
+                if len(fields) < 6:
+                    raise ValueError("BED file line contains less than 6 fields")
+                if len(fields) > 9:
+                    raise ValueError("BED file line contains more than 9 fields")
+                nameCountSet.add(len(fields[3].split(self.__dividerName__)))
+                i+=1
+                if i>=self.__iMax__:
+                    break
         nameCountSet = list(nameCountSet)
         if len(nameCountSet)!=1:
             raise ValueError("The 'name' column in {} is incorrectly formatted. The number of 'name' entries must be equal in all rows of the file".format(self.annotation))
@@ -101,11 +114,6 @@ class countCLIP(object):
         # annotationWindowNumber = windowNumber.zfill(self.__zeroFillWindow__) if isWindowed else ""
         # annotationWindowSeparator = "W" if isWindowed else ""
         
-        # UID = "{}:{}{}{}{}".format(geneID,
-        #                                 geneRegion,
-        #                                 genePositionNumber.zfill(self.__zeroFillFeature__),
-        #                                 annotationWindowSeparator,
-        #                                 annotationWindowNumber)
         if self._isWindowed:
             windowNumber = arr[self.__indexWindowNumber__]
             return (UID, geneID, geneSymbol, geneType, geneRegion, genePositionNumber, genePositionTotal, windowNumber)
@@ -145,24 +153,20 @@ class countCLIP(object):
         # length of positions occupied would be 2 + 2, therefore 4. 
         # the maximum counts, the height would be 3.
         # this is a workaround to annotation file crashing on snakemake runs
-        if self.annotation.lower().endswith((".gz",".gzip")):
-            fo = gzip.open
-        else:
-            fo = open
-        with fo(self.annotation) as _ah: # annotation handler
+        with self.fo(self.annotation) as _ah: # annotation handler
             # these lines are a work around to odd splitting behavior
             for line in _ah:
                 if line.startswith( "track" ):
                     continue
                 fields = line.split("\t")
                 if len(fields) < 3:
-                    raise ValueError, "BED file line contains less than 3 fields"
+                    raise ValueError("BED file line contains less than 3 fields")
                 if len(fields) > 9:
-                    raise ValueError, "BED file line contains more than 9 fields"
-                iv = GenomicInterval( fields[0], int(fields[1]), int(fields[2]), fields[5] if len(fields) > 5 else "." )
-                anno = GenomicFeature( fields[3] if len(fields) > 3 else "unnamed", "BED line", iv )
+                    raise ValueError("BED file line contains more than 9 fields")
+                iv = HTSeq.GenomicInterval( fields[0], int(fields[1]), int(fields[2]), fields[5] if len(fields) > 5 else "." )
+                anno = HTSeq.GenomicFeature( fields[3] if len(fields) > 3 else "unnamed", "BED line", iv )
                 anno.score = float( fields[4] ) if len(fields) > 4 else None
-                anno.thick = GenomicInterval( iv.chrom, int( fields[6] ), int( fields[7] ), iv.strand ) if len(fields) > 7 else None
+                anno.thick = HTSeq.GenomicInterval( iv.chrom, int( fields[6] ), int( fields[7] ), iv.strand ) if len(fields) > 7 else None
                 anno.itemRgb = [ int(a) for a in fields[8].split(",") ]  if len(fields) > 8 else None
                 # resume working with annotation
                 total_counts = 0   # variable for storing the total sum of site counts
