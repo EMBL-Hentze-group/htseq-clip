@@ -11,22 +11,22 @@ from HTSeq import BED_Reader, GenomicArray, GenomicFeature, GenomicInterval
 
 from output import Output
 
-class TempAnnotation(object):
+class TempBed(object):
     '''
     Temp file object for annotaiton files
-    This is a workaround to weird issues with reading gziped annotation file
+    This is a workaround to weird issues with reading gziped bed file
     with workflows using slurm/snakemake
     '''
-    def __init__(self,annotation):
-        self.annotation = annotation
+    def __init__(self,bedfile):
+        self.bedfile = bedfile
     
     def __enter__(self):
-        self.tmpAnn = tempfile.mkstemp()[1]
-        copyfile(self.annotation,self.tmpAnn)
-        return self.tmpAnn
+        self.tmpBed = tempfile.mkstemp()[1]
+        copyfile(self.bedfile,self.tmpBed)
+        return self.tmpBed
     
     def __exit__(self,exec_type,exec_val,exec_tback):
-        os.remove(self.tmpAnn)
+        os.remove(self.tmpBed)
 
 class countCLIP(object):
     # indices
@@ -71,19 +71,20 @@ class countCLIP(object):
         '''
         nameCountSet = set()
         i = 0
-        with self.fo(self.annotation) as _ah:
-            for line in _ah:
-                if line.startswith( "track" ):
-                    continue
-                fields = line.strip("\n").split("\t")
-                if len(fields) < 6:
-                    raise ValueError("BED file line contains less than 6 fields")
-                if len(fields) > 9:
-                    raise ValueError("BED file line contains more than 9 fields")
-                nameCountSet.add(len(fields[3].split(self.__dividerName__)))
-                i+=1
-                if i>=self.__iMax__:
-                    break
+        with TempBed(self.annotation) as tann:
+            with self.fo(tann) as _ah:
+                for line in _ah:
+                    if line.startswith( "track" ):
+                        continue
+                    afields = line.strip("\n").split("\t")
+                    if len(afields) < 6:
+                        raise ValueError("BED file line contains less than 6 fields")
+                    if len(afields) > 9:
+                        raise ValueError("BED file line contains more than 9 fields")
+                    nameCountSet.add(len(afields[3].split(self.__dividerName__)))
+                    i+=1
+                    if i>=self.__iMax__:
+                        break
         nameCountSet = list(nameCountSet)
         if len(nameCountSet)!=1:
             raise ValueError("The 'name' column in {} is incorrectly formatted. The number of 'name' entries must be equal in all rows of the file".format(self.annotation))
@@ -161,18 +162,19 @@ class countCLIP(object):
             sfo = gzip.open
         else:
             sfo = open
-        with sfo(self.sites) as _sh:
-            for line in _sh:
-                if line.startswith("track"):
-                    continue
-                fields = line.strip('\n').split("\t")
-                if len(fields) < 3:
-                    raise ValueError("BED file line contains less than 3 fields")
-                if len(fields) > 9:
-                    raise ValueError("BED file line contains more than 9 fields")
-                iv = GenomicInterval( fields[0], int(fields[1]), int(fields[2]), fields[5] if len(fields) > 5 else "." )
-                # add the sites to the data structure
-                sitesga[iv]+=1
+        with TempBed(self.sites) as tb:
+            with sfo(tb) as _sh:
+                for line in _sh:
+                    if line.startswith("track"):
+                        continue
+                    sFields = line.strip('\n').split("\t")
+                    if len(sFields) < 3:
+                        raise ValueError("BED file line contains less than 3 fields")
+                    if len(sFields) > 9:
+                        raise ValueError("BED file line contains more than 9 fields")
+                    iv = GenomicInterval( sFields[0], int(sFields[1]), int(sFields[2]), sFields[5] if len(sFields) > 5 else "." )
+                    # add the sites to the data structure
+                    sitesga[iv]+=1
         return sitesga
 
     def count(self, strandedCounting = True):
@@ -194,22 +196,22 @@ class countCLIP(object):
         # length of positions occupied would be 2 + 2, therefore 4. 
         # the maximum counts, the height would be 3.
         # this is a workaround to annotation file crashing on snakemake runs
-        with TempAnnotation(self.annotation) as ta:
+        with TempBed(self.annotation) as ta:
             with self.fo(ta) as _ah: # annotation handler
                 # these lines are a work around to odd splitting behavior
                 for line in _ah:
                     if line.startswith( "track" ):
                         continue
-                    fields = line.strip('\n').split("\t")
-                    if len(fields) < 3:
+                    bfields = line.strip('\n').split("\t")
+                    if len(bfields) < 3:
                         raise ValueError("BED file line contains less than 3 fields")
-                    if len(fields) > 9:
+                    if len(bfields) > 9:
                         raise ValueError("BED file line contains more than 9 fields")
-                    iv = GenomicInterval( fields[0], int(fields[1]), int(fields[2]), fields[5] if len(fields) > 5 else "." )
-                    anno = GenomicFeature( fields[3] if len(fields) > 3 else "unnamed", "BED line", iv )
-                    anno.score = float( fields[4] ) if len(fields) > 4 else None
-                    anno.thick = GenomicInterval( iv.chrom, int( fields[6] ), int( fields[7] ), iv.strand ) if len(fields) > 7 else None
-                    anno.itemRgb = [ int(a) for a in fields[8].split(",") ]  if len(fields) > 8 else None
+                    iv = GenomicInterval( bfields[0], int(bfields[1]), int(bfields[2]), bfields[5] if len(bfields) > 5 else "." )
+                    anno = GenomicFeature( bfields[3] if len(bfields) > 3 else "unnamed", "BED line", iv )
+                    anno.score = float( bfields[4] ) if len(bfields) > 4 else None
+                    anno.thick = GenomicInterval( iv.chrom, int( bfields[6] ), int( bfields[7] ), iv.strand ) if len(bfields) > 7 else None
+                    anno.itemRgb = [ int(a) for a in bfields[8].split(",") ]  if len(bfields) > 8 else None
                     # resume working with annotation
                     total_counts = 0   # variable for storing the total sum of site counts
                     max_counts = 0     # maximum site height, maximum site counts
