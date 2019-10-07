@@ -1,12 +1,32 @@
 
 import gzip
 import logging
+import os
 import sys
+import tempfile
 from decimal import Decimal
+from shutil import copyfile
 
-import HTSeq
+from HTSeq import BED_Reader, GenomicArray, GenomicFeature, GenomicInterval
 
 from output import Output
+
+class TempAnnotation(object):
+    '''
+    Temp file object for annotaiton files
+    This is a workaround to weird issues with reading gziped annotation file
+    with workflows using slurm/snakemake
+    '''
+    def __init__(self,annotation):
+        self.annotation = annotation
+    
+    def __enter__(self):
+        self.tmpAnn = tempfile.mkstemp()[1]
+        copyfile(self.annotation,self.tmpAnn)
+        return self.tmpAnn
+    
+    def __exit__(self,exec_type,exec_val,exec_tback):
+        os.remove(self.tmpAnn)
 
 class countCLIP(object):
     # indices
@@ -125,19 +145,40 @@ class countCLIP(object):
         if self._isWindowed:
             colHeader.append('window_number')
         self.output.write("\t".join(colHeader)+"\n")
-        for anno in HTSeq.BED_Reader(self.annotation):
+        for anno in BED_Reader(self.annotation):
             # annData = (anno.iv.chrom,str(anno.iv.start),str(anno.iv.end),anno.iv.strand)
             nameAnn = self._splitName(anno.name)
             self.output.write("\t".join((nameAnn[0],anno.iv.chrom,str(anno.iv.start),str(anno.iv.end),anno.iv.strand)+nameAnn[1:])+"\n")
         self.output.close()
+    
+    def _countSites(self,strandedCounting):
+        '''
+        Helper function, count sites and return as an object of GenomicArray
+        '''
+        # data structures to hold sites of interest (crosslink sites, deletion sites, insertion sites)
+        sitesga = GenomicArray(chroms="auto", stranded=strandedCounting, typecode='i', storage='step')
+        if self.sites.lower().endswith((".gz",".gzip")):
+            sfo = gzip.open
+        else:
+            sfo = open
+        with sfo(self.sites) as _sh:
+            for line in _sh:
+                if line.startswith("track"):
+                    continue
+                fields = line.strip('\n').split("\t")
+                if len(fields) < 3:
+                    raise ValueError("BED file line contains less than 3 fields")
+                if len(fields) > 9:
+                    raise ValueError("BED file line contains more than 9 fields")
+                iv = GenomicInterval( fields[0], int(fields[1]), int(fields[2]), fields[5] if len(fields) > 5 else "." )
+                # add the sites to the data structure
+                sitesga[iv]+=1
+        return sitesga
 
     def count(self, strandedCounting = True):
-        # data structures to hold sites of interest (crosslink sites, deletion sites, insertion sites)
-        sites_ga =  HTSeq.GenomicArray(chroms="auto", stranded=strandedCounting, typecode='i', storage='step')
-        
-        # add the sites to the data structure
-        for site in HTSeq.BED_Reader(self.sites):
-            sites_ga[ site.iv ] += 1
+        sites_ga =  self._countSites(strandedCounting)
+        # for site in BED_Reader(self.sites):
+        #     sites_ga[ site.iv ] += 1
         # write column headers for the output
         # sys.stderr.write("{}".format(self._isWindowed))
         if self._isWindowed:
@@ -153,52 +194,52 @@ class countCLIP(object):
         # length of positions occupied would be 2 + 2, therefore 4. 
         # the maximum counts, the height would be 3.
         # this is a workaround to annotation file crashing on snakemake runs
-        with self.fo(self.annotation) as _ah: # annotation handler
-            # these lines are a work around to odd splitting behavior
-            for line in _ah:
-                if line.startswith( "track" ):
-                    continue
-                fields = line.strip('\n').split("\t")
-                if len(fields) < 3:
-                    raise ValueError("BED file line contains less than 3 fields")
-                if len(fields) > 9:
-                    raise ValueError("BED file line contains more than 9 fields")
-                iv = HTSeq.GenomicInterval( fields[0], int(fields[1]), int(fields[2]), fields[5] if len(fields) > 5 else "." )
-                anno = HTSeq.GenomicFeature( fields[3] if len(fields) > 3 else "unnamed", "BED line", iv )
-                anno.score = float( fields[4] ) if len(fields) > 4 else None
-                anno.thick = HTSeq.GenomicInterval( iv.chrom, int( fields[6] ), int( fields[7] ), iv.strand ) if len(fields) > 7 else None
-                anno.itemRgb = [ int(a) for a in fields[8].split(",") ]  if len(fields) > 8 else None
-                # resume working with annotation
-                total_counts = 0   # variable for storing the total sum of site counts
-                max_counts = 0     # maximum site height, maximum site counts
-                total_length = anno.iv.length  # length of the annotation element
-                occupied_positions_length = 0  # length of the positions with site counts
-                nameAnns = self._splitName(anno.name)
-
-                for giv, count in sites_ga[ anno.iv ].steps():
-                    if count == 0:
+        with TempAnnotation(self.annotation) as ta:
+            with self.fo(ta) as _ah: # annotation handler
+                # these lines are a work around to odd splitting behavior
+                for line in _ah:
+                    if line.startswith( "track" ):
                         continue
-                    # add the number of sites to the total counts 
-                    total_counts += count * giv.length
-                    
-                    # store maximal count 
-                    if count > max_counts:
-                        max_counts = count
-                    
-                    # add length if sites are present in this interval
-                    occupied_positions_length += giv.length
-            
-                if total_counts == 0:
-                    continue
-                elif total_counts < occupied_positions_length:
-                    raise Exception("Total site counts {} can not be smaller than occupied_positions_length {} at {}\n{}".format(total_counts, occupied_positions_length, anno.name, anno.iv)) 
-                # site density is the number of occupied positions divided the total length of the annotation element
-                site_density = round(Decimal(occupied_positions_length) / Decimal(total_length),5)
-                # print count data
-                countString = [str(total_length),str(total_counts),str(occupied_positions_length),str(max_counts),str(site_density)]
-                if self._isWindowed:
-                    self.output.write("\t".join([nameAnns[0],nameAnns[-1]]+countString)+'\n')
-                else:
-                    self.output.write("\t".join([nameAnns[0]]+countString)+'\n')
-        self.output.close()
+                    fields = line.strip('\n').split("\t")
+                    if len(fields) < 3:
+                        raise ValueError("BED file line contains less than 3 fields")
+                    if len(fields) > 9:
+                        raise ValueError("BED file line contains more than 9 fields")
+                    iv = GenomicInterval( fields[0], int(fields[1]), int(fields[2]), fields[5] if len(fields) > 5 else "." )
+                    anno = GenomicFeature( fields[3] if len(fields) > 3 else "unnamed", "BED line", iv )
+                    anno.score = float( fields[4] ) if len(fields) > 4 else None
+                    anno.thick = GenomicInterval( iv.chrom, int( fields[6] ), int( fields[7] ), iv.strand ) if len(fields) > 7 else None
+                    anno.itemRgb = [ int(a) for a in fields[8].split(",") ]  if len(fields) > 8 else None
+                    # resume working with annotation
+                    total_counts = 0   # variable for storing the total sum of site counts
+                    max_counts = 0     # maximum site height, maximum site counts
+                    total_length = anno.iv.length  # length of the annotation element
+                    occupied_positions_length = 0  # length of the positions with site counts
+                    nameAnns = self._splitName(anno.name)
+
+                    for giv, count in sites_ga[ anno.iv ].steps():
+                        if count == 0:
+                            continue
+                        # add the number of sites to the total counts 
+                        total_counts += count * giv.length
+                        
+                        # store maximal count 
+                        if count > max_counts:
+                            max_counts = count
+                        
+                        # add length if sites are present in this interval
+                        occupied_positions_length += giv.length
                 
+                    if total_counts == 0:
+                        continue
+                    elif total_counts < occupied_positions_length:
+                        raise Exception("Total site counts {} can not be smaller than occupied_positions_length {} at {}\n{}".format(total_counts, occupied_positions_length, anno.name, anno.iv)) 
+                    # site density is the number of occupied positions divided the total length of the annotation element
+                    site_density = round(Decimal(occupied_positions_length) / Decimal(total_length),5)
+                    # print count data
+                    countString = [str(total_length),str(total_counts),str(occupied_positions_length),str(max_counts),str(site_density)]
+                    if self._isWindowed:
+                        self.output.write("\t".join([nameAnns[0],nameAnns[-1]]+countString)+'\n')
+                    else:
+                        self.output.write("\t".join([nameAnns[0]]+countString)+'\n')
+        self.output.close()
