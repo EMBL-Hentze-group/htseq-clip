@@ -10,7 +10,7 @@ import decimal
 import gzip
 import sys
 
-import HTSeq
+from HTSeq import BAM_Reader, GenomicPosition
 from output import Output
 
 
@@ -149,13 +149,14 @@ class bamCLIP:
     '''
     extractOptions
     extracts the optons ignore and offset from the choice parameter
+    @TODO: Remove me!
     '''
     def extractOptions(self, option):
         # option gets ['', '1i'], for eg
         ignore = False
         if len(option) == 1:
             # print option
-            print self.choice
+            print (self.choice)
 
         if len(option) <= 0:
             return(ignore, 0)
@@ -194,7 +195,7 @@ class bamCLIP:
                     break
                 else:
                     pos = pos - cig.size
-        return(HTSeq.GenomicPosition(almnt.iv.chrom, pos, almnt.iv.strand))
+        return(GenomicPosition(almnt.iv.chrom, pos, almnt.iv.strand))
 
     def getMiddleSiteAsBed(self, almnt):
         pos = self.determineMiddleSite(almnt)
@@ -215,7 +216,7 @@ class bamCLIP:
     Returns GenomicPosition for end site
     '''
     def determineEndSite(self, iv):
-        return(HTSeq.GenomicPosition(iv.chrom, iv.end_d, iv.strand))
+        return(GenomicPosition(iv.chrom, iv.end_d, iv.strand))
 
     '''
     Writes deletions of an alignment parsed by CIGAR string  as bed line
@@ -325,7 +326,7 @@ class bamCLIP:
     Extract start sites
     '''
     def extract_StartSites(self, offset = 0, ignore = False):
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        almnt_file = BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
 
         for almnt in almnt_file:
@@ -341,7 +342,7 @@ class bamCLIP:
     Extract middle sites
     '''   
     def extract_MiddleSites(self):
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        almnt_file = BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
     
         for almnt in almnt_file:
@@ -357,7 +358,7 @@ class bamCLIP:
     Extract end sites. 
     '''   
     def extract_EndSites(self, offset = 0, ignore = False):
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        almnt_file = BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
         for almnt in almnt_file:
             if self.readFullfillsQualityCriteria(almnt):
@@ -372,7 +373,7 @@ class bamCLIP:
     Deletion sites are determined by parsing the CIGAR string.
     ''' 
     def extract_DeletionSites(self):
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        almnt_file = BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
     
         for almnt in almnt_file:
@@ -386,7 +387,7 @@ class bamCLIP:
     Insertion sites are determined by parsing the CIGAR string.
     ''' 
     def extract_InsertionSites(self):
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        almnt_file = BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
     
         for almnt in almnt_file:

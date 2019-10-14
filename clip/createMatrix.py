@@ -85,10 +85,10 @@ class MatrixConverter:
         Argument:
          fn: file name as string
         '''
-        if re.match(r'.*\.gz.*',fn,re.IGNORECASE):
-            return gzip.open(fn,'rt')
+        if fn.lower().endswith((".gz",".gzip")):
+            return gzip.open(fn)
         else:
-            return open(fn,'r')
+            return open(fn)
 
     """
     Helper function
@@ -122,57 +122,4 @@ class MatrixConverter:
             self.out.write('\t'.join(outList) + "\n")
         self.out.close()
 
-
-'''
-parser = argparse.ArgumentParser(description = 'Creating a count matrix from htseq-clip count files.')
-
-
-parser.add_argument('--dir',
-                    action   = 'store',
-                    dest     = 'dir',
-                    required = True, 
-                    help     = 'directory of count files')
-                    
-parser.add_argument('--prefix',
-                    action   = 'store',
-                    dest     = 'prefix',
-                    default  = '',
-                    help     = 'prefix of count files')
-
-parser.add_argument('--postfix',
-                    action   = 'store',
-                    dest     = 'postfix',
-                    required = True,
-                    help     = 'postfix of count files')
-                    
-parser.add_argument('--output',
-                    action   = 'store',
-                    dest     = 'output',
-                    required = True, 
-                    help     = 'destination of output count matrix')
-
-args = parser.parse_args()
-
-
-#print args.dir
-#print args.prefix
-#print args.postfix
-#print args.output
-
-
-m1 = MatrixConverter(args.dir, args.prefix, args.postfix, args.output)
-##print("Reading in window counts")
-
-m1.read_samples()
-#print("Writing window counts") 
-
-
-#print m1.output_filename
-#print m1.count_dict
-#print m1.allsamples
-#print m1.input_dir
-#print m1.samplenames_list
-
-m1.write_matrix()
-'''
 
