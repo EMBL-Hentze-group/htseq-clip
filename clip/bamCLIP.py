@@ -4,17 +4,23 @@
 #          Thomas Schwarzl, schwarzl@embl.de
 # Institution: EMBL Heidelberg
 # Date: October 2015
+# Modified by: Sudeep Sahadevan, sahadeva@embl.de
 # --------------------------------------------------
 
-import decimal
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
+from builtins import object
+
+#import decimal
 import gzip
 import sys
 
 from HTSeq import BAM_Reader, GenomicPosition
 from output import Output
 
-
-class bamCLIP:
+class bamCLIP(object):
     
     # default parameters
     data = {}
@@ -180,7 +186,8 @@ class bamCLIP:
     '''
     def determineMiddleSite(self, almnt):
 
-        pos = round(decimal.Decimal(len(almnt.read.seq)) / 2, 0)
+        # pos = round(decimal.Decimal(len(almnt.read.seq)) / 2, 0)
+        pos = int(round(float(len(almnt.read.seq)) / 2))
 
         cigarList = almnt.cigar
 
@@ -285,10 +292,9 @@ class bamCLIP:
         elif almnt.iv.strand == "-":
             x = position - offset
         else:
-            raise("Strand not known %s" % almnt.iv.strand)
-
+            raise ValueError("Unknown value for strand {}, strand must be '+' or '-'".format(almnt.iv.strand))
         if x < 0:
-            msg = 'Start position cannot be less than zero. Alignment:{} , Read: '.format(str(almnt.iv),almnt.read.name)
+            msg = 'Start position cannot be less than zero. Alignment:{} , Read: {}'.format(str(almnt.iv),almnt.read.name)
             if ignore:
                 sys.stderr.write('Skipping {}'.format(almnt.read.name)+'\n')
                 sys.stderr.write(msg+'\n')

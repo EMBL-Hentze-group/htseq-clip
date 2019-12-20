@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from builtins import object
 __author__ = 'Tom'
 
 import gzip
@@ -7,7 +9,7 @@ import sys
 
 from output import Output
 
-class MatrixConverter:
+class MatrixConverter(object):
 
     """
     Class to convert count files into count matrixes.

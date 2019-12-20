@@ -4,9 +4,14 @@
 #          Thomas Schwarzl, schwarzl@embl.de
 #          Nadia Ashraf
 # Institution: EMBL Heidelberg
+# Modified by Sudeep Sahadevan, sahadeva@embl.de
 # Date: October 2015
 # --------------------------------------------------
 
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
+from builtins import object
 import gzip
 import sys
 import numpy as np
@@ -15,7 +20,7 @@ from collections import Counter, defaultdict
 import HTSeq
 from output import Output
 
-class bedCLIP:
+class bedCLIP(object):
     
     data = {}
     fInput = ""
@@ -38,30 +43,6 @@ class bedCLIP:
         # region types and encoding letters
         self.rtypes = {'exon':'E','intron':'I','CDS':'CDS','3UTR':'3U','5UTR':'5U'}
          
-    #=================================================================================
-    
-    # def buildDictForComparison(self, almnt_file):
-        
-    #     d = {}
-    #     for almnt in almnt_file:
-    #         if almnt.iv.strand == '+':
-    #             if not d.has_key(almnt.iv.chrom):
-    #                 d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]}
-    #             else:
-    #                 if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
-    #                     d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)]]
-    #                 else:
-    #                     d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.start_d, almnt.iv.end_d, almnt.name, int(almnt.score)])
-    #         else:
-    #             if not d.has_key(almnt.iv.chrom):
-    #                 d[almnt.iv.chrom] = {almnt.iv.strand : [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]}
-    #             else:
-    #                 if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
-    #                     d[almnt.iv.chrom][almnt.iv.strand] = [[almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)]]
-    #                 else:
-    #                     d[almnt.iv.chrom][almnt.iv.strand].append([almnt.iv.end_d, almnt.iv.start_d, almnt.name, int(almnt.score)])
-    #     return d
-    
     def buildDictForComparison(self, almnt_file):
         '''
         This method builds up a dictionary for comparison analysis
@@ -526,7 +507,6 @@ class bedCLIP:
             countInd = np.intersect1d( np.where(npA['end']>b[0]),np.where(npA['end']<=b[1]) )
             if countInd.shape[0]==0:
                 continue
-            print(b)
             readPosMap = {} # read to position map
             posReadMap = {} # position to read map
             for ci in countInd:
@@ -553,7 +533,7 @@ class bedCLIP:
                 crosslinkCount += len(readIds)
                 posReadMap[pos] = readIds
             density = float(crosslinkCount)/float(b[1]-b[0])
-            clMax = max([ len(reads) for reads in posReadMap.values()]) # max number of crosslink sites in one pos
+            clMax = max([ len(reads) for reads in list(posReadMap.values())]) # max number of crosslink sites in one pos
             dupCount = npA[countInd]['name'].shape[0] - crosslinkCount
             self._outWriter(chrom=chrom,strand=strand,windowData=b,crosslinkCount=crosslinkCount,crosslinkPosCount=len(posReadMap),maxPosCount=clMax,density=density,
                 dupCount=dupCount,maxDupCountPos=0)
@@ -732,10 +712,10 @@ class bedCLIP:
         d = {}
         
         for almnt in almnt_file:
-            if not d.has_key(almnt.iv.chrom):
-                    d[almnt.iv.chrom] = {almnt.iv.strand : [almnt.iv.start_d]}
+            if almnt.iv.chrom not in d:
+                d[almnt.iv.chrom] = {almnt.iv.strand : [almnt.iv.start_d]}
             else:
-                if not d[almnt.iv.chrom].has_key(almnt.iv.strand):
+                if almnt.iv.strand not in d[almnt.iv.chrom]:
                     d[almnt.iv.chrom][almnt.iv.strand] = [almnt.iv.start_d]
                 else:
                     if almnt.iv.strand == '+':
@@ -762,6 +742,6 @@ class bedCLIP:
         almnt_file = HTSeq.BED_Reader(self.fInput)   
         self.calcDistofSite(almnt_file)
 
-        output.close()
+        self.output.close()
       
     #===================================================================================

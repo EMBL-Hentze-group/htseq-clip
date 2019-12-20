@@ -1,3 +1,8 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import object
+
 import gzip
 import logging
 import os
@@ -236,7 +241,7 @@ class countCLIP(object):
                     elif total_counts < occupied_positions_length:
                         raise Exception("Total site counts {} can not be smaller than occupied_positions_length {} at {}\n{}".format(total_counts, occupied_positions_length, anno.name, anno.iv)) 
                     # site density is the number of occupied positions divided the total length of the annotation element
-                    site_density = round(Decimal(occupied_positions_length) / Decimal(total_length),5)
+                    site_density = round(float(occupied_positions_length) / float(total_length),5)
                     # print count data
                     countString = [str(total_length),str(total_counts),str(occupied_positions_length),str(max_counts),str(site_density)]
                     if self._isWindowed:

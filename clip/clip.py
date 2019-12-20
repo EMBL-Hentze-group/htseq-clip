@@ -81,6 +81,7 @@ def _count(args):
     countC.count(stranded)
 
 def _junction(args):
+    raise NotImplementedError('This function is not yet implemented yet')
     bedC = bedCLIP(args)
     bedC.junction()
 
