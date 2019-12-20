@@ -3,6 +3,9 @@
 # Authors: Thomas Schwarzl, schwarzl@embl.de
 # --------------------------------------------------
 
+from builtins import str
+from builtins import object
+
 import gzip
 import logging
 from collections import OrderedDict, defaultdict
@@ -13,7 +16,7 @@ import HTSeq
 """
 The Class 'GTxFeature'  
 """
-class GTxFeature:
+class GTxFeature(object):
     # String which is returned if attribute for identifier,
     # e.g. geneTypeAttrib for geneType, or geneNameAttrib for 
     # geneName is not available
@@ -105,7 +108,7 @@ class GTxFeature:
     
     def setGeneType(self):
         if self.geneTypeAttrib is not None:
-            if self.feature.attr.has_key(self.geneTypeAttrib):
+            if self.geneTypeAttrib in self.feature.attr:
                 self.geneType = str(self.feature.attr[str(self.geneTypeAttrib)])
             else:
                 # @TODO reformat this message
@@ -116,7 +119,7 @@ class GTxFeature:
 
     def setGeneName(self):
         if self.geneNameAttrib is not None:
-            if self.feature.attr.has_key(self.geneNameAttrib):
+            if self.geneNameAttrib in self.feature.attr.has_key:
                 self.geneName = str(self.feature.attr[str(self.geneNameAttrib)])
             else:
                 # @TODO: reformat this message as well
@@ -127,7 +130,7 @@ class GTxFeature:
     
     def setGeneId(self):
         if self.geneIdAttrib is not None:
-            if self.feature.attr.has_key(self.geneIdAttrib):
+            if self.geneIdAttrib in self.feature.attr.has_key:
                 self.geneId = str(self.feature.attr[str(self.geneIdAttrib)])
             else:
                 # @TODO: reformat this message and change the silly attribute letter

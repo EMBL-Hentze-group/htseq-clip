@@ -8,6 +8,8 @@
 # EMBL Heidelberg
 # --------------------------------------------------
 
+from builtins import str
+from builtins import object
 
 import gzip
 import logging
@@ -98,7 +100,7 @@ class GeneInfo(object):
         '''
         return self._featList
 
-class gffCLIP:
+class gffCLIP(object):
     # @TODO: probably remove these
     # features = {}
     # inputFile  = ''

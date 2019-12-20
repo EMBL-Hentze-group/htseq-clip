@@ -1,10 +1,12 @@
 """
 Class for output file management
 """
+from builtins import object
+import gzip
+import os
+import sys
 
-import gzip, os, sys
-
-class Output:
+class Output(object):
     # constructor 
     def __init__(self, fileName):
         # if file name is empty, redirect to stdin
