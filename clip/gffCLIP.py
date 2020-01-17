@@ -29,7 +29,7 @@ flattens the annotation and outputs the
 results as Bed file
 """
 
-class GeneInfo(object):
+class GeneInfo:
 
     '''
     class for all gene feature related info, such as gene, intron, exon...
@@ -195,9 +195,7 @@ class gffCLIP(object):
                 self.processGene(gene)
                 
                 # then create a new Gene object
-                gene = Gene(feature,self.splitExons)
-                gene.splitExons = self.splitExons
-                gene.processGeneOnlyInformation = self.processGeneOnlyInformation
+                gene = Gene(feature,self.splitExons,self.processGeneOnlyInformation)
                 
             # else add the gene region info  
             else:
@@ -234,9 +232,7 @@ class gffCLIP(object):
             _gene = geneObj.gene
             if _gene is None:
                 continue
-            gene = Gene(GTxFeature(_gene))
-            gene.splitExons = self.splitExons
-            gene.processGeneOnlyInformation = self.processGeneOnlyInformation
+            gene = Gene(GTxFeature(_gene),self.splitExons,self.processGeneOnlyInformation)
             for f in geneObj.features:
                 if f.type in set(self.geneDefinitions):
                     continue

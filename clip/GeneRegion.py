@@ -3,21 +3,20 @@
 # Authors: Thomas Schwarzl, schwarzl@embl.de
 # --------------------------------------------------
 
-import gzip, HTSeq
-from collections import OrderedDict
-from output import Output
+import gzip
 import logging
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 
-    
+from output import Output
+
+
 """
 The Class 'GeneRegion' manages a genomic region of a gene.
 """
 class GeneRegion:
-    logger = logging.getLogger(__name__)
 
     def __init__(self, gene, interval):
-        self.logger.debug("Init GeneRegion")
+        logging.debug("Init GeneRegion")
 
         # corresponding gene
         self.gene           = gene
@@ -58,7 +57,7 @@ class GeneRegion:
         else: # both True
             flag = 3 
 
-        self.logger.debug("Calculated flag: (%s, %s) -> %s" % (self.upstreamFlag, self.downstreamFlag, flag))
+        logging.debug("Calculated flag: (%s, %s) -> %s" % (self.upstreamFlag, self.downstreamFlag, flag))
         return flag
 
     def isExon(self):
@@ -109,7 +108,7 @@ class GeneRegion:
     def doSplit(self):
         out = []
         
-        self.logger.debug("splitting exon region %s" % self)
+        logging.debug("splitting exon region %s" % self)
         
         for (regionInterval, regionType) in self.gene.details[ self.interval ].steps():
             region = GeneRegion(self.gene, regionInterval)
@@ -123,4 +122,3 @@ class GeneRegion:
             region.downstreamFlag = self.downstreamFlag
             out.append( region )
         return(out) 
-

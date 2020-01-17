@@ -3,11 +3,11 @@
 # Authors: Thomas Schwarzl, schwarzl@embl.de
 # ---------------------------------------------------
 
-import gzip, HTSeq
-from collections import OrderedDict
-from output import Output
+import gzip
 import logging
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
+
+from output import Output
 
 
 """
@@ -17,7 +17,6 @@ gene type is stored.
 """
 
 class GeneLengthSummary:
-    logger = logging.getLogger(__name__)
     splitExons = True
     
     def __init__(self):
@@ -56,4 +55,3 @@ class GeneLengthSummary:
         for type,length in self.genetypes.items():
             out += "track type %s %s\n" % (str(type), str(length))
         return str(out)
-        

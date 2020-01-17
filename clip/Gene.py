@@ -4,18 +4,16 @@
 # --------------------------------------------------
 
 
-import gzip, HTSeq
-from collections import OrderedDict
-from output import Output
+import gzip
 import logging
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 
-#logging.basicConfig(level = logging.DEBUG)
-logging.basicConfig(level = logging.ERROR)
+from HTSeq import GenomicArray, GenomicArrayOfSets, GenomicPosition, GenomicFeature
 
-from GTxFeature import GTxFeature
 from GeneRegion import GeneRegion
-from HTSeq import GenomicFeature
+from GTxFeature import GTxFeature
+from output import Output
+
 
 """
 The Class 'Gene' stores genomic gene location information
@@ -27,7 +25,6 @@ and calculates the Introns from the inbetween spaces.
 Also, the CDS and UTR information is stored and flatten.
 """
 class Gene:
-    logger = logging.getLogger(__name__)  
     __CDS__    = "CDS"
     __3UTR__   = "3UTR"
     __5UTR__   = "5UTR"
@@ -37,37 +34,36 @@ class Gene:
     """
     'Gene': init
     """
-    def __init__(self, feature,splitExons=True):
-        self.logger.debug("Initializing new gene")
+    def __init__(self, feature,splitExons=True,processGeneOnlyInformation=True):
+        logging.debug("Initializing new gene")
         self.splitExons = splitExons
+        self.processGeneOnlyInformation = processGeneOnlyInformation
         self.stranded = True
         self.forwardSymbol = "+"
         self.reverseSymbol = "-"
-        self.regionPriorityOrder = (self.__CDS__,
-                                    self.__3UTR__,
-                                    self.__5UTR__)
+        self.regionPriorityOrder = (self.__CDS__,self.__3UTR__,self.__5UTR__)
 
         self.features = {
-            self.__CDS__  : HTSeq.GenomicArrayOfSets('auto', stranded = self.stranded),
-            self.__3UTR__ : HTSeq.GenomicArrayOfSets('auto', stranded = self.stranded),
-            self.__5UTR__ : HTSeq.GenomicArrayOfSets('auto', stranded = self.stranded),
-            self.__EXON__ : HTSeq.GenomicArrayOfSets('auto', stranded = self.stranded)
+            self.__CDS__  : GenomicArrayOfSets('auto', stranded = self.stranded),
+            self.__3UTR__ : GenomicArrayOfSets('auto', stranded = self.stranded),
+            self.__5UTR__ : GenomicArrayOfSets('auto', stranded = self.stranded),
+            self.__EXON__ : GenomicArrayOfSets('auto', stranded = self.stranded)
         }
 
-        self.details = HTSeq.GenomicArrayOfSets('auto', stranded = self.stranded)
+        self.details = GenomicArrayOfSets('auto', stranded = self.stranded)
 
         self.startSites = {
-            self.__CDS__  : HTSeq.GenomicArray('auto', stranded = self.stranded),
-            self.__3UTR__ : HTSeq.GenomicArray('auto', stranded = self.stranded),
-            self.__5UTR__ : HTSeq.GenomicArray('auto', stranded = self.stranded),
-            self.__EXON__ : HTSeq.GenomicArray('auto', stranded = self.stranded)
+            self.__CDS__  : GenomicArray('auto', stranded = self.stranded),
+            self.__3UTR__ : GenomicArray('auto', stranded = self.stranded),
+            self.__5UTR__ : GenomicArray('auto', stranded = self.stranded),
+            self.__EXON__ : GenomicArray('auto', stranded = self.stranded)
         }
 
         self.endSites = {
-            self.__CDS__  : HTSeq.GenomicArray('auto', stranded = self.stranded),
-            self.__3UTR__ : HTSeq.GenomicArray('auto', stranded = self.stranded),
-            self.__5UTR__ : HTSeq.GenomicArray('auto', stranded = self.stranded),
-            self.__EXON__ : HTSeq.GenomicArray('auto', stranded = self.stranded)
+            self.__CDS__  : GenomicArray('auto', stranded = self.stranded),
+            self.__3UTR__ : GenomicArray('auto', stranded = self.stranded),
+            self.__5UTR__ : GenomicArray('auto', stranded = self.stranded),
+            self.__EXON__ : GenomicArray('auto', stranded = self.stranded)
         }
 
         self.storage = { 
@@ -136,12 +132,12 @@ class Gene:
     Calculating total exon and total intron number
     """
     def calculateTotalExonAndIntronCount(self):
-        self.logger.debug("processing gene")
+        logging.debug("processing gene")
         
         self.exonTotal  = (len(self.rawRegionList) + 1) / 2
         self.intronTotal = self.exonTotal - 1
         
-        self.logger.debug("exon total: %s, intron total: %s" % (str(self.exonTotal), str(self.intronTotal)))
+        logging.debug("exon total: {}, intron total: {}".format(str(self.exonTotal), str(self.intronTotal)))
     
     
     """
@@ -159,7 +155,7 @@ class Gene:
     The processed annotation is stored in the variable self.regionList
     """
     def process(self):
-        self.logger.debug("processing gene")
+        logging.debug("processing gene")
         
         if self.exonsWereAdded():
         
@@ -177,7 +173,7 @@ class Gene:
         else:
             if self.processGeneOnlyInformation:
                 
-                self.logger.debug("adding an exon for a gene without exon information.")
+                logging.debug("adding an exon for a gene without exon information.")
                 
                 feature = GTxFeature(GenomicFeature("name", self.__EXON__, self.feature.feature.iv))
                 
@@ -215,7 +211,7 @@ class Gene:
     def calculateExonsAndIntrons(self):
         self.calculateTotalExonAndIntronCount()
         
-        self.logger.debug("calculating exons and introns and their corresponding flags, number, and total count")
+        logging.debug("calculating exons and introns and their corresponding flags, number, and total count")
         
         exonIndex   = 1 if self.isForwardStrand() else self.exonTotal 
         intronIndex = 1 if self.isForwardStrand() else self.intronTotal 
@@ -224,12 +220,12 @@ class Gene:
         
         for (regionInterval, regionInfo) in self.rawRegionList:
             
-            self.logger.debug("processing region %s - %s" % (str(regionInterval), str(regionInfo)))
+            logging.debug("processing region {} - {}".format(str(regionInterval), str(regionInfo)))
             
             region = GeneRegion(self, regionInterval)
             # if exon
             if len(regionInfo) > 0: # == "exon":
-                self.logger.debug("processing exon")
+                logging.debug("processing exon")
                 
                 upstreamFlag   = self.getExonUpstreamFlag(regionInterval)
                 downstreamFlag = self.getExonDownstreamFlag(regionInterval)
@@ -244,7 +240,7 @@ class Gene:
 
             # else intron
             else:
-                self.logger.debug("processing intron")
+                logging.debug("processing intron")
                 
                 region.type = self.__INTRON__
                 region.index = intronIndex
@@ -283,7 +279,7 @@ class Gene:
     Calculates flags for Introns by retrieving flags from the neighboring regions.
     """
     def calculateIntronFlags(self):
-        self.logger.debug("calculating intron flags directional")
+        logging.debug("calculating intron flags directional")
 
         regionIndex = 1
         while regionIndex < len(self.regionList):
@@ -297,7 +293,7 @@ class Gene:
     to 'detailedRegionList'
     """
     def splitExonsIntoUTRandCDSRegions(self):
-        self.logger.debug("calculate UTR and CDS regions")
+        logging.debug("calculate UTR and CDS regions")
         
         self.detailedRegionList = []
         
@@ -329,7 +325,7 @@ class Gene:
     """
     def getExonUpstreamFlag(self, interval):
         length = len(list(self.startSites[ self.__EXON__ ][ interval ].steps()))
-        self.logger.debug("Get exon start sites in interval: %s" % length)
+        logging.debug("Get exon start sites in interval: %s" % length)
         return length == 1
 
     """
@@ -337,7 +333,7 @@ class Gene:
     """
     def getExonDownstreamFlag(self, interval):
         length = len(list(self.endSites[ self.__EXON__ ][ interval ].steps()))
-        self.logger.debug("Get exon end sites in interval: %s" % length)
+        logging.debug("Get exon end sites in interval: %s" % length)
         return length == 1
 
     """
@@ -347,12 +343,12 @@ class Gene:
         if self.isProcessed():
             raise Exception("Gene already has been processed, you cannot add additional regions.")
         
-        self.logger.debug("adding info %s " % feature)
+        logging.debug("adding info %s " % feature)
 
         self.assertFeatureBelongsToGene(feature)
         
         if feature.isExon():
-            self.logger.debug("invoking addRegion %s %s" % (feature, self.__EXON__))
+            logging.debug("invoking addRegion %s %s" % (feature, self.__EXON__))
             self.addRegion(feature, self.__EXON__)
 
         elif feature.isCDS():
@@ -365,7 +361,7 @@ class Gene:
             self.storeRegion(feature, self.__3UTR__)
         
         else:
-            self.logger.debug("ignoring feature %s" % feature)
+            logging.debug("ignoring feature %s" % feature)
     
     """
     Assert that the feature belongs to the gene
@@ -381,18 +377,18 @@ class Gene:
     
     """
     def addRegion(self, feature, name):
-        self.logger.debug("adding {} {} {}".format(name, feature, feature.getInterval()))
+        logging.debug("adding {} {} {}".format(name, feature, feature.getInterval()))
         
         self.features[ name ][ feature.getInterval() ] = name 
-        self.startSites[ name ][ HTSeq.GenomicPosition( feature.getInterval().chrom,
+        self.startSites[ name ][ GenomicPosition( feature.getInterval().chrom,
                                                         feature.getInterval().start_d,
                                                         strand = feature.getStrand() ) ] = True 
-        self.endSites[ name ][ HTSeq.GenomicPosition(   feature.getInterval().chrom,
+        self.endSites[ name ][ GenomicPosition(   feature.getInterval().chrom,
                                                         feature.getInterval().end_d,
                                                         strand = feature.getStrand() ) ] = True 
         self.details[ feature.getInterval() ] = name
         
-        self.logger.debug("finished adding %s %s" % (name, feature))
+        logging.debug("finished adding %s %s" % (name, feature))
 
 
     """
@@ -400,7 +396,7 @@ class Gene:
     Processing can be only started once all the regions are stored.
     """
     def storeRegion(self, feature, name):
-        self.logger.debug("storing %s %s" % (str(name), str(feature)))
+        logging.debug("storing %s %s" % (str(name), str(feature)))
         self.storage[ name ].append(feature)
 
     
@@ -408,7 +404,7 @@ class Gene:
     This function adds regions according to the region priority order
     """
     def processStoredRegions(self):
-        self.logger.debug("processing stored regions")
+        logging.debug("processing stored regions")
         
         for regionName in self.regionPriorityOrder:
             for feature in self.storage[ regionName ]:
