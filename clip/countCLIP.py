@@ -1,5 +1,3 @@
-from __future__ import print_function
-from __future__ import absolute_import
 from builtins import str
 from builtins import object
 
@@ -115,8 +113,8 @@ class countCLIP(object):
         try:
             arr = name.split(self.__dividerName__)
         except ValueError as err:
-            print('Error processing annotation name: {}'.format(str(err)))
-            print('Could not split name with divider {} from {}'.format(self.__dividerName__,name))
+            logging.exception('Error processing annotation name: {}'.format(str(err)))
+            logging.exception('Could not split name with divider {} from {}'.format(self.__dividerName__,name))
 
         if len(arr)!= self._nameColCount:
             raise ValueError("Malformed name entry '{}'. There must be {} fields separated by {}".format(name,self._nameColCount,self.__dividerName__))
@@ -130,8 +128,8 @@ class countCLIP(object):
         try:
             (genePositionNumber, genePositionTotal) = arr[self.__indexRegionPos__].split(self.__dividerRegion__)
         except ValueError as err:
-            print ('Error processing annotation name: {}'.format(str(err)))
-            print ('Could not split value with index {} with divider {} from {}'.format(self.__indexRegionPos__, 
+            logging.exception('Error processing annotation name: {}'.format(str(err)))
+            logging.exception('Could not split value with index {} with divider {} from {}'.format(self.__indexRegionPos__, 
                                                                                        self.__dividerRegion__,
                                                                                        arr))
             

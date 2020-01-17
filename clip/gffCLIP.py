@@ -61,19 +61,19 @@ class GeneInfo(object):
         '''
         geneDef = list(self._geneDefinitions & set(self._typeMap.keys()))
         if len(geneDef)==0:
-            sys.stderr.write('{}: No gene definitions found!...Skipping\n'.format(self.id))
+            logging.warning('{}: No gene definitions found!...Skipping'.format(self.id))
             return None
         elif len(geneDef)>1:
-            sys.stderr.write('{}: Multiple gene definitions found!...Skipping\n'.format(self.id))
+            logging.warning('{}: Multiple gene definitions found!...Skipping'.format(self.id))
             return None
         else:
             geneInd = self._typeMap[geneDef[0]]
             if len(geneInd)>1:
                 if self._checkGeneFeature(geneInd):
-                    sys.stderr.write('{}: Found multiple attributes for the same gene co-ordinates, using one at random\n'.format(self.id))
+                    logging.warning('{}: Found multiple attributes for the same gene co-ordinates, using one at random'.format(self.id))
                     return self._featList[geneInd[0]]
                 else:
-                    sys.stderr.write('{}: Multiple gene features found!...Skipping\n'.format(self.id))
+                    logging.warning('{}: Multiple gene features found!...Skipping'.format(self.id))
                     return None
             else:
                 return self._featList[geneInd[0]]
@@ -313,13 +313,13 @@ class gffCLIP(object):
             if pos2 >= end:
                 UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
                 seq = (line[0], str(start), str(end), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
-                self.fOutput.write(str('\t').join(seq) + "\n")
+                self.fOutput.write("\t".join(seq) + "\n")
                 windowCount+=1
             else:
                 while pos2 < end:
                     UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
                     seq = (line[0], str(pos1), str(pos2), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
-                    self.fOutput.write(str('\t').join(seq) + "\n")
+                    self.fOutput.write("\t".join(seq) + "\n")
                     pos1 = pos1 + self.windowStep
                     pos2 = pos2 + self.windowStep
                     windowCount+=1
@@ -327,7 +327,7 @@ class gffCLIP(object):
                         pos2 = end
                         UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
                         seq = (line[0], str(pos1), str(pos2), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
-                        self.fOutput.write(str('\t').join(seq) + "\n")
+                        self.fOutput.write("\t".join(seq) + "\n")
                         windowCount+=1
             windowidMap[name[0]] = windowCount
         almnt_file.close()

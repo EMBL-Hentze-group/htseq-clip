@@ -1,12 +1,14 @@
 import argparse
+import logging
 import os
 import re
 import sys
 import traceback
 
+from datetime import datetime
+
 from bamCLIP import bamCLIP
 from bedCLIP import bedCLIP
-from bokehCLIP import bokehCLIP
 from countCLIP import countCLIP
 from createMatrix import MatrixConverter
 from featureCLIP import feature
@@ -60,15 +62,26 @@ def _extract(args):
     '''
     bamC = bamCLIP(args)
     if args.choice == 's':
+        logging.info('Extracting start sites')
+        logging.info('Bam file : {}, output file: {}, offset: {}'.format(args.input,args.output,args.offset))
         bamC.extract_StartSites(offset=args.offset,ignore=args.ignore)
     elif args.choice == 'i':
+        logging.info('Extracting insertion sites')
+        logging.info('Bam file : {}, output file: {}'.format(args.input,args.output))
         bamC.extract_InsertionSites()
-    elif args.choice == 'd':      
+    elif args.choice == 'd':
+        logging.info('Extracting deletion sites')
+        logging.info('Bam file : {}, output file: {}'.format(args.input,args.output))
         bamC.extract_DeletionSites()
-    elif args.choice == 'm': 
+    elif args.choice == 'm':
+        logging.info('Extracting middle sites')
+        logging.info('Bam file : {}, output file: {}'.format(args.input,args.output))
         bamC.extract_MiddleSites()
     elif args.choice == 'e':
+        logging.info('Extracting end sites')
+        logging.info('Bam file : {}, output file: {}, offset: {}'.format(args.input,args.output,args.offset))
         bamC.extract_EndSites(offset=args.offset,ignore=args.ignore)
+    logging.info('run completed at {}'.format(datetime.now().strftime('%Y-%m-%d %H:%M')))
 
 def _count(args):
     '''

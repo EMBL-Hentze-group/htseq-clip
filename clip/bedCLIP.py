@@ -8,7 +8,6 @@
 # Date: October 2015
 # --------------------------------------------------
 
-from __future__ import absolute_import
 from builtins import str
 from builtins import range
 from builtins import object
@@ -80,7 +79,7 @@ class bedCLIP(object):
         seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
                 'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
                 'Density','Total before duplication removal','Max height before duplication removal ')
-        self.output.write(str("\t").join(seq)+'\n')
+        self.output.write("\t".join(seq)+'\n')
         for line in fn:
             if line.startswith("track"):
                 self.output.write('#'+line)
@@ -121,7 +120,7 @@ class bedCLIP(object):
             name = b[2].split("@")
             posi = name[4].split("/")
             seq = (chrom, str(b[0]+1), str(b[1]+1), name[0], name[1], str(1), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
-            self.output.write(str("\t").join(seq) + "\n")
+            self.output.write("\t".join(seq) + "\n")
 
     #===================================================================================
     #===================================================================================
@@ -140,7 +139,7 @@ class bedCLIP(object):
         seq = ('Chromosome','Region start pos','Region end pos','Gene ID','Gene name','Flag','Strand','Type of region','Number of exon or intron','Total exons or introns',
                 'Functional type','Length in nt', 'Total cross-link sites in region','Positions where crosslinks are located', 'Max height',
                 'Density','Total before duplication removal','Max height before duplication removal ')
-        self.output.write(str("\t").join(seq)+'\n')
+        self.output.write("\t".join(seq)+'\n')
         for line in fn:
             if line.startswith("track"):
                 self.output.write('#'+line)
@@ -266,7 +265,7 @@ class bedCLIP(object):
                                 
             if not intergenicCounts == 0:
                 seq = (chrom, '~', '~', '~', '~','~', strand, 'intergenic', '~', '~', 'intergenic', '~', str(intergenicCounts), '~', '~', '~', '~', '~')
-                self.output.write(str("\t").join(seq) + "\n")
+                self.output.write("\t".join(seq) + "\n")
                                 
                     
     #===================================================================================
@@ -311,11 +310,11 @@ class bedCLIP(object):
                 #else its in a region or in an intergenic region between two genes
                 if a[1] < b_First[0]:
                     seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(1))
-                    self.output.write(str("\t").join(seq) + "\n")
+                    self.output.write("\t".join(seq) + "\n")
                     check = False
                 elif a[0] > b_Last[1]:
                     seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(3))
-                    self.output.write(str("\t").join(seq) + "\n")
+                    self.output.write("\t".join(seq) + "\n")
                     check = False
                 else:
                         
@@ -341,15 +340,15 @@ class bedCLIP(object):
                                 d2 = d2 * -1
                             # modified from the original module to account for 'gene_name' in the annotation tags
                             seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d2), str(d1), str(flag), strand, bn[1], bn[2], bn[3], bn[4])
-                            self.output.write(str("\t").join(seq) + "\n")
+                            self.output.write("\t".join(seq) + "\n")
                             check = False
                             # else:         
                             #     seq = (chrom, str(a[0]), str(a[1]), bn[0], str(d1) , str(d2), str(flag), strand, bn[1], bn[2], bn[3], bn[4])
-                            #     output.write(str("\t").join(seq) + "\n")
+                            #     output.write("\t".join(seq) + "\n")
                             #     check = False
                         else:
                             seq = (chrom, str(a[0]), str(a[1]), '~', '~', '~', '~', strand, '~', 'intergenic', 'intergenic', str(2))
-                            self.output.write(str("\t").join(seq) + "\n")
+                            self.output.write("\t".join(seq) + "\n")
                             check = False                              
     #===================================================================================
     
@@ -573,7 +572,7 @@ class bedCLIP(object):
                 sys.stderr.write('WARNING! Skipping {}, found uknown region type: {}\n'.format(line.strip('\n'),feature))
                 continue
             seq = (idx+":"+letter+featureNr+"W"+windowNr, counts)
-            self.output.write(str("\t").join(seq) + "\n")
+            self.output.write("\t".join(seq) + "\n")
         self.output.close()
     #===================================================================================
     
@@ -604,11 +603,11 @@ class bedCLIP(object):
             
             posi = name[4].split("/")
             seq = (chrom, str(b[0]+1), str(b[1]+1), name[0],name[1], str(b[3]), strand, name[3], posi[0], posi[1], name[2], str(length), str(sum(d_count.values())), str(counts), str(d_count[m_count]), str(density), str(dup_counts), str(d_dup[m_dup]))
-            self.output.write(str("\t").join(seq) + "\n")
+            self.output.write("\t".join(seq) + "\n")
         else:
             posi = name[4].split("/")
             seq = (chrom, str(b[0]+1), str(b[1]+1), name[0],name[1], str(b[3]), strand, name[3], posi[0], posi[1], name[2], str(length), str(0), str(0), str(0), str(0), str(0), str(0))
-            self.output.write(str("\t").join(seq) + "\n")
+            self.output.write("\t".join(seq) + "\n")
 
     #===================================================================================
     
