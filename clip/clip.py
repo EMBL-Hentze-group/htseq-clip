@@ -40,9 +40,9 @@ def _annotation(args):
         if args.unsorted:
             raise(se)
         else:
-            sys.stderr.write(str(se)+'\n')
-            sys.stderr.write('Trying to parse {} with "--unsorted" option.\n'.format(args.gff))
-            sys.stderr.write('Warning! this step is memory hungry\n')
+            logging.warning(str(se)+'\n')
+            logging.warning('Trying to parse {} with "--unsorted" option.\n'.format(args.gff))
+            logging.warning('This step is memory hungry\n')
             gffc.process(True)
 
 def _createSlidingWindows(args):
@@ -163,7 +163,7 @@ def main():
     epilog = "For command line options of each argument, use: {} <positional argument> -h".format(prog)
     # @TODO: some of the argument names are confusing, needs fixing
     parser = argparse.ArgumentParser(prog=prog, description=description,epilog=epilog,formatter_class=argparse.RawDescriptionHelpFormatter)
-    subps = parser.add_subparsers(help='Need positional arguments',dest='subparser')
+    subps = parser.add_subparsers(help='Need positional arguments',dest='subparser',required=True)
     ''' ____________________ [Annotation] ___________________  '''
     # annotation
     ahelp = 'annotation: flattens (to BED format) the given annotation file (in GFF format)'

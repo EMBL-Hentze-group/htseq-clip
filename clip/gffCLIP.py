@@ -63,10 +63,8 @@ class GeneInfo(object):
         if len(geneDef)==0:
             logging.warning('{}: No gene definitions found!...Skipping'.format(self.id))
             return None
-        elif len(geneDef)>1:
-            logging.warning('{}: Multiple gene definitions found!...Skipping'.format(self.id))
-            return None
         else:
+            logging.warning('{}: Multiple gene definitions found! using one at random'.format(self.id))
             geneInd = self._typeMap[geneDef[0]]
             if len(geneInd)>1:
                 if self._checkGeneFeature(geneInd):
@@ -116,7 +114,6 @@ class gffCLIP(object):
     processGeneOnlyInformation = True
     geneDefinitions = ["tRNA", "gene", "tRNAscan", "tRNA_gene"] 
     
-    logger    = logging.getLogger(__name__) 
 
     """
     gffCLIP: Init
@@ -124,7 +121,6 @@ class gffCLIP(object):
     def __init__(self, options):
         if hasattr(options, 'gff'):
             self.gtfFile = options.gff
-            self.logger.debug("set gff")
 
         if hasattr(options, 'windowSize'):
             self.windowSize = options.windowSize
@@ -163,7 +159,7 @@ class gffCLIP(object):
         consecutive lines. An exception will be raised if
         the annotation is out of order.
         """
-        self.logger.debug("Reading from '%s'" % self.gtfFile)
+        logging.debug("Reading from {}".format(self.gtfFile))
         
         # initializing gff reader
         gtf = HTSeq.GFF_Reader(self.gtfFile, end_included=True)
@@ -282,9 +278,7 @@ class gffCLIP(object):
         for line in almnt_file:
             if line.startswith("track"):
                 continue
-            line = line.split('\n')
-            line = line[0].split('\t')
-
+            line = line.strip().split('\n')
             name = line[3].split('@')
             featureNumber, _ = name[4].split('/')
             # this will creaet duplicate windowCount if there are multiple genes annotated to the same chromosomal locations
