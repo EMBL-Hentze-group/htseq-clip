@@ -243,7 +243,7 @@ class gffCLIP(object):
     Processing gene
     """
     def processGene(self, gene):
-        self.logger.debug("annotation gene function")
+        logging.debug("annotation gene function")
         if gene is not None:
             #gene.toBed()
             # write the gene as bed entries to output

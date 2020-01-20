@@ -8,12 +8,12 @@ import traceback
 from datetime import datetime
 
 from bamCLIP import bamCLIP
-from bedCLIP import bedCLIP
+#from bedCLIP import bedCLIP
 from countCLIP import countCLIP
 from createMatrix import MatrixConverter
-from featureCLIP import feature
+#from featureCLIP import feature
 from gffCLIP import gffCLIP
-from heatmap import HeatMap
+#from heatmap import HeatMap
 
 
 '''
@@ -119,14 +119,9 @@ Given below is should be the completed help file, functions with a '*' needs to 
     
     [Counting]
         count                   count sites in annotation
-        feature*                count sites in repeated regions
             
     [Distances]
         junction                calculates distances to junctions
-        dist*                    calculates nearest cross link site to a feature
-
-    [Visualisation] 
-        plot*                   visualisation 
 
     [Helpers]
         createMatrix            create R friendly matrix from count function output files

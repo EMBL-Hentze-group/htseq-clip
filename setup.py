@@ -1,6 +1,6 @@
 
-from __future__ import print_function
-import sys, os
+import sys
+import os
 from codecs import open
 
 if sys.version_info < (2, 7):
