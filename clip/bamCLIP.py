@@ -12,7 +12,7 @@ import gzip
 import logging
 
 from HTSeq import BAM_Reader, GenomicPosition
-from output import Output
+from .output import Output
 
 
 class bamCLIP(object):
@@ -168,8 +168,7 @@ class bamCLIP(object):
     '''
     def determineMiddleSite(self, almnt):
 
-        pos = round(decimal.Decimal(len(almnt.read.seq)) / 2, 0)
-
+        pos = decimal.Decimal(decimal.Decimal(len(almnt.read.seq))/2).quantize(decimal.Decimal(1),rounding=decimal.ROUND_HALF_UP)
         cigarList = almnt.cigar
 
         if almnt.iv.strand == "-":

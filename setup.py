@@ -2,9 +2,10 @@
 import sys
 import os
 from codecs import open
+from setuptools import setup, find_packages
 
-if sys.version_info < (2, 7):
-    print ("At least Python 2.7 is required. Please install Python 2.7.")
+if sys.version_info < (3, 5):
+    print ("At least Python 3.5 is required. Please install Python 3.5.")
     exit(1)
 
 try:
@@ -27,8 +28,8 @@ with open(os.path.join(here, 'README'), encoding='utf-8') as f:
 
 setup(
     name='htseq-clip',
-    version='0.1.28b',
-    description='htseq-clip: a toolset for the analysis of iCLIP datasets',
+    version='0.2.0b',
+    description='htseq-clip: a toolset for the analysis of e/iCLIP datasets',
 	long_description=long_description,
     url='https://bitbucket.org/htseq-clip/htseq-clip',
     author='Marko Fritz, Thomas Schwarzl',
@@ -42,10 +43,11 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Environment :: Console',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.7',
     ],
-	install_requires=['HTSeq', 'bokeh', 'pandas', 'pysam', 'biopython'],
-    packages=['clip'],
+	install_requires=['HTSeq', 'pandas', 'pysam', 'biopython'],
+    packages=['clip','tests'],
+    test_suite = 'tests',
 	entry_points = {
         'console_scripts': ['htseq-clip=clip.command_line:main'],
     }

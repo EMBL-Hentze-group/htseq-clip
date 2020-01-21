@@ -7,7 +7,7 @@ import os
 import re
 import sys
 
-from output import Output
+from .output import Output
 
 class MatrixConverter(object):
 

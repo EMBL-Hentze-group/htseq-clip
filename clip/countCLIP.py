@@ -11,7 +11,7 @@ from shutil import copyfile
 
 from HTSeq import BED_Reader, GenomicArray, GenomicFeature, GenomicInterval
 
-from output import Output
+from .output import Output
 
 class TempBed(object):
     '''

@@ -7,12 +7,12 @@ import traceback
 
 from datetime import datetime
 
-from bamCLIP import bamCLIP
+from .bamCLIP import bamCLIP
 #from bedCLIP import bedCLIP
-from countCLIP import countCLIP
-from createMatrix import MatrixConverter
+from .countCLIP import countCLIP
+from .createMatrix import MatrixConverter
 #from featureCLIP import feature
-from gffCLIP import gffCLIP
+from .gffCLIP import gffCLIP
 #from heatmap import HeatMap
 
 
@@ -81,7 +81,7 @@ def _extract(args):
         logging.info('Extracting end sites')
         logging.info('Bam file : {}, output file: {}, offset: {}'.format(args.input,args.output,args.offset))
         bamC.extract_EndSites(offset=args.offset,ignore=args.ignore)
-    logging.info('run completed at {}'.format(datetime.now().strftime('%Y-%m-%d %H:%M')))
+    
 
 def _count(args):
     '''
@@ -93,10 +93,10 @@ def _count(args):
         stranded = False
     countC.count(stranded)
 
-def _junction(args):
-    raise NotImplementedError('This function is not yet implemented yet')
-    bedC = bedCLIP(args)
-    bedC.junction()
+# def _junction(args):
+#     raise NotImplementedError('This function is not yet implemented yet')
+#     bedC = bedCLIP(args)
+#     bedC.junction()
 
 def _countMatrix(args):
     mC = MatrixConverter(args.input,args.prefix,args.postfix,args.output)
@@ -119,9 +119,6 @@ Given below is should be the completed help file, functions with a '*' needs to 
     
     [Counting]
         count                   count sites in annotation
-            
-    [Distances]
-        junction                calculates distances to junctions
 
     [Helpers]
         createMatrix            create R friendly matrix from count function output files
@@ -211,11 +208,11 @@ def main():
     count.add_argument('--unstranded',dest='unstranded', help='by default, crosslink site counting is strand specific. Use this flag for non strand specific crosslink site counting',action='store_true')
     ''' ____________________ [Distances] ___________________ '''
     # junction 
-    jhelp = 'junction: calculates the distance from crosslink/deletion/insertion sites to the junction'
-    junction = subps.add_parser('junction',description=jhelp, formatter_class=argparse.RawTextHelpFormatter) # help='crosslink junctions',
-    junction.add_argument('-i','--input',metavar='input bed',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
-    junction.add_argument('-a','--ann',metavar = 'annotation',dest='compare',help='flattened annotation file (.bed[.gz]), see "{} annotation -h"'.format(prog),required=True)
-    junction.add_argument('-o','--output',metavar = 'output file',dest='output',help='output junction file (.txt[.gz], default: print to console)',default=None,type=str)
+    # jhelp = 'junction: calculates the distance from crosslink/deletion/insertion sites to the junction'
+    # junction = subps.add_parser('junction',description=jhelp, formatter_class=argparse.RawTextHelpFormatter) # help='crosslink junctions',
+    # junction.add_argument('-i','--input',metavar='input bed',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
+    # junction.add_argument('-a','--ann',metavar = 'annotation',dest='compare',help='flattened annotation file (.bed[.gz]), see "{} annotation -h"'.format(prog),required=True)
+    # junction.add_argument('-o','--output',metavar = 'output file',dest='output',help='output junction file (.txt[.gz], default: print to console)',default=None,type=str)
     ''' ____________________ [Helpers] ___________________ '''
     # createMatrix
     cmhelp = 'createMatrix: create R friendly output matrix file from count function output files'
@@ -240,6 +237,7 @@ def main():
     # heatmap = subps.add_parser('heatmap',description=hhelp) # help='plot heatmap',
     # Now read in arguments and process
     try:
+        logging.info('run started at {}'.format(datetime.now().strftime('%Y-%m-%d %H:%M')))
         args = parser.parse_args()
         if args.subparser == 'annotation':
             # parse annotations
@@ -255,15 +253,16 @@ def main():
         elif args.subparser == 'count':
             # count extracted crosslink sites
             _count(args)
-        elif args.subparser == 'junction':
-            # generate junction info from extracted crosslink sites
-            _junction(args)
+        # elif args.subparser == 'junction':
+        #     # generate junction info from extracted crosslink sites
+        #     _junction(args)
         elif args.subparser == 'createMatrix':
             # collect output files from count function and generate an R friendly matrix
             if args.prefix == '' and args.postfix == '':
                 createMatrix.print_help()
                 raise argparse.ArgumentTypeError('Input values for both arguments "--prefix" and "--postfix" cannot be empty! Either one of the values MUST be given')
             _countMatrix(args)
+        logging.info('run completed at {}'.format(datetime.now().strftime('%Y-%m-%d %H:%M')))
     except KeyboardInterrupt:
         sys.stderr.write('Keyboard interrupt... good bye\n')
         sys.exit(1)

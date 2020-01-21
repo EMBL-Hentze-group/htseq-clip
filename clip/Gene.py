@@ -10,9 +10,9 @@ from collections import OrderedDict, defaultdict
 
 from HTSeq import GenomicArray, GenomicArrayOfSets, GenomicPosition, GenomicFeature
 
-from GeneRegion import GeneRegion
-from GTxFeature import GTxFeature
-from output import Output
+from .GeneRegion import GeneRegion
+from .GTxFeature import GTxFeature
+from .output import Output
 
 
 """

@@ -8,7 +8,7 @@ import logging
 from collections import OrderedDict, defaultdict
 
 import HTSeq
-from output import Output
+from .output import Output
 
 
 """

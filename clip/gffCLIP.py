@@ -13,15 +13,16 @@ from builtins import object
 
 import gzip
 import logging
+import os
 import sys
 from collections import OrderedDict, defaultdict
 
 import HTSeq
-from Gene import Gene
-from GeneLengthSummary import GeneLengthSummary
-from GeneRegion import GeneRegion
-from GTxFeature import GTxFeature
-from output import Output
+from .Gene import Gene
+from .GeneLengthSummary import GeneLengthSummary
+from .GeneRegion import GeneRegion
+from .GTxFeature import GTxFeature
+from .output import Output
 
 """
 The class gffCLIP reads in genomic location,
@@ -160,11 +161,11 @@ class gffCLIP(object):
         the annotation is out of order.
         """
         logging.debug("Reading from {}".format(self.gtfFile))
-        
+        # file size check
+        if os.path.getsize(self.gtfFile)==0:
+            raise OSError('Input file {} is empty!'.format(self.gtfFile))
         # initializing gff reader
         gtf = HTSeq.GFF_Reader(self.gtfFile, end_included=True)
-        
-        
         # initializing gene length summary, which records total length of
         # chromosomes, gene types etc
         self.summary = GeneLengthSummary()
@@ -186,6 +187,7 @@ class gffCLIP(object):
         Helper function, process chromosome co-ordinate sorted GFF files
         '''
         gene = None
+        featCount = 0
         for f in gtf:
             # initialize a new feature object
             feature = GTxFeature(f)
@@ -196,7 +198,7 @@ class gffCLIP(object):
                 
                 # then create a new Gene object
                 gene = Gene(feature,self.splitExons,self.processGeneOnlyInformation)
-                
+                featCount+=1
             # else add the gene region info  
             else:
                 # if there was no gene definition provided, raise an exception
@@ -205,6 +207,9 @@ class gffCLIP(object):
                 # else add the gene info to the genes
                 else:
                     gene.add(feature)
+                    featCount+=1
+        if featCount==0:
+            raise ValueError('Cannot parse features from file {}'.format(self.gtfFile))
         
         # annotation the last gene
         self.processGene(gene)
