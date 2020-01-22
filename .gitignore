@@ -10,7 +10,7 @@ dist/
 .snakemake*
 .DS_Store
 .metadata*
-.bak
+*.bak
 
 Genomes/
 archive/
