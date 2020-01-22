@@ -30,6 +30,15 @@ flattens the annotation and outputs the
 results as Bed file
 """
 
+class EmptyFileException(Exception):
+    pass
+
+class NoFeaturesException(Exception):
+    pass
+
+class FeatureOrderException(Exception):
+    pass
+
 class GeneInfo:
 
     '''
@@ -65,7 +74,8 @@ class GeneInfo:
             logging.warning('{}: No gene definitions found!...Skipping'.format(self.id))
             return None
         else:
-            logging.warning('{}: Multiple gene definitions found! using one at random'.format(self.id))
+            if(len(geneDef)>1):
+                logging.warning('{}: Multiple gene definitions found! using one at random'.format(self.id))
             geneInd = self._typeMap[geneDef[0]]
             if len(geneInd)>1:
                 if self._checkGeneFeature(geneInd):
@@ -163,7 +173,7 @@ class gffCLIP(object):
         logging.debug("Reading from {}".format(self.gtfFile))
         # file size check
         if os.path.getsize(self.gtfFile)==0:
-            raise OSError('Input file {} is empty!'.format(self.gtfFile))
+            raise EmptyFileException('Input file {} is empty!'.format(self.gtfFile))
         # initializing gff reader
         gtf = HTSeq.GFF_Reader(self.gtfFile, end_included=True)
         # initializing gene length summary, which records total length of
@@ -188,6 +198,7 @@ class gffCLIP(object):
         '''
         gene = None
         featCount = 0
+        noGeneFeature = False
         for f in gtf:
             # initialize a new feature object
             feature = GTxFeature(f)
@@ -203,13 +214,16 @@ class gffCLIP(object):
             else:
                 # if there was no gene definition provided, raise an exception
                 if gene is None:
-                    raise Exception("GTF/GFF file provides gene feature info before the actual gene definition.")
+                    noGeneFeature = True
+                    break
                 # else add the gene info to the genes
                 else:
                     gene.add(feature)
                     featCount+=1
+        if noGeneFeature:
+            raise FeatureOrderException("GTF/GFF file should provide gene feature info before the actual gene definition.")
         if featCount==0:
-            raise ValueError('Cannot parse features from file {}'.format(self.gtfFile))
+            raise NoFeaturesException('Cannot parse features from file {}'.format(self.gtfFile))
         
         # annotation the last gene
         self.processGene(gene)
@@ -266,64 +280,71 @@ class gffCLIP(object):
         for gtype,length in self.summary.genetypes.items():
             self.fOutput.write('track type {} {}\n'.format(gtype,length))
 
+    
+    def _fo(self,fileName):
+        '''
+        helper function
+        return file handle based on file name suffix
+        '''
+        if fileName.lower().endswith('.gz'):
+            return gzip.open(fileName,'r')
+        else:
+            return open(fileName,'r')
+    
     """
     This functions calculates the sliding window positions
     """
     def slidingWindow(self,inputFile):
-        if inputFile.endswith('.gz'):
-            almnt_file  =  gzip.open(inputFile,'r')
-        else:
-            almnt_file = open(inputFile,'r')
         windowidMap = {}
+        with self._fo(inputFile) as almnt_file:
+            for line in almnt_file:
+                if line.startswith("track"):
+                    continue
+                line = line.strip().split('\t')
+                name = line[3].split('@')
+                featureNumber, _ = name[4].split('/')
+                # this will creaet duplicate windowCount if there are multiple genes annotated to the same chromosomal locations
+                # this needs to be reimplemented
+                # if currentName == None or currentName != name[0]:
+                #     currentName = name[0]
+                #     windowCount = 1
+                try:
+                    windowCount = windowidMap[name[0]]
+                    windowCount +=1
+                except KeyError:
+                    windowidMap[name[0]] = 1
+                    windowCount = 1
+                strand = line[5]
 
-        for line in almnt_file:
-            if line.startswith("track"):
-                continue
-            line = line.strip().split('\n')
-            name = line[3].split('@')
-            featureNumber, _ = name[4].split('/')
-            # this will creaet duplicate windowCount if there are multiple genes annotated to the same chromosomal locations
-            # this needs to be reimplemented
-            # if currentName == None or currentName != name[0]:
-            #     currentName = name[0]
-            #     windowCount = 1
-            try:
-                windowCount = windowidMap[name[0]]
-                windowCount +=1
-            except KeyError:
-                windowidMap[name[0]] = 1
-                windowCount = 1
-            strand = line[5]
+                start = int(line[1])
+                end = int(line[2])
 
-            start = int(line[1])
-            end = int(line[2])
+                pos1 = start
+                pos2 = start + self.windowSize
 
-            pos1 = start
-            pos2 = start + self.windowSize
-
-            #if length shorter than given windowsize then the whole feature is one window
-            #else split the current feature up by the given options
-            # @TODO: add gene name, window id, UID to last
-            
-            if pos2 >= end:
-                UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
-                seq = (line[0], str(start), str(end), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
-                self.fOutput.write("\t".join(seq) + "\n")
-                windowCount+=1
-            else:
-                while pos2 < end:
+                #if length shorter than given windowsize then the whole feature is one window
+                #else split the current feature up by the given options
+                # @TODO: add gene name, window id, UID to last
+                
+                if pos2 >= end:
                     UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
-                    seq = (line[0], str(pos1), str(pos2), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
+                    seq = (line[0], str(start), str(end), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
                     self.fOutput.write("\t".join(seq) + "\n")
-                    pos1 = pos1 + self.windowStep
-                    pos2 = pos2 + self.windowStep
                     windowCount+=1
-                    if pos2 > end:
-                        pos2 = end
+                else:
+                    while pos2 < end:
                         UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
                         seq = (line[0], str(pos1), str(pos2), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
                         self.fOutput.write("\t".join(seq) + "\n")
+                        pos1 = pos1 + self.windowStep
+                        pos2 = pos2 + self.windowStep
                         windowCount+=1
-            windowidMap[name[0]] = windowCount
-        almnt_file.close()
+                        if pos2 > end:
+                            pos2 = end
+                            UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
+                            seq = (line[0], str(pos1), str(pos2), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
+                            self.fOutput.write("\t".join(seq) + "\n")
+                            windowCount+=1
+                windowidMap[name[0]] = windowCount
+        
         self.fOutput.close()

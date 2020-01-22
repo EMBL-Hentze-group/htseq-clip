@@ -112,29 +112,29 @@ class GTxFeature(object):
                 self.geneType = str(self.feature.attr[str(self.geneTypeAttrib)])
             else:
                 # @TODO reformat this message
-                error = "Gene type attribute -t '" + self.geneTypeAttrib + "' was not found. Please use -t to specifiy the identifier used in your annotation file to describe the gene type. Alternatively, locate and change the record with the missing identifier. Feature: " + str(feature)
+                error = "Gene type attribute -t '" + self.geneTypeAttrib + "' was not found. Please use -t to specifiy the identifier used in your annotation file to describe the gene type. Alternatively, locate and change the record with the missing identifier. Feature: " + str(self.feature)
                 raise KeyError(error)
         else:
             self.geneType = self.__NA__
 
     def setGeneName(self):
         if self.geneNameAttrib is not None:
-            if self.geneNameAttrib in self.feature.attr.has_key:
+            if self.geneNameAttrib in self.feature.attr:
                 self.geneName = str(self.feature.attr[str(self.geneNameAttrib)])
             else:
                 # @TODO: reformat this message as well
-                error = "Gene name attribute -n '" + self.geneNameAttrib + "' was not found. Please use -n to specify the idenfier used in your annotation file to describe the gene name. Alternatively, locate and change the record with the missing identifier. Feature: " + str(feature)
+                error = "Gene name attribute -n '" + self.geneNameAttrib + "' was not found. Please use -n to specify the idenfier used in your annotation file to describe the gene name. Alternatively, locate and change the record with the missing identifier. Feature: " + str(self.feature)
                 raise KeyError(error)
         else:
             self.geneName = self.__NA__
     
     def setGeneId(self):
         if self.geneIdAttrib is not None:
-            if self.geneIdAttrib in self.feature.attr.has_key:
+            if self.geneIdAttrib in self.feature.attr:
                 self.geneId = str(self.feature.attr[str(self.geneIdAttrib)])
             else:
                 # @TODO: reformat this message and change the silly attribute letter
-                error = "Gene id attribute -a '" + self.geneIdAttrib + "' was not found. Please use -n to specify the idenfier used in your annotation file to describe the gene name. Alternatively, locate and change the record with the missing identifier. Feature: " + str(feature)
+                error = "Gene id attribute -a '" + self.geneIdAttrib + "' was not found. Please use -n to specify the idenfier used in your annotation file to describe the gene name. Alternatively, locate and change the record with the missing identifier. Feature: " + str(self.feature)
                 raise KeyError(error)
         else:
             self.geneId = self.__NA__
