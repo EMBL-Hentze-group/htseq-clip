@@ -40,6 +40,9 @@ class TestGFFCLIP(unittest.TestCase):
         self.assertSetEqual(gffUnsorted,gffDefault)
     
     def test_default(self):
+        '''
+        unit test for subparser command annotation
+        '''
         options = Namespace(gff='tests/testgFFCLIP/test.gff3',output='tests/testgFFCLIP/checkgFFCLIP/test_default_check.bed',
         id='gene_id',name='gene_name',type='gene_type',splitExons=True,unsorted=False)
         gffD = gffCLIP(options)
@@ -55,6 +58,10 @@ class TestGFFCLIP(unittest.TestCase):
         self.assertSetEqual(gffSorted,gffDefault)
     
     def test_w50s20(self):
+        '''
+        unit test for subparser command createSlidingWindows
+        with window size 50 & step size 20
+        '''
         options = Namespace(output='tests/testgFFCLIP/checkgFFCLIP/test_w50S20.bed',windowSize=50,windowStep=20)
         gffW50S20 = gffCLIP(options)
         gffW50S20.slidingWindow('tests/testgFFCLIP/checkgFFCLIP/test_default_check.bed')

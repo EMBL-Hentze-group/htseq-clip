@@ -202,10 +202,10 @@ def main():
     # count
     chelp = 'count: counts the number of crosslink/deletion/insertion sites'
     count = subps.add_parser('count',description=chelp,formatter_class=argparse.RawTextHelpFormatter) #help='count crosslinks',
-    count.add_argument('-i','--input',metavar='input bed',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
+    count.add_argument('-i','--input',metavar='input bed',dest='input',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
     count.add_argument('-o','--output',metavar = 'output file',dest='output',help='output count file (.txt[.gz], default: print to console)',default=None,type=str)
     count.add_argument('-a','--ann',metavar = 'annotation',dest='annotation',help='flattened annotation file (.bed[.gz]), see "{0} annotation -h" OR sliding window annotation file (.bed[.gz]), see "{0} createSlidingWindows -h"'.format(prog),required=True)
-    count.add_argument('--unstranded',dest='unstranded', help='by default, crosslink site counting is strand specific. Use this flag for non strand specific crosslink site counting',action='store_true')
+    count.add_argument('--unstranded',dest='unstranded', help='crosslink site counting is strand specific by default. Use this flag for non strand specific crosslink site counting',action='store_true')
     ''' ____________________ [Distances] ___________________ '''
     # junction 
     # jhelp = 'junction: calculates the distance from crosslink/deletion/insertion sites to the junction'

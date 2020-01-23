@@ -1,4 +1,5 @@
 import unittest
+import gzip
 from argparse import Namespace
 
 from clip.bamCLIP import bamCLIP
@@ -141,6 +142,22 @@ class TestBamCLIP(unittest.TestCase):
                 v2.append(line)
              
         self.assertEqual(v1, v2)
+    
+    def test03_extract_gz(self):
+        optionsI = Namespace(input = "tests/testBamCLIP/test03.bam", output = "tests/UnitTestOutput/testBamCLIP/test03_INS.bed.gz", 
+            minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
+            primary = False,mate=1,choice='e' )
+        bamI= bamCLIP(optionsI)
+        bamI.extract_InsertionSites()
+        v1,v2 = set(),set()
+        with gzip.open("tests/UnitTestOutput/testBamCLIP/test03_INS.bed.gz","r") as outgz:
+            for line in outgz:
+                v1.add(line.decode('utf-8')) 
+        with open("tests/testBamCLIP/checktestBamCLIP/test03_INS_check.bed", "r") as checkTest:
+            for line in checkTest:
+                v2.add(line)
+        self.assertSetEqual(v1,v2)
+
 
 if __name__ == '__main__':
     unittest.main()
