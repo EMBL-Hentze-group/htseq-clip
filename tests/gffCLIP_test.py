@@ -99,5 +99,6 @@ class TestGFFCLIP(unittest.TestCase):
             for l in sw:
                 gffW.add(l.decode('utf-8'))
         self.assertSetEqual(gffW,gffDefault)
+        
 if __name__ == '__main__':
     unittest.main()

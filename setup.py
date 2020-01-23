@@ -11,13 +11,19 @@ if sys.version_info < (3, 5):
 try:
 	from setuptools import setup
 except ImportError as e:
-    sys.stderr.write("Could not import setuptools. Please install setuptools and try again to install htseq-clip. \n Error: %s" % e)
+    sys.stderr.write("Could not import setuptools. Please install setuptools and try again to install htseq-clip. \n Error: {}".format(e))
     sys.exit(1)
-	
+
+try:
+	import Cython
+except ImportError as e:
+    sys.stderr.write("Could not import HTSeq dependency 'Cython'. Please install it with pip install Cython and then try again to install htseq-clip. \n Exception: {}".format(e))
+    sys.exit(1)
+
 try:
 	import numpy
 except ImportError as e:
-    sys.stderr.write("Could not import numpy. Please install it with pip install numpy and then try again to install htseq-clip. \n Exception: %s" % e)
+    sys.stderr.write("Could not import numpy. Please install it with pip install numpy and then try again to install htseq-clip. \n Exception: {}".format(e))
     sys.exit(1)
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -32,8 +38,8 @@ setup(
     description='htseq-clip: a toolset for the analysis of e/iCLIP datasets',
 	long_description=long_description,
     url='https://bitbucket.org/htseq-clip/htseq-clip',
-    author='Marko Fritz, Thomas Schwarzl',
-    author_email='marko.fritz@embl.de, schwarzl@embl.de',
+    author='Thomas Schwarzl, Sudeep Sahadevan, Marko Fritz, Nadia Ashraf',
+    author_email='schwarzl@embl.de, sudeep.sahadevan@embl.de',
 	zip_safe=False,
     license='MIT',
     classifiers=[
