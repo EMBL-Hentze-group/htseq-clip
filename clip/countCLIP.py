@@ -54,11 +54,13 @@ class countCLIP(object):
         self.annotation = options.annotation
         self._nameColCount = 0
         self._isWindowed  = None
+        self._decoder = None
         if hasattr(options,'input'):
             self.sites = options.input
         self.output = Output(options.output)
+        
         self.fo = self._annotationParser()
-        self._decoder = self._toStr
+
         self._annotationSanityCheck()
     
     def _toStr(self,line):
@@ -80,6 +82,7 @@ class countCLIP(object):
             self._decoder = self._byteToStr
             return gzip.open
         else:
+            self._decoder = self._toStr
             return open
         
     def _annotationSanityCheck(self):

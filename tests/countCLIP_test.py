@@ -39,14 +39,23 @@ class TestcountCLIP(unittest.TestCase):
                 annSet.add(l.decode('utf-8'))
         self.assertSetEqual(annSet,expSet)
     
-    # def test_count(self):
-    #     '''
-    #     unit test for subparser command count
-    #     '''
-        options = Namespace(annotation='tests/testcountCLIP/W50S20.bed',output='tests/testcountCLIP/checkcountCLIP/test_slidingWindows_count.txt',
+    def test_count(self):
+        '''
+        unit test for subparser command count
+        '''
+        options = Namespace(annotation='tests/testcountCLIP/W50S20.bed',output='tests/UnitTestOutput/testcountCLIP/test_slidingWindows_count.txt.gz',
             input='tests/testcountCLIP/end_sites.bed.gz')
         countSW = countCLIP(options)
         countSW.count()
+        countSet, defaultSet = set(),set()
+        with open('tests/testcountCLIP/checkcountCLIP/test_slidingWindows_count.txt','r') as ds:
+            for l in ds:
+                defaultSet.add(l)
+        with gzip.open('tests/UnitTestOutput/testcountCLIP/test_slidingWindows_count.txt.gz','r') as cs:
+            for l in cs:
+                countSet.add(l.decode('utf-8'))
+        self.assertSetEqual(countSet,defaultSet)
+        
 
 
 if __name__ == '__main__':
