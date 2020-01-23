@@ -58,10 +58,26 @@ class countCLIP(object):
             self.sites = options.input
         self.output = Output(options.output)
         self.fo = self._annotationParser()
+        self._decoder = self._toStr
         self._annotationSanityCheck()
     
+    def _toStr(self,line):
+        '''
+        helper function
+        given a string return it as it is
+        '''
+        return line
+    
+    def _byteToStr(self,line):
+        '''
+        helper function
+        given bytes decode to string
+        '''
+        return line.decode('utf-8')
+
     def _annotationParser(self):
         if self.annotation.lower().endswith((".gz",".gzip")):
+            self._decoder = self._byteToStr
             return gzip.open
         else:
             return open
@@ -76,6 +92,7 @@ class countCLIP(object):
         with TempBed(self.annotation) as tann:
             with self.fo(tann) as _ah:
                 for line in _ah:
+                    line = self._decoder(line)
                     if line.startswith( "track" ):
                         continue
                     afields = line.strip("\n").split("\t")
@@ -144,6 +161,9 @@ class countCLIP(object):
             return (UID, geneID, geneSymbol, geneType, geneRegion, genePositionNumber, genePositionTotal)
     
     def annotationToIDs(self):
+        '''
+        given an annotation file convert it to a mapping file
+        '''
         colHeader = ['unique_id','chromosome','begin','end','strand','gene_id','gene_name','gene_type','gene_region','Nr_of_region','Total_nr_of_region']
         if self._isWindowed:
             colHeader.append('window_number')
@@ -160,13 +180,17 @@ class countCLIP(object):
         '''
         # data structures to hold sites of interest (crosslink sites, deletion sites, insertion sites)
         sitesga = GenomicArray(chroms="auto", stranded=strandedCounting, typecode='i', storage='step')
+        
         if self.sites.lower().endswith((".gz",".gzip")):
             sfo = gzip.open
+            decoder = self._byteToStr
         else:
             sfo = open
+            decoder = self._toStr
         with TempBed(self.sites) as tb:
             with sfo(tb) as _sh:
                 for line in _sh:
+                    line = decoder(line)
                     if line.startswith("track"):
                         continue
                     sFields = line.strip('\n').split("\t")
@@ -202,6 +226,7 @@ class countCLIP(object):
             with self.fo(ta) as _ah: # annotation handler
                 # these lines are a work around to odd splitting behavior
                 for line in _ah:
+                    line = self._decoder(line)
                     if line.startswith( "track" ):
                         continue
                     bfields = line.strip('\n').split("\t")
