@@ -83,5 +83,21 @@ class TestGFFCLIP(unittest.TestCase):
                 gffW.add(l)
         self.assertSetEqual(gffW,gffDefault)
 
+    def test_w50s20_gz(self):
+        '''
+        unit test for subparser command createSlidingWindows
+        with window size 50 & step size 20
+        '''
+        options = Namespace(output=os.path.join(self.outDir,'test_w50S20.bed.gz'),windowSize=50,windowStep=20)
+        gffW50S20 = gffCLIP(options)
+        gffW50S20.slidingWindow('tests/testgFFCLIP/checkgFFCLIP/test_default_check.bed.gz')
+        gffW,gffDefault = set(),set()
+        with open('tests/testgFFCLIP/checkgFFCLIP/test_w50S20.bed','r') as so:
+            for l in so:
+                gffDefault.add(l)
+        with gzip.open(os.path.join(self.outDir,'test_w50S20.bed.gz'),'r') as sw:
+            for l in sw:
+                gffW.add(l.decode('utf-8'))
+        self.assertSetEqual(gffW,gffDefault)
 if __name__ == '__main__':
     unittest.main()

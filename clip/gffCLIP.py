@@ -159,6 +159,7 @@ class gffCLIP(object):
         self.fOutput = Output(options.output)
         self._geneMap = None # for unsorted GFF files
         self.summary = None # GeneSummary
+        self._decoder = None # decoder for gz files
 
     def process(self,unsorted = False):
         """
@@ -280,15 +281,30 @@ class gffCLIP(object):
         for gtype,length in self.summary.genetypes.items():
             self.fOutput.write('track type {} {}\n'.format(gtype,length))
 
+    def _toStr(self,line):
+        '''
+        helper function
+        given a string return it as it is
+        '''
+        return line
     
+    def _byteToStr(self,line):
+        '''
+        helper function
+        given bytes decode to string
+        '''
+        return line.decode('utf-8')
+
     def _fo(self,fileName):
         '''
         helper function
         return file handle based on file name suffix
         '''
-        if fileName.lower().endswith('.gz'):
+        if fileName.lower().endswith(('.gz','gzip')):
+            self._decoder = self._toStr
             return gzip.open(fileName,'r')
         else:
+            self._decoder = self._byteToStr
             return open(fileName,'r')
     
     """
@@ -298,6 +314,7 @@ class gffCLIP(object):
         windowidMap = {}
         with self._fo(inputFile) as almnt_file:
             for line in almnt_file:
+                line = self._decoder(line)
                 if line.startswith("track"):
                     continue
                 line = line.strip().split('\t')
