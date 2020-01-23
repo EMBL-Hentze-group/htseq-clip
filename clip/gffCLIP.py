@@ -301,10 +301,10 @@ class gffCLIP(object):
         return file handle based on file name suffix
         '''
         if fileName.lower().endswith(('.gz','gzip')):
-            self._decoder = self._toStr
+            self._decoder = self._byteToStr
             return gzip.open(fileName,'r')
         else:
-            self._decoder = self._byteToStr
+            self._decoder = self._toStr
             return open(fileName,'r')
     
     """
