@@ -1,14 +1,12 @@
-from __future__ import absolute_import
-from builtins import object
-__author__ = 'Tom'
-
 import gzip
+import logging
 import os
 import re
 import sys
 
 from .output import Output
 
+__author__ = 'Tom'
 class MatrixConverter(object):
 
     """
@@ -40,6 +38,9 @@ class MatrixConverter(object):
         
         # sample names are stored here for consistent output
         self.samplenamesList = None
+
+        # decoder for bytes in gzip
+        self._decoder = None
         
     """
     Helper function
@@ -67,20 +68,35 @@ class MatrixConverter(object):
         for file in self.inputFilenames:
             samplename = file.split(".")[0]
             self.allSamples.add(samplename)
-            sys.stderr.write('Reading file {}\n'.format(file))
+            logging.info('Reading file {}'.format(file))
             # @TODO:  use logging module for all messages
             # open file and read in the content and store the results 
             with self._file_reader(os.path.join(self.inputDir, file)) as f:
                 for linecount, line in enumerate(f):
                     if(linecount == 0):
                         continue
+                    line = self._decoder(line)
                     linesplit = line.strip().split("\t")
                     try:
                         self.countDict[ linesplit[0] ][ samplename ] = linesplit[3]
                     except KeyError:
                         self.countDict[ linesplit[0] ] = { samplename : linesplit[3] }
         self._init_samplenames_list()
+
+    def _toStr(self,line):
+        '''
+        helper function
+        given a string return it as it is
+        '''
+        return line
     
+    def _byteToStr(self,line):
+        '''
+        helper function
+        given bytes decode to string
+        '''
+        return line.decode('utf-8')
+
     def _file_reader(self,fn):
         '''
         Helper function, return the correct file reade object based on file suffix
@@ -88,8 +104,10 @@ class MatrixConverter(object):
          fn: file name as string
         '''
         if fn.lower().endswith((".gz",".gzip")):
+            self._decoder = self._byteToStr
             return gzip.open(fn)
         else:
+            self._decoder = self._toStr
             return open(fn)
 
     """
@@ -123,5 +141,3 @@ class MatrixConverter(object):
                     outList.append('0')
             self.out.write('\t'.join(outList) + "\n")
         self.out.close()
-
-

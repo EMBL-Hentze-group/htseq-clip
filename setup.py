@@ -34,7 +34,7 @@ with open(os.path.join(here, 'README'), encoding='utf-8') as f:
 
 setup(
     name='htseq-clip',
-    version='0.2.0b',
+    version='1.0b0',
     description='htseq-clip: a toolset for the analysis of e/iCLIP datasets',
 	long_description=long_description,
     url='https://bitbucket.org/htseq-clip/htseq-clip',
@@ -49,7 +49,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Environment :: Console',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3',
     ],
 	install_requires=['HTSeq', 'pandas', 'pysam', 'biopython'],
     packages=['clip','tests'],
