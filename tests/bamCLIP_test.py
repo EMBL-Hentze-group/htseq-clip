@@ -1,19 +1,26 @@
-import unittest
 import gzip
+import os
+import unittest
 from argparse import Namespace
 
 from clip.bamCLIP import bamCLIP
+
 
 class TestBamCLIP(unittest.TestCase):
     '''
     Unit tests for module BamCLIP
     '''
+    outDir = 'tests/testBamCLIP/UnitTestOutput'
+    @classmethod
+    def setUpClass(cls):
+        if not os.path.exists(cls.outDir):
+            os.makedirs(cls.outDir)
 
     '''
     test01.bam is supposed to raise a ValueError in all cases
     '''
     def test01_extract_SS(self):
-        optionsSS = Namespace(input = "tests/testBamCLIP/test01.bam", output = "tests/UnitTestOutput/testBamCLIP/test01_SS.bed", 
+        optionsSS = Namespace(input = "tests/testBamCLIP/test01.bam", output = os.path.join(self.outDir,"test01_SS.bed"), 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='s' )
         bamS = bamCLIP(optionsSS)
@@ -21,7 +28,7 @@ class TestBamCLIP(unittest.TestCase):
             bamS.extract_StartSites()
 
     def test01_extract_MS(self):
-        optionsSS = Namespace(input = "tests/testBamCLIP/test01.bam", output = "tests/UnitTestOutput/testBamCLIP/test01_SS.bed", 
+        optionsSS = Namespace(input = "tests/testBamCLIP/test01.bam", output = os.path.join(self.outDir,"test01_MS.bed"), 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='m' )
         bamS = bamCLIP(optionsSS)
@@ -29,7 +36,7 @@ class TestBamCLIP(unittest.TestCase):
             bamS.extract_MiddleSites()
     
     def test01_extract_ES(self):
-        optionsSS = Namespace(input = "tests/testBamCLIP/test01.bam", output = "tests/UnitTestOutput/testBamCLIP/test01_SS.bed", 
+        optionsSS = Namespace(input = "tests/testBamCLIP/test01.bam", output = os.path.join(self.outDir,"test01_ES.bed"), 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='e' )
         bamS = bamCLIP(optionsSS)
@@ -41,7 +48,7 @@ class TestBamCLIP(unittest.TestCase):
     '''
     def test03_extract_SS(self):
         
-        optionsSS = Namespace(input = "tests/testBamCLIP/test03.bam", output = "tests/UnitTestOutput/testBamCLIP/test03_SS.bed", 
+        optionsSS = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_SS.bed"), 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='s' )
          
@@ -50,7 +57,7 @@ class TestBamCLIP(unittest.TestCase):
                 
         v1 = []
         v2 = []
-        with open("tests/UnitTestOutput/testBamCLIP/test03_SS.bed", "r") as outputTest:
+        with open(os.path.join(self.outDir,"test03_SS.bed"), "r") as outputTest:
             for line in outputTest:
                 v1.append(line)
         
@@ -63,7 +70,7 @@ class TestBamCLIP(unittest.TestCase):
     
     def test03_extract_MS(self):
         
-        optionsMS = Namespace(input = "tests/testBamCLIP/test03.bam", output = "tests/UnitTestOutput/testBamCLIP/test03_MS.bed", 
+        optionsMS = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_MS.bed"), 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='m' )
          
@@ -72,7 +79,7 @@ class TestBamCLIP(unittest.TestCase):
                 
         v1 = []
         v2 = []
-        with open("tests/UnitTestOutput/testBamCLIP/test03_MS.bed", "r") as outputTest:
+        with open(os.path.join(self.outDir,"test03_MS.bed"), "r") as outputTest:
             for line in outputTest:
                 v1.append(line)
         
@@ -84,7 +91,7 @@ class TestBamCLIP(unittest.TestCase):
     
     def test03_extract_ES(self):
         
-        optionsES = Namespace(input = "tests/testBamCLIP/test03.bam", output = "tests/UnitTestOutput/testBamCLIP/test03_ES.bed", 
+        optionsES = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_ES.bed"), 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='e' )
          
@@ -93,7 +100,7 @@ class TestBamCLIP(unittest.TestCase):
                 
         v1 = []
         v2 = []
-        with open("tests/UnitTestOutput/testBamCLIP/test03_ES.bed", "r") as outputTest:
+        with open(os.path.join(self.outDir,"test03_ES.bed"), "r") as outputTest:
             for line in outputTest:
                 v1.append(line)
         
@@ -105,7 +112,7 @@ class TestBamCLIP(unittest.TestCase):
     
     def test03_extract_DEL(self):
 
-        optionsD = Namespace(input = "tests/testBamCLIP/test03.bam", output = "tests/UnitTestOutput/testBamCLIP/test03_DEL.bed", 
+        optionsD = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_DEL.bed"), 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='e' )
         bamD = bamCLIP(optionsD)
@@ -113,7 +120,7 @@ class TestBamCLIP(unittest.TestCase):
                 
         v1 = []
         v2 = []
-        with open("tests/UnitTestOutput/testBamCLIP/test03_DEL.bed", "r") as outputTest:
+        with open(os.path.join(self.outDir,"test03_DEL.bed"), "r") as outputTest:
             for line in outputTest:
                 v1.append(line)
         
@@ -125,7 +132,7 @@ class TestBamCLIP(unittest.TestCase):
     
     def test03_extract_INS(self):
 
-        optionsI = Namespace(input = "tests/testBamCLIP/test03.bam", output = "tests/UnitTestOutput/testBamCLIP/test03_INS.bed", 
+        optionsI = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_INS.bed"), 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='e' )
         bamI= bamCLIP(optionsI)
@@ -133,7 +140,7 @@ class TestBamCLIP(unittest.TestCase):
                 
         v1 = []
         v2 = []
-        with open("tests/UnitTestOutput/testBamCLIP/test03_INS.bed", "r") as outputTest:
+        with open(os.path.join(self.outDir,"test03_INS.bed"), "r") as outputTest:
             for line in outputTest:
                 v1.append(line)
         
@@ -144,13 +151,13 @@ class TestBamCLIP(unittest.TestCase):
         self.assertEqual(v1, v2)
     
     def test03_extract_gz(self):
-        optionsI = Namespace(input = "tests/testBamCLIP/test03.bam", output = "tests/UnitTestOutput/testBamCLIP/test03_INS.bed.gz", 
+        optionsI = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_INS.bed.gz"), 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='e' )
         bamI= bamCLIP(optionsI)
         bamI.extract_InsertionSites()
         v1,v2 = set(),set()
-        with gzip.open("tests/UnitTestOutput/testBamCLIP/test03_INS.bed.gz","r") as outgz:
+        with gzip.open(os.path.join(self.outDir,"test03_INS.bed.gz"),"r") as outgz:
             for line in outgz:
                 v1.add(line.decode('utf-8')) 
         with open("tests/testBamCLIP/checktestBamCLIP/test03_INS_check.bed", "r") as checkTest:

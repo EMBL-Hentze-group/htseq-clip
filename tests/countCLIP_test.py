@@ -39,7 +39,7 @@ class TestcountCLIP(unittest.TestCase):
                 annSet.add(l.decode('utf-8'))
         self.assertSetEqual(annSet,expSet)
     
-    def test_count(self):
+    def test_count_slidingWindows(self):
         '''
         unit test for subparser command count
         '''
@@ -56,7 +56,5 @@ class TestcountCLIP(unittest.TestCase):
                 countSet.add(l.decode('utf-8'))
         self.assertSetEqual(countSet,defaultSet)
         
-
-
 if __name__ == '__main__':
     unittest.main()
