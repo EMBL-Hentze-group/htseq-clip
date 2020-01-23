@@ -134,8 +134,8 @@ class Gene:
     def calculateTotalExonAndIntronCount(self):
         logging.debug("processing gene")
         
-        self.exonTotal  = (len(self.rawRegionList) + 1) / 2
-        self.intronTotal = self.exonTotal - 1
+        self.exonTotal  = int((len(self.rawRegionList) + 1) / 2)
+        self.intronTotal = int(self.exonTotal - 1)
         
         logging.debug("exon total: {}, intron total: {}".format(str(self.exonTotal), str(self.intronTotal)))
     
