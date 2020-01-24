@@ -14,22 +14,49 @@ After successful installation of the package use
    $ htseq-clip -h
 
 for a brief description of the functions available in htseq-clip. 
-The available functions can be categorized into 4 different classes:
+The available functions can be categorized into 4 different classes given below.
 
-**Annotation**
-**************
+Annotation
+**********
 
   * :c1:`annotation`
 
     Flattens a given annotation file in GFF format to BED6 format 
+    
+    **Arguments**
 
+    * ``-g/--gff``       GFF formatted annotation file, supports .gz files
+    * ``-u/--geneid``    Gene id attribute in GFF file 
+    * ``-n/--genename``  Gene name attribute in GFF file
+    * ``-t/--genetype``  Gene type attribute in GFF file
+    * ``--splitExons``   This flag splits exons into components such as 5' UTR, CDS and 3' UTR
+    * ``--unsorted``     Use this flag if the GFF file is unsorted
+    * ``-o/--output``    Output file name. If the file name is given with .gz suffix, it is gzipped. If no file name is given, output is print to console   
+
+    The default values for ``--geneid``, ``--genename`` and ``--genetype`` arguments follow 
+    `gencode GFF format`_
+    
+    .. _`gencode GFF format`: https://www.gencodegenes.org/pages/data_format.html
+
+    **Usage**
+    
     .. code-block:: sh    
       
       $ htseq-clip annotation -h  
 
   * :c1:`createSlidingWindows`
 
-    Create sliding windows from the flattened annotation file   
+    Create sliding windows from the flattened annotation file
+
+    **Arguments**
+
+    * ``-i/--input``  Flattened annoation file, see 
+    * ``-w/--windowSize``  Window size in number of base pairs for the sliding window
+    * ``-s/--windowStep``  Window step size for sliding window
+    * ``-o/--output``    Output file name. If the file name is given with .gz suffix, it is gzipped. If no file name is given, output is print to console
+
+
+    **Usage**
 
     .. code-block:: sh    
       
@@ -40,12 +67,20 @@ The available functions can be categorized into 4 different classes:
     Extract "name" column from the annotation file and map the entries to unique id 
     and print out in tab separated format
 
+    **Arguments**
+
+    * ``-a/--annotation``  Flattened annotation file from --- or sliding window file from ---
+    * ``-o/--output``    Output file name. If the file name is given with .gz suffix, it is gzipped. If no file name is given, output is print to console
+
+    
+    **Usage**
+    
     .. code-block:: sh    
       
       $ htseq-clip mapToId -h
 
-**Extraction**
-**************
+Extraction
+**********
 
   * :c1:`extract`
 
@@ -55,8 +90,8 @@ The available functions can be categorized into 4 different classes:
       
       $ htseq-clip extract -h
 
-**Counting**
-************
+Counting
+********
   
   * :c1:`count`
 
@@ -66,8 +101,8 @@ The available functions can be categorized into 4 different classes:
       
       $ htseq-clip count -h
 
-**Helpers**
-***********
+Helpers
+*******
   
   * :c1:`createMatrix`
     
