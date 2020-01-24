@@ -34,7 +34,11 @@ class TestGFFCLIP(unittest.TestCase):
             gffC.process()
     
     def test_unsorted(self):
-        options = Namespace(gff='tests/testgFFCLIP/test_unsorted.gff3',output=os.path.join(self.outDir,'test_unsorted_check.bed'),
+        '''
+        unit test for subparser command annotation with flag --unsorted
+        '''
+        outFile = os.path.join(self.outDir,'test_unsorted_check.bed')
+        options = Namespace(gff='tests/testgFFCLIP/test_unsorted.gff3',output=outFile,
         id='gene_id',name='gene_name',type='gene_type',splitExons=True,unsorted=False)
         gffU = gffCLIP(options)
         gffU.process(True) # unsorted gff file
@@ -43,7 +47,7 @@ class TestGFFCLIP(unittest.TestCase):
         with open('tests/testgFFCLIP/checkgFFCLIP/test_unsorted_check.bed','r') as so:
             for l in so:
                 gffDefault.add(l)
-        with open(os.path.join(self.outDir,'test_unsorted_check.bed'),'r') as un:
+        with open(outFile,'r') as un:
             for l in un:
                 gffUnsorted.add(l)
         self.assertSetEqual(gffUnsorted,gffDefault)
@@ -52,7 +56,8 @@ class TestGFFCLIP(unittest.TestCase):
         '''
         unit test for subparser command annotation
         '''
-        options = Namespace(gff='tests/testgFFCLIP/test.gff3',output=os.path.join(self.outDir,'test_process_default.bed'),
+        outFile = os.path.join(self.outDir,'test_process_default.bed')
+        options = Namespace(gff='tests/testgFFCLIP/test.gff3',output=outFile,
         id='gene_id',name='gene_name',type='gene_type',splitExons=True,unsorted=False)
         gffD = gffCLIP(options)
         gffD.process(False) # unsorted gff file
@@ -61,7 +66,7 @@ class TestGFFCLIP(unittest.TestCase):
         with open('tests/testgFFCLIP/checkgFFCLIP/test_default_check.bed','r') as un:
             for l in un:
                 gffSorted.add(l)
-        with open(os.path.join(self.outDir,'test_process_default.bed'),'r') as so:
+        with open(outFile,'r') as so:
             for l in so:
                 gffDefault.add(l)
         self.assertSetEqual(gffSorted,gffDefault)
@@ -71,14 +76,15 @@ class TestGFFCLIP(unittest.TestCase):
         unit test for subparser command createSlidingWindows
         with window size 50 & step size 20
         '''
-        options = Namespace(output=os.path.join(self.outDir,'test_w50S20.bed'),windowSize=50,windowStep=20)
+        outFile = os.path.join(self.outDir,'test_w50S20.bed')
+        options = Namespace(output=outFile,windowSize=50,windowStep=20)
         gffW50S20 = gffCLIP(options)
         gffW50S20.slidingWindow('tests/testgFFCLIP/checkgFFCLIP/test_default_check.bed')
         gffW,gffDefault = set(),set()
         with open('tests/testgFFCLIP/checkgFFCLIP/test_w50S20.bed','r') as so:
             for l in so:
                 gffDefault.add(l)
-        with open(os.path.join(self.outDir,'test_w50S20.bed'),'r') as sw:
+        with open(outFile,'r') as sw:
             for l in sw:
                 gffW.add(l)
         self.assertSetEqual(gffW,gffDefault)
@@ -88,14 +94,15 @@ class TestGFFCLIP(unittest.TestCase):
         unit test for subparser command createSlidingWindows
         with window size 50 & step size 20
         '''
-        options = Namespace(output=os.path.join(self.outDir,'test_w50S20.bed.gz'),windowSize=50,windowStep=20)
+        outFile = os.path.join(self.outDir,'test_w50S20.bed.gz')
+        options = Namespace(output=outFile,windowSize=50,windowStep=20)
         gffW50S20 = gffCLIP(options)
         gffW50S20.slidingWindow('tests/testgFFCLIP/checkgFFCLIP/test_default_check.bed.gz')
         gffW,gffDefault = set(),set()
         with open('tests/testgFFCLIP/checkgFFCLIP/test_w50S20.bed','r') as so:
             for l in so:
                 gffDefault.add(l)
-        with gzip.open(os.path.join(self.outDir,'test_w50S20.bed.gz'),'r') as sw:
+        with gzip.open(outFile,'r') as sw:
             for l in sw:
                 gffW.add(l.decode('utf-8'))
         self.assertSetEqual(gffW,gffDefault)

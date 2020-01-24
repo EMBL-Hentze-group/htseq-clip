@@ -48,7 +48,8 @@ class TestBamCLIP(unittest.TestCase):
     '''
     def test03_extract_SS(self):
         
-        optionsSS = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_SS.bed"), 
+        outFile = os.path.join(self.outDir,"test03_SS.bed")
+        optionsSS = Namespace(input = "tests/testBamCLIP/test03.bam", output = outFile, 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='s' )
          
@@ -57,7 +58,7 @@ class TestBamCLIP(unittest.TestCase):
                 
         v1 = []
         v2 = []
-        with open(os.path.join(self.outDir,"test03_SS.bed"), "r") as outputTest:
+        with open(outFile, "r") as outputTest:
             for line in outputTest:
                 v1.append(line)
         
@@ -70,7 +71,8 @@ class TestBamCLIP(unittest.TestCase):
     
     def test03_extract_MS(self):
         
-        optionsMS = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_MS.bed"), 
+        outFile = os.path.join(self.outDir,"test03_MS.bed")
+        optionsMS = Namespace(input = "tests/testBamCLIP/test03.bam", output = outFile, 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='m' )
          
@@ -79,7 +81,7 @@ class TestBamCLIP(unittest.TestCase):
                 
         v1 = []
         v2 = []
-        with open(os.path.join(self.outDir,"test03_MS.bed"), "r") as outputTest:
+        with open(outFile, "r") as outputTest:
             for line in outputTest:
                 v1.append(line)
         
@@ -91,7 +93,8 @@ class TestBamCLIP(unittest.TestCase):
     
     def test03_extract_ES(self):
         
-        optionsES = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_ES.bed"), 
+        outFile = os.path.join(self.outDir,"test03_ES.bed")
+        optionsES = Namespace(input = "tests/testBamCLIP/test03.bam", output = outFile, 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='e' )
          
@@ -100,7 +103,7 @@ class TestBamCLIP(unittest.TestCase):
                 
         v1 = []
         v2 = []
-        with open(os.path.join(self.outDir,"test03_ES.bed"), "r") as outputTest:
+        with open(outFile, "r") as outputTest:
             for line in outputTest:
                 v1.append(line)
         
@@ -111,8 +114,9 @@ class TestBamCLIP(unittest.TestCase):
         self.assertEqual(v1, v2)
     
     def test03_extract_DEL(self):
-
-        optionsD = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_DEL.bed"), 
+        
+        outFile = os.path.join(self.outDir,"test03_DEL.bed")
+        optionsD = Namespace(input = "tests/testBamCLIP/test03.bam", output = outFile, 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='e' )
         bamD = bamCLIP(optionsD)
@@ -120,7 +124,7 @@ class TestBamCLIP(unittest.TestCase):
                 
         v1 = []
         v2 = []
-        with open(os.path.join(self.outDir,"test03_DEL.bed"), "r") as outputTest:
+        with open(outFile, "r") as outputTest:
             for line in outputTest:
                 v1.append(line)
         
@@ -132,7 +136,8 @@ class TestBamCLIP(unittest.TestCase):
     
     def test03_extract_INS(self):
 
-        optionsI = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_INS.bed"), 
+        outFile = os.path.join(self.outDir,"test03_INS.bed")
+        optionsI = Namespace(input = "tests/testBamCLIP/test03.bam", output = outFile, 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='e' )
         bamI= bamCLIP(optionsI)
@@ -140,7 +145,7 @@ class TestBamCLIP(unittest.TestCase):
                 
         v1 = []
         v2 = []
-        with open(os.path.join(self.outDir,"test03_INS.bed"), "r") as outputTest:
+        with open(outFile, "r") as outputTest:
             for line in outputTest:
                 v1.append(line)
         
@@ -151,13 +156,15 @@ class TestBamCLIP(unittest.TestCase):
         self.assertEqual(v1, v2)
     
     def test03_extract_gz(self):
-        optionsI = Namespace(input = "tests/testBamCLIP/test03.bam", output = os.path.join(self.outDir,"test03_INS.bed.gz"), 
+
+        outFile = os.path.join(self.outDir,"test03_INS.bed.gz")
+        optionsI = Namespace(input = "tests/testBamCLIP/test03.bam", output = outFile, 
             minAlignmentQuality = 10, minReadLength = 0, maxReadLength = 0, maxReadIntervalLength=10000,
             primary = False,mate=1,choice='e' )
         bamI= bamCLIP(optionsI)
         bamI.extract_InsertionSites()
         v1,v2 = set(),set()
-        with gzip.open(os.path.join(self.outDir,"test03_INS.bed.gz"),"r") as outgz:
+        with gzip.open(outFile,"r") as outgz:
             for line in outgz:
                 v1.add(line.decode('utf-8')) 
         with open("tests/testBamCLIP/checktestBamCLIP/test03_INS_check.bed", "r") as checkTest:

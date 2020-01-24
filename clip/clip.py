@@ -4,13 +4,13 @@ import os
 import re
 import sys
 import traceback
-
 from datetime import datetime
 
 from .bamCLIP import bamCLIP
 from .countCLIP import countCLIP
 from .createMatrix import MatrixConverter
-from .gffCLIP import gffCLIP
+from .gffCLIP import FeatureOrderException, gffCLIP
+
 
 '''
 --------------------------------------------------
@@ -29,26 +29,33 @@ def _annotation(args):
     Parse annotations from given GFF file
     @TODO use logging module
     '''
+    logging.info('Paring annotations') 
+    logging.info('GFF file {}, output file {}'.format(args.gff,args.output))
     gffc = gffCLIP(args)
     try:
         gffc.process(args.unsorted)
-    except SyntaxError as se:
+    except FeatureOrderException as se:
         if args.unsorted:
             raise(se)
         else:
-            logging.warning(str(se)+'\n')
-            logging.warning('Trying to parse {} with "--unsorted" option.\n'.format(args.gff))
-            logging.warning('This step is memory hungry\n')
+            logging.warning(str(se))
+            logging.warning('Trying to parse {} with "--unsorted" option.'.format(args.gff))
+            logging.warning('This step is memory hungry')
             gffc.process(True)
 
 def _createSlidingWindows(args):
     '''
     Create sliding windows from the given annotation file
     '''
+    logging.info('Create sliding windows')
+    logging.info('input file {}, output file {}'.format(args.input,args.output))
+    logging.info('Window size {} step size {}'.format(args.windowSize,args.windowStep))
     gffc = gffCLIP(args)
     gffc.slidingWindow(args.input)
 
 def _mapToId(args):
+    logging.info('Creating mapping file from annotations')
+    logging.info('Input file {} output file {}'.format(args.annotation,args.output))
     mapC = countCLIP(args)
     mapC.annotationToIDs()
 
