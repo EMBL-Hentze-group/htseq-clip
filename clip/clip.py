@@ -89,6 +89,8 @@ def _count(args):
     '''
     Count crosslink sites per sliding window
     '''
+    logging.info('Count crosslink sites')
+    logging.info('Annotation file {} crosslink sites file {} output file {}'.format(args.annotation,args.input,args.output))
     countC = countCLIP(args)
     stranded = True
     if args.unstranded:
@@ -96,6 +98,8 @@ def _count(args):
     countC.count(stranded)
 
 def _countMatrix(args):
+    logging.info('Generate matrix from files')
+    logging.info('Input folder {}, output file {}'.format(args.input,args.output))
     mC = MatrixConverter(args.input,args.prefix,args.postfix,args.output)
     mC.read_samples()
     mC.write_matrix()
@@ -207,7 +211,7 @@ def main():
         else:
             logger.setLevel(logging.getLevelName(args.log.upper()))
             if len(logger.handlers)>=1:
-                # ugly fix for multile logging handlers
+                # ugly fix for multiple logging handlers
                 logger.handlers = []
             consHandle = logging.StreamHandler(sys.stderr)
             consHandle.setLevel(logging.getLevelName(args.log.upper()))
