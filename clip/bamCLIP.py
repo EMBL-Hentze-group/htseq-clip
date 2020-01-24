@@ -4,12 +4,18 @@
 #          Thomas Schwarzl, schwarzl@embl.de
 # Institution: EMBL Heidelberg
 # Date: October 2015
+# modified by Sudeep Sahadevan, sudeep.sahadevan@embl.de
 # --------------------------------------------------
 
-import gzip, decimal, HTSeq, sys
-from output import Output
+import decimal
+import gzip
+import logging
 
-class bamCLIP:
+from HTSeq import BAM_Reader, GenomicPosition
+from .output import Output
+
+
+class bamCLIP(object):
     
     # default parameters
     data = {}
@@ -29,18 +35,13 @@ class bamCLIP:
         self.fInput = options.input
         self.writeFile = True
         self.fOutput = options.output
-        self.minAlignmentQuality = options.minAlignmentQuality
-        self.minReadLength = options.minReadLength
-        self.maxReadLength = options.maxReadLength
-        self.maxReadIntervalLength = options.maxReadIntervalLength
-        self.primary = options.primary
         self.choice = options.choice
         self.mate = options.mate           
-        self.data = {'maxReadLength' : self.maxReadLength,
-                     'minReadLength' : self.minReadLength,
-                     'primary': self.primary,
-                     'maxReadIntervalLength': self.maxReadIntervalLength,
-                     'minAlignmentQuality': self.minAlignmentQuality}
+        self.data = {'maxReadLength' : options.maxReadLength,
+                     'minReadLength' : options.minReadLength,
+                     'primary': options.primary,
+                     'maxReadIntervalLength': options.maxReadIntervalLength,
+                     'minAlignmentQuality': options.minAlignmentQuality}
               
     #================================================================================ 
     '''
@@ -53,12 +54,9 @@ class bamCLIP:
                        almnt.aQual >= self.data['minAlignmentQuality'] and not almnt.failed_platform_qc
                        and self.primaryFilter(almnt))
             elif almnt.paired_end and almnt.pe_which == "first":
-                self.count += 1
                 return False
             elif not almnt.paired_end:
                 raise Exception("Alignment is not paired end.")
-                
-                
         elif self.mate == 1: #select the first read of a pair to extract
             if ( not almnt.paired_end ) or (almnt.paired_end and almnt.pe_which =="first"):
                 return(almnt.aligned and
@@ -67,7 +65,6 @@ class bamCLIP:
                        not almnt.failed_platform_qc and #SAM flag 0x0200
                        self.primaryFilter(almnt))
             elif almnt.paired_end and almnt.pe_which == "second":
-                self.count += 1
                 return False
         else:
             raise ValueError("Mate argument can only be 1 for first read or 2 for second")
@@ -79,7 +76,7 @@ class bamCLIP:
     '''
     def primaryFilter(self, almnt):
         if self.data['primary']:
-            return(almnt.not_primary_alignment)
+            return(not almnt.not_primary_alignment)
         else:
             return(True) 
 
@@ -117,13 +114,13 @@ class bamCLIP:
          
         return(variations)
 
-    def posCalcStartSite(self, pos_d, strand, x):
-        if strand == "+":
-            return(pos_d + x)
-        elif strand == "-":
-            return(pos_d + x)
-        else:
-            raise Exception("Strand not known %s" % strand)
+    # def posCalcStartSite(self, pos_d, strand, x):
+    #     if strand == "+":
+    #         return(pos_d + x)
+    #     elif strand == "-":
+    #         return(pos_d + x)
+    #     else:
+    #         raise Exception("Strand not known {}".format(strand))
 
     def posCalcMiddleSite(self, pos_d, strand, x):
         if strand == "+":
@@ -131,51 +128,47 @@ class bamCLIP:
         elif strand == "-":
             return(pos_d - x)
         else:
-            raise Exception("Strand not known %s" % strand)
+            raise Exception("Strand not known {}".format(strand))
 
-    def posCalcEndSite(self, pos_d, strand, x):
-        if strand == "+":
-            return(pos_d + x)
-        elif strand == "-":
-            return(pos_d + x)
-        else:
-            raise Exception("Strand not known %s" % strand)
+    # def posCalcEndSite(self, pos_d, strand, x):
+    #     if strand == "+":
+    #         return(pos_d + x)
+    #     elif strand == "-":
+    #         return(pos_d + x)
+    #     else:
+    #         raise Exception("Strand not known {}".format(strand))
 
     '''
     extractOptions
-    extracts the optons ignore and offset from the choice parameter
+    extracts the options ignore and offset from the choice parameter
     '''
-    def extractOptions(self, option):
-        # option gets ['', '1i'], for eg
-        ignore = False
-        if len(option) == 1:
-            print option
-            print self.choice
-
-        if len(option) <= 0:
-            return(ignore, 0)
-        else:
-            if option[1] == '':
-                offset = 0
-            else:
-                if "i" in option[1]:
-                    ignore = True     
-                    offset = option[1].split("i")
-                    offset = int(offset[0])
-                else:
-                    offset = int(option[1])
+    # def extractOptions(self, option):
+    #     # option gets ['', '1i'], for eg
+    #     ignore = False
+    #     if len(option) == 1:
+    #         # print option
+    #         print self.choice
+    #     if len(option) <= 0:
+    #         return(ignore, 0)
+    #     else:
+    #         if option[1] == '':
+    #             offset = 0
+    #         else:
+    #             if "i" in option[1]:
+    #                 ignore = True     
+    #                 offset = option[1].split("i")
+    #                 offset = int(offset[0])
+    #             else:
+    #                 offset = int(option[1])
             
-            return((ignore, offset))
-
-
+    #         return((ignore, offset))
  
     '''
     Returns GenomicPosition for middle site and supports Gapped alignments!
     '''
     def determineMiddleSite(self, almnt):
 
-        pos = round(decimal.Decimal(len(almnt.read.seq)) / 2, 0)
-
+        pos = decimal.Decimal(decimal.Decimal(len(almnt.read.seq))/2).quantize(decimal.Decimal(1),rounding=decimal.ROUND_HALF_UP)
         cigarList = almnt.cigar
 
         if almnt.iv.strand == "-":
@@ -189,7 +182,7 @@ class bamCLIP:
                     break
                 else:
                     pos = pos - cig.size
-        return(HTSeq.GenomicPosition(almnt.iv.chrom, pos, almnt.iv.strand))
+        return(GenomicPosition(almnt.iv.chrom, pos, almnt.iv.strand))
 
     def getMiddleSiteAsBed(self, almnt):
         pos = self.determineMiddleSite(almnt)
@@ -204,13 +197,13 @@ class bamCLIP:
         
         seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name + "|" + str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
         
-        return(str("\t").join(seq))
+        return("\t".join(seq))
  
     '''
     Returns GenomicPosition for end site
     '''
     def determineEndSite(self, iv):
-        return(HTSeq.GenomicPosition(iv.chrom, iv.end_d, iv.strand))
+        return(GenomicPosition(iv.chrom, iv.end_d, iv.strand))
 
     '''
     Writes deletions of an alignment parsed by CIGAR string  as bed line
@@ -238,7 +231,7 @@ class bamCLIP:
                     x = y
                     y = b
                 seq = (almnt.iv.chrom, str(x), str(y), almnt.read.name + "|" + str(len(almnt.read.seq)), str(deletion[i].query_from), almnt.iv.strand)
-                seq = (str("\t").join(seq)) 
+                seq = ("\t".join(seq)) 
                 fOutput.write(seq + "\n")    
    
     '''
@@ -265,9 +258,8 @@ class bamCLIP:
                     x = y
                     y = b
                 seq = (almnt.iv.chrom, str(x), str(y), almnt.read.name+"|"+str(len(almnt.read.seq)), str(insertion[i].query_from), almnt.iv.strand)
-                seq = (str("\t").join(seq)) 
+                seq = ("\t".join(seq)) 
                 fOutput.write(seq + "\n")     
-
 
     '''
     Returns GenomicPosition for desired site with offset
@@ -279,13 +271,13 @@ class bamCLIP:
         elif almnt.iv.strand == "-":
             x = position - offset
         else:
-            raise("Strand not known %s" % almnt.iv.strand)
+            raise ValueError("Strand not known {}".format(almnt.iv.strand))
 
         if x < 0:
-            msg = 'Start position cannot be less than zero. Alignment:{} , Read: '.format(str(almnt.iv),almnt.read.name)
+            msg = 'Start position cannot be less than zero. Alignment:{} , Read: {}'.format(str(almnt.iv),almnt.read.name)
             if ignore:
-                sys.stderr.write('Skipping {}'.format(almnt.read.name)+'\n')
-                sys.stderr.write(msg+'\n')
+                logging.warning('Skipping {}'.format(almnt.read.name))
+                logging.warning(msg)
             else:
                 raise ValueError(msg)
             return None
@@ -301,9 +293,8 @@ class bamCLIP:
             
             seq = (almnt.iv.chrom, str(min(x,y)), str(max(x,y)), almnt.read.name + "|" + str(len(almnt.read.seq)), str(yb), almnt.iv.strand)
     
-            return(str("\t").join(seq))
-	
-            
+            return("\t".join(seq))
+	            
     '''
     Returns start site (with offset) as bed line 
     '''
@@ -320,15 +311,15 @@ class bamCLIP:
     Extract start sites
     '''
     def extract_StartSites(self, offset = 0, ignore = False):
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        almnt_file = BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
-
         for almnt in almnt_file:
-            if self.readFullfillsQualityCriteria(almnt):
-                
-                out = self.getStartSiteAsBed(almnt, ignore, offset)
-                if not out == None:
-                    fOutput.write(out + "\n")
+            if not self.readFullfillsQualityCriteria(almnt):
+                continue
+            out = self.getStartSiteAsBed(almnt = almnt, ignore = ignore, offset = offset)
+            if out is None:
+                continue
+            fOutput.write(out + "\n")
 
         fOutput.close()
 
@@ -336,15 +327,16 @@ class bamCLIP:
     Extract middle sites
     '''   
     def extract_MiddleSites(self):
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        almnt_file = BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
     
         for almnt in almnt_file:
-            if self.readFullfillsQualityCriteria(almnt):
-
-                out = self.getMiddleSiteAsBed(almnt)
-                if not out == None:
-                    fOutput.write(out + "\n")
+            if not self.readFullfillsQualityCriteria(almnt):
+                continue
+            out = self.getMiddleSiteAsBed(almnt)
+            if out is None:
+                continue
+            fOutput.write(out + "\n")
        
         fOutput.close() 
            
@@ -352,14 +344,15 @@ class bamCLIP:
     Extract end sites. 
     '''   
     def extract_EndSites(self, offset = 0, ignore = False):
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        almnt_file = BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
-    
         for almnt in almnt_file:
-            if self.readFullfillsQualityCriteria(almnt):
-                out = self.getEndSiteAsBed(almnt, ignore, offset)
-                if not out == None:
-                    fOutput.write(out + "\n")
+            if not self.readFullfillsQualityCriteria(almnt):
+                continue
+            out = self.getEndSiteAsBed(almnt = almnt, ignore = ignore, offset = offset)
+            if out is None:
+                continue
+            fOutput.write(out + "\n")
 
         fOutput.close()
         
@@ -368,12 +361,12 @@ class bamCLIP:
     Deletion sites are determined by parsing the CIGAR string.
     ''' 
     def extract_DeletionSites(self):
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        almnt_file = BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
-    
         for almnt in almnt_file:
-            if self.readFullfillsQualityCriteria(almnt):
-                self.writeDeletionSiteAsBed(almnt, fOutput)
+            if not self.readFullfillsQualityCriteria(almnt):
+                continue
+            self.writeDeletionSiteAsBed(almnt, fOutput)
        
         fOutput.close()
         
@@ -382,11 +375,11 @@ class bamCLIP:
     Insertion sites are determined by parsing the CIGAR string.
     ''' 
     def extract_InsertionSites(self):
-        almnt_file = HTSeq.BAM_Reader(self.fInput)
+        almnt_file = BAM_Reader(self.fInput)
         fOutput = Output(self.fOutput)
-    
         for almnt in almnt_file:
-            if self.readFullfillsQualityCriteria(almnt):
-                self.writeInsertionSiteAsBed(almnt, fOutput)
+            if not self.readFullfillsQualityCriteria(almnt):
+                continue
+            self.writeInsertionSiteAsBed(almnt, fOutput)
        
         fOutput.close()      
