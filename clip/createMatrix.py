@@ -13,7 +13,7 @@ class MatrixConverter(object):
     Class to convert count files into count matrixes.
     """
 
-    def __init__(self, inputDir, inputPrefix, inputPostfix, outputFilename, annotation=None):
+    def __init__(self, inputDir, inputPrefix, inputPostfix, outputFilename):
         '''
         Arguments:
          inputDir: input directory
