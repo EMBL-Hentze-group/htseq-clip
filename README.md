@@ -1,0 +1,16 @@
+# htseq-clip
+
+htseq-clip is a toolset for the analysis of eCLIP/iCLIP datasets. 
+This python package can be used to generate files necessary for 
+data analysis using the companion R/Bioconductor package [DEWSeq](https://bioconductor.org/packages/release/bioc/html/DEWSeq.html).
+
+URL: https://github.com/EMBL-Hentze-group/htseq-clip/   
+BugReports: https://github.com/EMBL-Hentze-group/htseq-clip/issues
+
+Copyright (c) 2020 Sudeep Sahadevan, Marko Fritz, Nadia Ashraf and Thomas Schwarzl*
+
+*Project lead: Thomas Schwarzl
+
+[Matthias Hentze](https://www.embl.de/research/units/directors_research/hentze/index.html) and    
+[Wolfgang Huber](https://www.embl.de/research/units/genome_biology/huber/index.html) Labs,   
+[EMBL , Heidelberg](https://www.embl.de/). 
