@@ -28,9 +28,10 @@ except ImportError as e:
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-# Get the long description from the README file
-with open(os.path.join(here, 'README'), encoding='utf-8') as f:
-    long_description = f.read()
+long_description = """
+htseq-clip is a toolset for the analysis of eCLIP/iCLIP datasets. 
+This python package can be used to generate files necessary for data analysis using the companion R/Bioconductor package DEWSeq
+"""
 
 setup(
     name='htseq-clip',
