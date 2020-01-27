@@ -14,11 +14,11 @@ except ImportError as e:
     sys.stderr.write("Could not import setuptools. Please install setuptools and try again to install htseq-clip. \n Error: {}".format(e))
     sys.exit(1)
 
-try:
-	import Cython
-except ImportError as e:
-    sys.stderr.write("Could not import HTSeq dependency 'Cython'. Please install it with pip install Cython and then try again to install htseq-clip. \n Exception: {}".format(e))
-    sys.exit(1)
+#try:
+#	import Cython
+#except ImportError as e:
+#    sys.stderr.write("Could not import HTSeq dependency 'Cython'. Please install it with pip install Cython and then try again to install htseq-clip. \n Exception: {}".format(e))
+#    sys.exit(1)
 
 try:
 	import numpy
@@ -28,10 +28,10 @@ except ImportError as e:
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-long_description = """
-htseq-clip is a toolset for the analysis of eCLIP/iCLIP datasets. 
-This python package can be used to generate files necessary for data analysis using the companion R/Bioconductor package DEWSeq
-"""
+# Get the long description from the README file
+with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 
 setup(
     name='htseq-clip',
