@@ -35,7 +35,7 @@ This python package can be used to generate files necessary for data analysis us
 
 setup(
     name='htseq-clip',
-    version='1.1.2b0',
+    version='1.1.3b0',
     description='htseq-clip: a toolset for the analysis of e/iCLIP datasets',
 	long_description=long_description,
     url='https://bitbucket.org/htseq-clip/htseq-clip',
