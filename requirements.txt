@@ -1,5 +1,2 @@
 numpy
 cython
-pandas
-pysam
-biopython

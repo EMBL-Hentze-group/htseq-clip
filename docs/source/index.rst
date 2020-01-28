@@ -25,18 +25,12 @@ data analysis using the companion R/Bioconductor package `DEWSeq`_
    documentation
    references
 
-`Matthias Hentze`_ and `Wolfgang Huber`_ Labs, European Molecular Laboratory (EMBL)
+   
+`Matthias Hentze`_ and `Wolfgang Huber`_ Labs, `EMBL Heidelberg`_.
 
 .. _`Matthias Hentze`: https://www.embl.de/research/units/directors_research/hentze/index.html
 
 .. _`Wolfgang Huber`: https://www.embl.de/research/units/genome_biology/huber/index.html
 
+.. _`EMBL Heidelberg`: https://www.embl.de/
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
