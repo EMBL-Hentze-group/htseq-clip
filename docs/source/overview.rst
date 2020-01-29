@@ -27,15 +27,16 @@ For an example, this function converts the following GFF annotation
 
 .. list-table::
    
-    * - chr1
-      - HAVANA
-      - exon
-      - 11869
-      - 12227
-      - .
-      - \+
-      - .
-      - ID=exon:ENST00000456328.2:1;Parent=ENST00000456328.2;gene_id=ENSG00000223972.5;transcript_id=ENST00000456328.2;gene_type=transcribed_unprocessed_pseudogene;gene_status=KNOWN;gene_name=DDX11L1;transcript_type=processed_transcript;transcript_status=KNOWN;transcript_name=DDX11L1-002;exon_number=1;exon_id=ENSE00002234944.1;level=2;transcript_support_level=1;havana_gene=OTTHUMG00000000961.2;havana_transcript=OTTHUMT00000362751.1;tag=basic    
+  * - chr1
+    - HAVANA
+    - exon
+    - 1373730
+    - 1373902
+    - .
+    - \-
+    - .
+    - ID=exon:ENST00000338338.9:4;Parent=ENST00000338338.9;gene_id=ENSG00000175756.13;transcript_id=ENST00000338338.9;gene_type=protein_coding;gene_name=AURKAIP1;transcript_type=protein_coding;transcript_name=AURKAIP1-202;exon_number=4;exon_id=ENSE00001611509.1;level=2;protein_id=ENSP00000340656.5;transcript_support_level=1;tag=basic,appris_principal_1,CCDS;ccdsid=CCDS25.1;havana_gene=OTTHUMG00000001413.3;havana_transcript=OTTHUMT00000004082.2
+
 
 and converts this entry into the following BED6 format
 
@@ -51,11 +52,11 @@ and converts this entry into the following BED6 format
       - score
       - strand
     * - chr1
-      - 11868
-      - 12227
-      - ENSG00000223972.5@DDX11L1@transcribed_unprocessed_pseudogene@exon@1/4@ENSG00000223972.5:exon0001
+      - 13737329
+      - 1373902
+      - ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/2@ENSG00000175756.13:exon0002
       - 0
-      - \+
+      - \-
 Various attributes in the name column in this BED entry is seperated by ``@`` and the
 order is given below
 
@@ -68,17 +69,17 @@ order is given below
 
     * - atrribute
       - attribute description 
-    * - ENSG00000223972.5
+    * - ENSG00000175756.13
       - gene id
-    * - DDX11L1
+    * - AURKAIP1
       - gene name
-    * - transcribed_unprocessed_pseudogene
+    * - protein_coding
       - gene type
     * - exon
       - gene feature (exon, intron, CDS,...)
-    * - 1/4
-      - 1st exon out of a total of 4 exons of this gene
-    * - ENSG00000223972.5:exon0001
+    * - 2/4
+      - 2nd exon out of a total of 2 exons of this gene
+    * - ENSG00000175756.13:exon0002
       - unique id, merging gene id feature and feature number
 
 :c1:`createSlidingWindows`
@@ -103,35 +104,35 @@ Continuing with the example entry above, the first 5 sliding windows generated f
       - score
       - strand
     * - chr1
-      - 11868
-      - 11918
-      - ENSG00000223972.5@DDX11L1@transcribed_unprocessed_pseudogene@exon@1/4@ENSG00000223972.5:exon0001W00001@1
+      - 1373729
+      - 1373779
+      - ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/2@ENSG00000175756.13:exon0002W00001@1
       - 0
-      - \+
+      - \-
     * - chr1
-      - 11888
-      - 11938
-      - ENSG00000223972.5@DDX11L1@transcribed_unprocessed_pseudogene@exon@1/4@ENSG00000223972.5:exon0001W00002@2
+      - 1373749
+      - 1373799
+      - ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/2@ENSG00000175756.13:exon0002W00002@2
       - 0
-      - \+
+      - \-
     * - chr1
-      - 11908
-      - 11958
-      - ENSG00000223972.5@DDX11L1@transcribed_unprocessed_pseudogene@exon@1/4@ENSG00000223972.5:exon0001W00003@3
+      - 1373769
+      - 1373819
+      - ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/2@ENSG00000175756.13:exon0002W00003@3
       - 0
-      - \+
+      - \-
     * - chr1
-      - 11928
-      - 11978
-      - ENSG00000223972.5@DDX11L1@transcribed_unprocessed_pseudogene@exon@1/4@ENSG00000223972.5:exon0001W00004@4
+      - 1373789
+      - 1373839
+      - ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/2@ENSG00000175756.13:exon0002W00004@4
       - 0
-      - \+
+      - \-
     * - chr1
-      - 11948
-      - 11998
-      - ENSG00000223972.5@DDX11L1@transcribed_unprocessed_pseudogene@exon@1/4@ENSG00000223972.5:exon0001W00005@5
+      - 1373809
+      - 1373859
+      - ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/2@ENSG00000175756.13:exon0002W00005@5
       - 0
-      - \+
+      - \-
 
 Each sliding window listed here is 50bp long, as default value for ``--windowSize`` argument is ``50``  and the difference between
 start positions of each is 20bp, as the default value for ``--windowStep`` argument is ``20`` 
@@ -148,23 +149,23 @@ An example is given below
     * - atrribute
       - attribute description
       - Found in :ref:`flattend name attribute <AttibTable>`
-    * - ENSG00000223972.5
+    * - ENSG00000175756.13
       - gene id
       - Yes
-    * - DDX11L1
+    * - AURKAIP1
       - gene name
       - Yes
-    * - transcribed_unprocessed_pseudogene
+    * - protein_coding
       - gene type
       - Yes
     * - exon
       - gene feature (exon, intron, CDS,...)
       - Yes
-    * - 1/4
-      - 1st exon out of a total of 4 exons of this gene
+    * - 2/2
+      - 2nd exon out of a total of 2 exons of this gene
       - Yes
-    * - ENSG00000223972.5:exon0001W00001
-      - unique id, merging gene id feature, feature number and window number (W stands for window)
+    * - ENSG00000175756.13:exon0002W00001
+      - unique id, merging gene id feature, feature number and window number (W : window)
       - No
     * - 1
       - 1st window of this feature 
@@ -182,28 +183,55 @@ Extract and process crosslink sites from alignment file.
 writes either start, insertion, deletion, middle or end site into a BED6 formatted file.
 The argument ``--site``  determines crosslink site choice.
 
+Given below is an example paired end sequence and start, middle and end positions extracted from the second mate of this fragment
+
 .. _AlignTable1:
 
 .. list-table::
 
-  * - HWI-EAS350_213:5:47:1250:7471_4969020:GAAGTCC
-    - 0
+  * - TTATTACAGC\:K00180\:131\:H7J3YBBXX\:3:2123:15057:19918
+    - 99
     - chr1
-    - 10063051
+    - 1373726
     - 255
-    - 47M
-    - \*
-    - 0
-    - 0
-    - GATGTGTCGGGTACTTGGGCATGAGAGTGAGCAGAGGGAGGAGCTAA
-    - \`aa\^a\^aba\]NZY_\^aa]YY\\aV\^P\^PYQ\\RNWLY\`ZMV\[OYNPXT
+    - 33M
+    - \=
+    - 1373729
+    - 41
+    - TTTTAAAGGCTGAGTCCTCTGAGAATTTATTAC
+    - JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ
     - NH:i:1
     - HI:i:1
-    - AS:i:46
-    - nM:i:0
-    - YB:i:3
+    - AS:i:60
+    - nM:i:5
+    - NM:i:4
+    - MD:Z:0C0A0G0G29
+    - jM:B:c,-1
+    - jI:B:i,-1
+    - RG:Z:foo
+  * - TTATTACAGC\:K00180\:131\:H7J3YBBXX\:3:2123:15057:19918
+    - 147
+    - chr1
+    - 1373729
+    - 255
+    - 38M
+    - \=
+    - 1373726
+    - \-41
+    - TAAAGGCTGAGTCCTCTGAGAATTTATTACTACGGATC
+    - JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ
+    - NH:i:1
+    - HI:i:1
+    - AS:i:60
+    - nM:i:5
+    - NM:i:1
+    - MD:Z:0G37
+    - jM:B:c,-1
+    - jI:B:i,-1
+    - RG:Z:foo
 
-**start site entry**
+
+**start site**
 
 .. _StartTable:
 
@@ -216,13 +244,13 @@ The argument ``--site``  determines crosslink site choice.
     - score
     - strand
   * - chr1
-    - 10063050
-    - 10063051
-    - HWI-EAS350_213:5:47:1250:7471_4969020:GAAGTCC|47
-    - 3
-    - \+
+    - 1373765
+    - 1373766
+    - TTATTACAGC\:K00180\:131\:H7J3YBBXX\:3:2123:15057:19918|38
+    - 1
+    - \-
 
-**middle site entry**
+**middle site**
 
 .. _MiddleTable:
 
@@ -235,13 +263,13 @@ The argument ``--site``  determines crosslink site choice.
     - score
     - strand
   * - chr1
-    - 10063074
-    - 10063075
-    - HWI-EAS350_213:5:47:1250:7471_4969020:GAAGTCC|47
-    - 3
-    - \+
+    - 1373746
+    - 1373747
+    - TTATTACAGC\:K00180\:131\:H7J3YBBXX\:3:2123:15057:19918|38
+    - 1
+    - \-
 
-**end site entry**
+**end site**
 
 .. _EndTable:
 
@@ -254,16 +282,103 @@ The argument ``--site``  determines crosslink site choice.
     - score
     - strand
   * - chr1
-    - 10063097
-    - 10063098
-    - HWI-EAS350_213:5:47:1250:7471_4969020:GAAGTCC|47
-    - 3
-    - \+
+    - 1373727
+    - 1373728
+    - TTATTACAGC\:K00180\:131\:H7J3YBBXX\:3:2123:15057:19918|38
+    - 1
+    - \-
 
+.. Note:: In a paired end alignment file, argument ``--mate`` is used to choose the read/mate from which crosslink sites are extracted. The sequencing protocol used to generate the file determines whether the crosslink site is located on the first mate or the second mate. Please consult your sequencing protocol to decide which mate to use.
 
 :ref:`Count <CountOverview>`
 ****************************
 Calculate the number of extracted crosslink sites per given gene annotation feature.
 
-.. figure:: htseq-clip.png
-   :width: 75% 
+:c1:`count`
+
+:ref:`count function <count>` takes as input either a flattened annotation file generated by annotation function or a sliding windows
+file generated by createSlidingWindows function and a crosslink sites file generated by extract function and for each entry/window in the
+annotation/sliding windows file count the number of crosslink sites in the region.
+
+Given below is an example output entries from count function for sliding windows in :ref:`createSlidingWindows example <SWTable>`.
+
+.. _CountTable:
+
+.. list-table::
+
+  * - unique_id
+    - window_number
+    - window_length
+    - crosslink_count_total
+    - crosslink_count_position_nr
+    - crosslink_count_position_max
+    - crosslink_density
+  * - ENSG00000175756.13:exon0002W00001
+    - 1
+    - 50
+    - 4
+    - 3
+    - 2
+    - 0.06
+  * - ENSG00000175756.13:exon0002W00002
+    - 2
+    - 50
+    - 17
+    - 12
+    - 3
+    - 0.24
+  * - ENSG00000175756.13:exon0002W00003
+    - 3
+    - 50
+    - 159
+    - 25
+    - 76
+    - 0.5
+  * - ENSG00000175756.13:exon0002W00004
+    - 4
+    - 50
+    - 207
+    - 26
+    - 76
+    - 0.52
+  * - ENSG00000175756.13:exon0002W00005
+    - 5
+    - 50
+    - 183
+    - 21
+    - 76
+    - 0.42
+
+Here is a brief explanation of the columns in the table above
+
+.. _CountAttribTable:
+
+.. list-table::
+
+  * - column heading
+    - description
+  * - unique_id
+    - unique id of the entry, as described in :ref:`sliding window attribute table <SWAttibTable>`
+  * - window_number
+    - window number, as described in :ref:`sliding window attribute table <SWAttibTable>`
+  * - window_length
+    - total length of this window (in bp) 
+  * - crosslink_count_total
+    - total number of crosslink sites
+  * - crosslink_count_position_nr
+    - number of positions with crosslink sites in this window
+  * - crosslink_count_position_max
+    - maximum number of crosslink sites found at a single position
+  * - crosslink_density
+    - calculated as: :math:`\frac{crosslink\_count\_position\_nr}{window\_length}`
+
+Please refer to :ref:`createMatrix function <createMatrix>` for merging count tables from multiple samples.
+
+Further analysis
+*****************
+
+Further analysis and processing of crosslink windows is done using R/Bioconductor package `DEWSeq`_. Please refer to the
+user manual of this package for requirements, installation and help. 
+
+.. _`DEWSeq`: https://bioconductor.org/packages/release/bioc/html/DEWSeq.html
+
