@@ -372,7 +372,7 @@ Here is a brief explanation of the columns in the table above
   * - crosslink_density
     - calculated as: :math:`\frac{crosslink\_count\_position\_nr}{window\_length}`
 
-Please refer to :ref:`createMatrix function <createMatrix>` for merging count tables from multiple samples.
+.. Note:: Please refer to :ref:`createMatrix function <createMatrix>` for merging count tables from multiple samples.
 
 Further analysis
 *****************
