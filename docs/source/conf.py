@@ -23,6 +23,7 @@ project = 'htseq-clip'
 copyright = '2020, Thomas Schwarzl, Sudeep Sahadevan'
 author = 'Thomas Schwarzl, Sudeep Sahadevan'
 
+master_doc = 'index'
 
 # -- General configuration ---------------------------------------------------
 
