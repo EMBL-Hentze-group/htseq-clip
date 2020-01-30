@@ -5,8 +5,12 @@ This python package can be used to generate files necessary for
 data analysis using the companion R/Bioconductor package [DEWSeq](https://bioconductor.org/packages/release/bioc/html/DEWSeq.html).
 
 URL: https://github.com/EMBL-Hentze-group/htseq-clip
+
 Documentation: https://htseq-clip.readthedocs.io/en/latest/index.html 
+
 BugReports: https://github.com/EMBL-Hentze-group/htseq-clip/issues
+
+installation: `pip install htseq-clip`
 
 Copyright (c) 2020 Sudeep Sahadevan, Marko Fritz, Nadia Ashraf and Thomas Schwarzl*
 
