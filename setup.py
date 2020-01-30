@@ -39,7 +39,7 @@ setup(
     description='htseq-clip: a toolset for the analysis of eCLIP/iCLIP datasets',
 	long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://bitbucket.org/htseq-clip/htseq-clip',
+    url='https://github.com/EMBL-Hentze-group/htseq-clip',
     author='Thomas Schwarzl, Sudeep Sahadevan, Marko Fritz, Nadia Ashraf',
     author_email='schwarzl@embl.de, sudeep.sahadevan@embl.de',
 	zip_safe=False,
