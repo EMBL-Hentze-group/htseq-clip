@@ -29,7 +29,9 @@ data analysis using the companion R/Bioconductor package `DEWSeq`_
    references
 
    
-`Matthias Hentze`_ and `Wolfgang Huber`_ Labs, `EMBL Heidelberg`_.
+`Matthias Hentze`_ and 
+`Wolfgang Huber`_ Labs,
+`EMBL Heidelberg`_.
 
 .. _`Matthias Hentze`: https://www.embl.de/research/units/directors_research/hentze/index.html
 
@@ -37,3 +39,4 @@ data analysis using the companion R/Bioconductor package `DEWSeq`_
 
 .. _`EMBL Heidelberg`: https://www.embl.de/
 
+We would also like to acknowledge contributions from Marko Fritz and  Nadia Ashraf in developing this package.
