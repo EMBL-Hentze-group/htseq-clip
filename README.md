@@ -18,4 +18,4 @@ Copyright (c) 2020 Sudeep Sahadevan, Marko Fritz, Nadia Ashraf and Thomas Schwar
 
 [Matthias Hentze](https://www.embl.de/research/units/directors_research/hentze/index.html) and    
 [Wolfgang Huber](https://www.embl.de/research/units/genome_biology/huber/index.html) Labs,   
-[EMBL , Heidelberg](https://www.embl.de/). 
+[EMBL, Heidelberg](https://www.embl.de/). 

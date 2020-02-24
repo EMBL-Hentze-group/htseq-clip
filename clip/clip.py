@@ -205,6 +205,9 @@ def main():
     # Now read in arguments and process
     try:
         args = parser.parse_args()
+        if args.subparser is None:
+            parser.print_help(sys.stderr)
+            sys.exit(1)
         # set logging level and handler
         if args.log== 'quiet':
             logger.addHandler(logging.NullHandler())

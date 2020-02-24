@@ -30,13 +30,13 @@ flattens the annotation and outputs the
 results as Bed file
 """
 
-class EmptyFileException(Exception):
+class EmptyFileException(FileExistsError):
     pass
 
-class NoFeaturesException(Exception):
+class NoFeaturesException(ValueError):
     pass
 
-class FeatureOrderException(Exception):
+class FeatureOrderException(LookupError):
     pass
 
 class GeneInfo:
