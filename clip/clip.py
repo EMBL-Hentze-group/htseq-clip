@@ -133,7 +133,7 @@ def main():
     # log levels
     loglevels = ['debug','info','warn','quiet']
     # subparsers
-    subps = parser.add_subparsers(help='Need positional arguments',dest='subparser',required=True)
+    subps = parser.add_subparsers(help='Need positional arguments',dest='subparser')
 
     ''' ____________________ [Annotation] ___________________  '''
     # annotation
