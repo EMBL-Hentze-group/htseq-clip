@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/EMBL-Hentze-group/htseq-clip.svg?branch=master)](https://travis-ci.org/EMBL-Hentze-group/htseq-clip)
+[![Build Status](https://travis-ci.org/EMBL-Hentze-group/htseq-clip.svg?branch=master)](https://travis-ci.org/EMBL-Hentze-group/htseq-clip)    
 ![GitHub](https://img.shields.io/github/license/EMBL-Hentze-group/htseq-clip)
 
 # htseq-clip
