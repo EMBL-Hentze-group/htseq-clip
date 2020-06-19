@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/EMBL-Hentze-group/htseq-clip.svg?branch=master)](https://travis-ci.org/EMBL-Hentze-group/htseq-clip)
+![GitHub](https://img.shields.io/github/license/EMBL-Hentze-group/htseq-clip)
+
 # htseq-clip
 
 htseq-clip is a toolset for the analysis of eCLIP/iCLIP datasets. 
