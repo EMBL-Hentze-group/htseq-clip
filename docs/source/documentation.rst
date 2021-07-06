@@ -132,6 +132,9 @@ Extraction
   .. code-block:: sh    
     
     $ htseq-clip extract -h
+  
+  
+  .. Note:: To extract ``1``st offset position of second mate (``2``) start site (``s``) in eCLIP, use: ``--mate 2 --site s --offset -1``
 
 
 .. _CountOverview:

@@ -83,11 +83,12 @@ class bamCLIP(object):
     '''
     Calculates the read length and stores the min and max length
     '''
-    def getSequenceLength(self, almnt):
-        return(len(almnt.read.seq))   
+    # def getSequenceLength(self, almnt):
+    #     return(len(almnt.read.seq))   
        
     def calcMinMax(self, almnt):
-        length = self.getSequenceLength(almnt)
+        
+        length = len(almnt.read.seq)
       
         if not (self.data['maxReadLength'] == 0 and self.data['minReadLength'] == 0):
             if length > self.data['maxReadLength']:
