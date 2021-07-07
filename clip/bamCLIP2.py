@@ -5,12 +5,19 @@
 import decimal
 import gzip
 import logging
+import multiprocessing as mp
+import tempfile
+from collections import OrderedDict
+from os import sched_getaffinity
+from pathlib import Path
+from shutil import rmtree
 
-import pysam
 import numpy as np
-from .output import Output
+import pysam
 
-class bamCLIP(object):
+# from .output import Output
+
+class bamCLIP:
         
     def __init__(self, options):
         self.fInput = options.input
@@ -18,33 +25,123 @@ class bamCLIP(object):
         self.fOutput = options.output
         self.choice = options.choice
         self.mate = options.mate           
-        self.data = {'maxReadLength' : options.maxReadLength,
-                     'minReadLength' : options.minReadLength,
+        self.read = {'min_len' : options.minReadLength,
+                     'max_len' : options.maxReadLength,
                      'primary': options.primary,
-                     'maxReadIntervalLength': options.maxReadIntervalLength,
-                     'minAlignmentQuality': options.minAlignmentQuality}
+                     'max_interval_length': options.maxReadIntervalLength,
+                     'min_qual': options.minAlignmentQuality}
+        self.chromFile = options.chromFile
+        self.cores = options.cores
+        self.chromes = list()
+        if options.tmp is None:
+            self.tmp = Path(self.fOutput).parent/next(tempfile._get_candidate_names())
+        else:
+            self.tmp = Path(options.tmp).parent/next(tempfile._get_candidate_names())
     
+    def __enter__(self):
+        # find all chromosomes in the given bam file
+        self._bam_checker()
+        self._set_cores()
+        try:
+            self.tmp.mkdir()
+        except FileExistsError:
+            logging.warning('Files in {} might be re-written!'.format(str(self.tmp)))
+        return self
+
+    def __exit__(self,except_type,except_val,except_traceback):
+        # clean up
+        rmtree(self.tmp)
+        if except_type:
+            logging.exception(except_val)
+
+    @staticmethod
+    def _read_chromosomes(fin):
+        '''
+        Helper function
+        Given a TAB seperated file with chromosome names as first column, parse them
+        '''
+        if fin is None:
+            return None
+        else:
+            chromosomes = set()
+            with open(fin,'r') as fh:
+                for ch in fh:
+                    chromosomes.add(ch.strip().split('\t')[0])
+            return chromosomes
+    
+    def _bam_checker(self):
+        '''
+        Helper function
+        find names of all chromosmes in the bam file,
+        if a file with list of chromosomes are given, filter chromosomes based on the list
+        '''
+        with pysam.AlignmentFile(self.fInput,mode='rb',check_sq=True,check_header=True,require_index=True) as _bh:
+            bam_header = dict(_bh.header)
+            if 'SQ' not in bam_header:
+                msg = 'Cannot find @SQ header lines in file {}'.format(self.fInput)
+                logging.error(msg)
+                raise LookupError(msg)
+            chroms = set(map(lambda s: s['SN'],bam_header['SQ']))
+        in_chroms = bamCLIP._read_chromosomes(self.chromFile)
+        if in_chroms is not None:
+            chroms = chroms & in_chroms
+            diff_chroms = in_chroms - chroms
+            if len(diff_chroms)>0:
+                logging.warning('Cannot find reads for {} chromosomes in {}'.format(', '.join(diff_chroms), self.fInput))
+        if len(chroms) == 0:
+            msg = 'Cannot find common chromosmes between bam file: {} and chromosome file {}'.format(self.fInput, self.chromFile)
+            logging.error(msg)
+            raise ValueError(msg)
+        logging.info('Paring reads in {} chromosomes from {}'.format(len(chroms),self.fInput))
+        # Final list of chroms to work with
+        self.chromes = sorted(chroms)
+    
+    def _set_cores(self):
+        '''
+        Helper function
+        set number of cores
+        '''
+        allcores = len(sched_getaffinity(0))
+        if self.cores > allcores:
+            setcores =  max(allcores-1,1)
+            logging.warning('Give number of cores {} > number of cores detected {}. Setting cores to {}'.format(self.cores,allcores,setcores))
+            self.cores = setcores
+        elif allcores==1:
+            logging.warning('Available # cores: 1, resetting cores parameter from {} to 1'.format(self.ncores))
+            self.cores = 1
+        else:
+            logging.info('Using {} cores out of {}...'.format(self.cores, allcores))
+    
+    def _create_tmp_files(self,op='start'):
+        '''
+        Helper function crete temp. file names
+        '''
+        tmpDict = OrderedDict()
+        for chrom in sorted(self.chromes):
+            tmpDict[chrom] = str(self.tmp/'{}_{}{}'.format(chrom,op,next(tempfile._get_candidate_names())))
+        return tmpDict
+
     def extract_start_sites(self):
-        # @TODO: Fill me up
+        start_dict = self._create_tmp_files(op='start')
         pass
 
     def extract_middle_sites(self):
-        # @TODO: fill me up
+        middle_dict = self._create_tmp_files(op='middle')
         pass
 
     def extract_end_sites(self):
-        # @TODO Fill me up
+        end_dict = self._create_tmp_files(op='end')
         pass
 
     def extract_insertion_sites(self):
-        # @TODO Fill me up
+        middle_dict = self._create_tmp_files(op='middle')
         pass
 
     def extract_deletion_sites(self):
         # @TODO Fill me up
         pass
 
-def _discard_read(aln,qual = 10, max_interval_length = 10000, primary = False, mate = 2):
+def _discard_read(aln,qual = 10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2):
     '''
     Helper function, return True if any of the qc params fail
     Arugments:
@@ -55,10 +152,10 @@ def _discard_read(aln,qual = 10, max_interval_length = 10000, primary = False, m
         mate: mate with crosslink site
     check qc params and return True if any of them fails
     '''
-    if aln.is_duplicate or aln.is_qcfail or aln.is_unmapped  or (aln.mapping_quality < qual) or (aln.reference_length >= max_interval_length):
+    if aln.is_duplicate or aln.is_qcfail or aln.is_unmapped  or (aln.mapping_quality < qual) :
         # remove PCR duplicates, qc fails, unmapped ones or with low mapping quality
         return True
-    if primary and aln.is_secondary:
+    if (primary and aln.is_secondary) or (aln.reference_length >= max_interval_length) or (aln.query_length < min_len) or (aln.query_length > max_len):
         # remove all secondary alignments if primary flag is given
         return True
     if mate == 1 and aln.is_read2:
@@ -69,7 +166,7 @@ def _discard_read(aln,qual = 10, max_interval_length = 10000, primary = False, m
         return True
     return False
     
-def _start_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, primary = False, mate = 2, offset = 0 ):
+def _start_sites(bam, chrom, outf, qual = 10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2, offset = 0):
     '''
     parse crosslink sites at the start positions
     Arugments:
@@ -84,7 +181,7 @@ def _start_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, prima
     '''
     with pysam.AlignmentFile(bam,mode='rb') as bh, open(outf,'w') as oh:
         for aln in bh.fetch(chrom,multiple_iterators=True):
-            if _discard_read(aln, qual = qual, max_interval_length = max_interval_length, primary = primary, mate = mate):
+            if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate):
                 continue
             pos = list()
             strand = ''
@@ -105,7 +202,7 @@ def _start_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, prima
             dat = [chrom, str(pos[0]), str(pos[1]), aln.query_name+'|'+ str(aln.query_length),str(yb),strand]
             oh.write('\t'.join(dat)+'\n')
 
-def _middle_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, primary = False, mate = 2, offset = 0 ):
+def _middle_sites(bam, chrom, outf, qual = 10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2, offset = 0):
     '''
     parse crosslink sites at the middle positions
     Arugments:
@@ -120,21 +217,27 @@ def _middle_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, prim
     '''
     with pysam.AlignmentFile(bam,mode='rb') as bh, open(outf,'w') as oh:
         for aln in bh.fetch(chrom,multiple_iterators=True):
-            if _discard_read(aln, qual = qual, max_interval_length = max_interval_length, primary = primary, mate = mate):
+            if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate):
                 continue
             alignedDict = dict(aln.aligned_pairs)
             mid = int(decimal.Decimal(aln.query_length/2).quantize(decimal.Decimal(1),rounding=decimal.ROUND_HALF_UP))
-            end = alignedDict[mid]+offset
-            begin = end-1
             if aln.is_reverse:
                 if aln.reference_length%2==1:
                     # adjust for reverse strand and odd read length
                     mid-=1
-                end = alignedDict[mid]-offset-1
+                end = alignedDict[mid]
+                if end is None:
+                    logging.warning('Skipping {}, middle is an inserted position'.format(aln.query_name))
+                    continue
+                end = end-offset-1
                 begin = end -1
                 strand = '-'
             else:
-                end = alignedDict[mid] + offset
+                end = alignedDict[mid]
+                if end is None:
+                    logging.warning('Skipping {}, middle is an inserted position'.format(aln.query_name))
+                    continue
+                end += offset
                 begin = end -1
                 strand = '+'
             if begin <0:
@@ -146,7 +249,7 @@ def _middle_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, prim
             dat = [chrom, str(begin), str(end), aln.query_name+'|'+ str(aln.query_length),str(yb),strand]
             oh.write('\t'.join(dat)+'\n')
 
-def _end_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, primary = False, mate = 2, offset = 0 ):
+def _end_sites(bam, chrom, outf, qual = 10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2, offset = 0):
     '''
     parse crosslink sites at the end positions
     Arugments:
@@ -161,7 +264,7 @@ def _end_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, primary
     '''
     with pysam.AlignmentFile(bam,mode='rb') as bh, open(outf,'w') as oh:
         for aln in bh.fetch(chrom,multiple_iterators=True):
-            if _discard_read(aln, qual = qual, max_interval_length = max_interval_length, primary = primary, mate = mate):
+            if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate):
                 continue
             pos = list()
             strand = ''
@@ -182,7 +285,7 @@ def _end_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, primary
             dat = [chrom, str(pos[0]), str(pos[1]), aln.query_name+'|'+ str(aln.query_length),str(yb),strand]
             oh.write('\t'.join(dat)+'\n')
 
-def _insertion_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, primary = False, mate = 2, offset = 0 ):
+def _insertion_sites(bam, chrom, outf, qual = 10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2):
     '''
     parse insertion sites
     Arugments:
@@ -197,7 +300,7 @@ def _insertion_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, p
     '''
     with pysam.AlignmentFile(bam,mode='rb') as bh, open(outf,'w') as oh:
         for aln in bh.fetch(chrom,multiple_iterators=True):
-            if _discard_read(aln, qual = qual, max_interval_length = max_interval_length, primary = primary, mate = mate):
+            if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate):
                 continue
             if 1 not in set(map(lambda x: x[0], aln.cigartuples)):
                 # https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.get_cigar_stats
@@ -233,7 +336,7 @@ def _insertion_positions(is_reverse):
     else:
         return pos_strand
 
-def _deletion_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, primary = False, mate = 2, offset = 0 ):
+def _deletion_sites(bam, chrom, outf, qual = 10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2):
     '''
     parse deletion sites
     Arugments:
@@ -248,7 +351,7 @@ def _deletion_sites(bam, chrom, outf, qual = 10, max_interval_length = 10000, pr
     '''
     with pysam.AlignmentFile(bam,mode='rb') as bh, open(outf,'w') as oh:
         for aln in bh.fetch(chrom,multiple_iterators=True):
-            if _discard_read(aln, qual = qual, max_interval_length = max_interval_length, primary = primary, mate = mate):
+            if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate):
                 continue
             if 2 not in set(map(lambda x: x[0], aln.cigartuples)):
                 # https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.get_cigar_stats

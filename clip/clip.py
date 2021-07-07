@@ -177,9 +177,11 @@ def main():
     extract.add_argument('--ignore',dest='ignore',help='flag to ignore crosslink sites outside of genome',action='store_true')
     extract.add_argument('-q','--minAlignmentQuality',metavar = 'min. alignment quality',dest='minAlignmentQuality',help='minimum alignment quality (default: 10)',type=int,default=10)
     extract.add_argument('-m','--minReadLength',metavar='min. read length',dest='minReadLength',help='minimum read length (default: 0)',type=int,default=0)
-    extract.add_argument('-x','--maxReadLength',metavar='max. read length',dest='maxReadLength',help='maximum read length (default: 0)',type=int,default=0)
+    extract.add_argument('-x','--maxReadLength',metavar='max. read length',dest='maxReadLength',help='maximum read length (default: 0)',type=int,default=500)
     extract.add_argument('-l','--maxReadInterval',metavar='max. read interval',dest='maxReadIntervalLength',help='maximum read interval length (default: 10000)',type=int,default=10000)
     extract.add_argument('--primary',dest='primary',help='flag to use only primary positions of multimapping reads',action='store_true')
+    extract.add_argument('-c','--cores',dest='cores',metavar='cpus',help='Number of cores to use for alignment parsing (default: 5)',default=5,type=int)
+    extract.add_argument('-t','--tmp',dest='tmp',metavar='tmp',help='Path to create and store temp files (default behavior: use folder from "--output" parameter)',default=None,type=str)
     extract.add_argument('-v','--verbose',metavar='Verbose level',dest='log',help='Allowed choices: '+', '.join(loglevels)+' (default: info)',choices=loglevels,default='info')
 
     ''' ____________________ [Counting] ___________________ '''
