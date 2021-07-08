@@ -1,12 +1,11 @@
 """
 Class for output file management
 """
-from builtins import object
 import gzip
 import os
 import sys
 
-class Output(object):
+class Output:
     # constructor 
     def __init__(self, fileName):
         # if file name is empty, redirect to stdin
