@@ -19,7 +19,7 @@ bamCLIP module:
     Input bam files MUST be co-ordinated sorted and indexed.
 
 Authors: Sudeep Sahadevan, sudeep.sahadevan@embl.de
-          Thomas Schwarzl, thomas.schwarzl@embl.de
+         Thomas Schwarzl, thomas.schwarzl@embl.de
 Instituion: EMBL Heidelberg
 '''
 class bamCLIP:
@@ -40,28 +40,24 @@ class bamCLIP:
             self.tmp = Path(self.fOutput).parent/next(tempfile._get_candidate_names())
         else: # use given dir as tmp folder
             self.tmp = Path(options.tmp).parent/next(tempfile._get_candidate_names())
-        logging.info('Using {} as tmp folder'.format(self.tmp))
+        logging.info('Using {} as tmp folder'.format(str(self.tmp)))
     
     def __enter__(self):
         self.chromes = list()
-        # find all chromosomes in the given bam file
-        self._bam_checker()
-        self._set_cores()
-        # check if the output need to be gzipped
+        self._bam_checker() # find all chromosomes in the given bam file
+        self._set_cores() # sanity check user given number of cores
         self.gz = False
-        if self.fOutput is not None:
+        if self.fOutput is not None: # check if the output need to be gzipped
             if re.match(r'^.*\.gz.*$',self.fOutput,re.IGNORECASE):
                 self.gz = True
-        # temp folder
-        try:
+        try:  # temp folder
             self.tmp.mkdir()
         except FileExistsError:
             logging.warning('Files in {} might be re-written!'.format(str(self.tmp)))
         return self
 
     def __exit__(self,except_type,except_val,except_traceback):
-        # clean up
-        rmtree(self.tmp)
+        rmtree(self.tmp) # clean up temp dir
         if except_type:
             logging.exception(except_val)
 
@@ -123,14 +119,14 @@ class bamCLIP:
         else:
             logging.info('Using {} cores out of {}...'.format(self.cores, allcores))
     
-    def _create_tmp_files(self,op='start'):
+    def _create_tmp_files(self,site='start'):
         '''
         Helper function, generate temp. file names
         '''
         ext = '.bed.gz' if self.gz else '.bed'
         tmpDict = {}
         for chrom in self.chromes:
-            tmpDict[chrom] = str(self.tmp/'{}_{}{}{}'.format(chrom,op,next(tempfile._get_candidate_names()),ext))
+            tmpDict[chrom] = str(self.tmp/'{}_{}{}{}'.format(chrom,site,next(tempfile._get_candidate_names()),ext))
         return tmpDict
     
     def _write_output(self,tmp_dict):
@@ -151,56 +147,54 @@ class bamCLIP:
             with open(self.fOutput,'wb') as dest:
                 for chrom in chroms:
                     copyfileobj(open(tmp_dict[chrom],'rb'),dest)
+    
+    def _extract_crosslink(self, call_fn, site, offset = 0):
+        '''
+        Helper function
+        Extract crosslinks for the given site using the given function and arguments
+        Arguments:
+            call_fn: function to call
+            site: site to extract crosslinks from
+            offset: offset crosslink sites by "offset" bps
+        '''
+        site_dict = self._create_tmp_files(site=site)
+        pool = mp.Pool(processes = self.cores)
+        for chrom, tmp_file in site_dict.items():
+            pool.apply_async(call_fn, 
+                args=(self.fInput, chrom, tmp_file, self.gz , self.min_qual, self.min_len, self.max_len, self.max_interval_length, self.primary, self.mate, offset))
+        pool.close()
+        pool.join()
+        self._write_output(site_dict)
 
     def extract_start_sites(self, offset=0):
-        start_dict = self._create_tmp_files(op='start')
-        pool = mp.Pool(processes = self.cores)
-        for chrom, tmp_file in start_dict.items():
-            pool.apply_async(_start_sites, 
-                args=(self.fInput, chrom, tmp_file, self.gz , self.min_qual, self.min_len, self.max_len, self.max_interval_length, self.primary, self.mate, offset))
-        pool.close()
-        pool.join()
-        self._write_output(start_dict)
+        '''
+        Extract crosslink sites at the start of the mate, offset sites by "offset" base pairs
+        '''
+        self._extract_crosslink(call_fn = _start_sites, site = 'start', offset = offset)
 
     def extract_middle_sites(self):
-        middle_dict = self._create_tmp_files(op='middle')
-        pool = mp.Pool(processes = self.cores)
-        for chrom, tmp_file in middle_dict.items():
-            pool.apply_async(_middle_sites, 
-                args=(self.fInput, chrom, tmp_file, self.gz , self.min_qual, self.min_len, self.max_len, self.max_interval_length, self.primary, self.mate))
-        pool.close()
-        pool.join()
-        self._write_output(middle_dict)
+        '''
+        Extract crosslink sites from the middle of the read
+        '''
+        self._extract_crosslink(call_fn = _middle_sites, site = 'middle', offset = 0)
 
     def extract_end_sites(self, offset=0):
-        end_dict = self._create_tmp_files(op='end')
-        pool = mp.Pool(processes = self.cores)
-        for chrom, tmp_file in end_dict.items():
-            pool.apply_async(_end_sites, 
-                args=(self.fInput, chrom, tmp_file, self.gz , self.min_qual, self.min_len, self.max_len, self.max_interval_length, self.primary, self.mate, offset))
-        pool.close()
-        pool.join()
-        self._write_output(end_dict)
+        '''
+        Extract crosslink sites from the end of the read
+        '''
+        self._extract_crosslink(call_fn = _end_sites, site = 'end', offset = offset)
 
     def extract_insertion_sites(self):
-        insertion_dict = self._create_tmp_files(op='insertion')
-        pool = mp.Pool(processes = self.cores)
-        for chrom, tmp_file in insertion_dict.items():
-            pool.apply_async(_insertion_sites, 
-                args=(self.fInput, chrom, tmp_file, self.gz , self.min_qual, self.min_len, self.max_len, self.max_interval_length, self.primary, self.mate))
-        pool.close()
-        pool.join()
-        self._write_output(insertion_dict)
+        '''
+        Extract crosslink sites from insertion points the read
+        '''
+        self._extract_crosslink(call_fn = _insertion_sites, site = 'insertion', offset = 0)
 
     def extract_deletion_sites(self):
-        deletion_dict = self._create_tmp_files(op='deletion')
-        pool = mp.Pool(processes = self.cores)
-        for chrom, tmp_file in deletion_dict.items():
-            pool.apply_async(_deletion_sites, 
-                args=(self.fInput, chrom, tmp_file, self.gz , self.min_qual, self.min_len, self.max_len, self.max_interval_length, self.primary, self.mate))
-        pool.close()
-        pool.join()
-        self._write_output(deletion_dict)
+        '''
+        Extract crosslink sites from deletion points of the read
+        '''
+        self._extract_crosslink(call_fn = _deletion_sites, site = 'deletion', offset = 0)
 
 def _discard_read(aln,qual = 10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2):
     '''
@@ -291,7 +285,7 @@ def _start_sites(bam, chrom, outf, is_gzip = False, qual = 10, min_len = 5, max_
             dat = [chrom, str(pos[0]), str(pos[1]), aln.query_name+'|'+ str(aln.query_length),str(yb),strand]
             oh.write(encoder('\t'.join(dat)+'\n'))
 
-def _middle_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2):
+def _middle_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2, **args):
     '''
     parse crosslink sites at the middle positions
     Arugments:
@@ -377,7 +371,7 @@ def _end_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len 
             dat = [chrom, str(pos[0]), str(pos[1]), aln.query_name+'|'+ str(aln.query_length),str(yb),strand]
             oh.write(encoder('\t'.join(dat)+'\n'))
 
-def _insertion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2):
+def _insertion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2, **args):
     '''
     parse insertion sites
     Arugments:
@@ -394,7 +388,7 @@ def _insertion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, ma
     fwriter, encoder = _get_writer_encoder(is_gzip)
     with pysam.AlignmentFile(bam,mode='rb') as bh, fwriter(outf) as oh:
         for aln in bh.fetch(chrom,multiple_iterators=True):
-            if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate):
+            if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate,**args):
                 continue
             if 1 not in set(map(lambda x: x[0], aln.cigartuples)):
                 # https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.get_cigar_stats
@@ -430,7 +424,7 @@ def _insertion_positions(is_reverse):
     else:
         return pos_strand
 
-def _deletion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2):
+def _deletion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2,**args):
     '''
     parse deletion sites
     Arugments:
