@@ -285,7 +285,7 @@ def _start_sites(bam, chrom, outf, is_gzip = False, qual = 10, min_len = 5, max_
             dat = [chrom, str(pos[0]), str(pos[1]), aln.query_name+'|'+ str(aln.query_length),str(yb),strand]
             oh.write(encoder('\t'.join(dat)+'\n'))
 
-def _middle_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2, **args):
+def _middle_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2, offset = 0):
     '''
     parse crosslink sites at the middle positions
     Arugments:
@@ -304,24 +304,34 @@ def _middle_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_l
         for aln in bh.fetch(chrom,multiple_iterators=True):
             if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate):
                 continue
-            alignedDict = dict(aln.aligned_pairs)
-            mid = int(decimal.Decimal(aln.query_length/2).quantize(decimal.Decimal(1),rounding=decimal.ROUND_HALF_UP))
+            alignedTup = aln.get_aligned_pairs()
+            alnCigars = set(map(lambda x: x[0], aln.cigartuples))
             if aln.is_reverse:
-                if aln.reference_length%2==1:
-                    # adjust for reverse strand and odd read length
-                    mid-=1
-                end = alignedDict[mid]
+                # if aln.reference_length%2==1:
+                #     # adjust for reverse strand and odd read length
+                #     mid-=1
+                mid = int(decimal.Decimal(aln.query_length/2).quantize(decimal.Decimal(1),rounding=decimal.ROUND_HALF_DOWN))
+                _,end = alignedTup[-mid]
                 if end is None:
                     logging.warning('Skipping {}, middle is an inserted position'.format(aln.query_name))
                     continue
-                end = end-1
+                if aln.query_length%2==1:
+                    end-=1
                 begin = end -1
                 strand = '-'
             else:
-                end = alignedDict[mid]
+                mid = int(decimal.Decimal(aln.query_length/2).quantize(decimal.Decimal(1),rounding=decimal.ROUND_HALF_UP))
+                if 3 not in alnCigars:
+                    _,end = alignedTup[mid]
+                else:
+                    try:
+                        end = dict(alignedTup)[mid]
+                    except KeyError:
+                        end = None
                 if end is None:
                     logging.warning('Skipping {}, middle is an inserted position'.format(aln.query_name))
                     continue
+                end+=1
                 begin = end -1
                 strand = '+'
             if begin <0:
@@ -371,7 +381,7 @@ def _end_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len 
             dat = [chrom, str(pos[0]), str(pos[1]), aln.query_name+'|'+ str(aln.query_length),str(yb),strand]
             oh.write(encoder('\t'.join(dat)+'\n'))
 
-def _insertion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2, **args):
+def _insertion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2, offset = 0):
     '''
     parse insertion sites
     Arugments:
@@ -388,7 +398,7 @@ def _insertion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, ma
     fwriter, encoder = _get_writer_encoder(is_gzip)
     with pysam.AlignmentFile(bam,mode='rb') as bh, fwriter(outf) as oh:
         for aln in bh.fetch(chrom,multiple_iterators=True):
-            if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate,**args):
+            if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate):
                 continue
             if 1 not in set(map(lambda x: x[0], aln.cigartuples)):
                 # https://pysam.readthedocs.io/en/latest/api.html#pysam.AlignedSegment.get_cigar_stats
@@ -424,7 +434,7 @@ def _insertion_positions(is_reverse):
     else:
         return pos_strand
 
-def _deletion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2,**args):
+def _deletion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2, offset = 0):
     '''
     parse deletion sites
     Arugments:
