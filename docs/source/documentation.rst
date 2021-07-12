@@ -19,7 +19,7 @@ The available functions can be categorized into 4 different classes given below.
 
 .. _AnnotationOverview:
 
-Annotation
+Prepare annotation
 **********
 
 .. _annotation:
@@ -93,7 +93,7 @@ Annotation
 
 .. _ExtractionOverview:
 
-Extraction
+Extract crosslink sites
 **********
 
 .. _extract:
@@ -141,7 +141,7 @@ Extraction
 
 .. _CountOverview:
 
-Counting
+Count crosslink sites
 ********
   
 .. _count:
@@ -164,7 +164,7 @@ Counting
     
     $ htseq-clip count -h
 
-Helpers
+Helper functions
 *******
   
 .. _createMatrix:

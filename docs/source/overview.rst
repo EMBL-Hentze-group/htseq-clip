@@ -13,7 +13,7 @@ overview
 htseq-clip is a toolset designed for the processing and analysis of eCLIP/iCLIP dataset.
 This package is designed primarily to do the following operations:
 
-:ref:`Annotation <AnnotationOverview>`
+:ref:`Prepare annotation <AnnotationOverview>`
 ***************************************
 
 A suite of functions to process and flatten genome annotation file. 
@@ -173,7 +173,7 @@ An example is given below
  
 .. Note:: There will be zero overlap between neighboring windows from two separate gene features
 
-:ref:`Extraction <ExtractionOverview>`
+:ref:`Extract crosslink sites <ExtractionOverview>`
 **************************************
 Extract and process crosslink sites from alignment file.
 
@@ -290,7 +290,7 @@ Given below is an example paired end sequence and start, middle and end position
 
 .. Note:: In a paired end alignment file, argument ``--mate`` is used to choose the read/mate from which crosslink sites are extracted. The sequencing protocol used to generate the file determines whether the crosslink site is located on the first mate or the second mate. Please consult your sequencing protocol to decide which mate to use.
 
-:ref:`Count <CountOverview>`
+:ref:`Count crosslink sites <CountOverview>`
 ****************************
 Calculate the number of extracted crosslink sites per given gene annotation feature.
 
