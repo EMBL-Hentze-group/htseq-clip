@@ -63,27 +63,31 @@ def _extract(args):
     '''
     Extract cross-link sites
     '''
-    bamC = bamCLIP(args)
     if args.choice == 's':
         logging.info('Extracting start sites')
         logging.info('Bam file : {}, output file: {}, offset: {}'.format(args.input,args.output,args.offset))
-        bamC.extract_StartSites(offset=args.offset,ignore=args.ignore)
+        with bamCLIP(args) as bh:
+            bh.extract_start_sites(offset = args.offset)
     elif args.choice == 'i':
         logging.info('Extracting insertion sites')
         logging.info('Bam file : {}, output file: {}'.format(args.input,args.output))
-        bamC.extract_InsertionSites()
+        with bamCLIP(args) as bh:
+            bh.extract_insertion_sites()
     elif args.choice == 'd':
         logging.info('Extracting deletion sites')
         logging.info('Bam file : {}, output file: {}'.format(args.input,args.output))
-        bamC.extract_DeletionSites()
+        with bamCLIP(args) as bh:
+            bh.extract_deletion_sites()
     elif args.choice == 'm':
         logging.info('Extracting middle sites')
         logging.info('Bam file : {}, output file: {}'.format(args.input,args.output))
-        bamC.extract_MiddleSites()
+        with bamCLIP(args) as bh:
+            bh.extract_middle_sites()
     elif args.choice == 'e':
         logging.info('Extracting end sites')
         logging.info('Bam file : {}, output file: {}, offset: {}'.format(args.input,args.output,args.offset))
-        bamC.extract_EndSites(offset=args.offset,ignore=args.ignore)
+        with bamCLIP(args) as bh:
+            bh.extract_end_sites(offset = args.offset)
 
 def _count(args):
     '''
@@ -129,7 +133,7 @@ def main():
 
     '''.format(prog)
     epilog = "For command line options of each argument, use: {} <positional argument> -h".format(prog)
-    parser = argparse.ArgumentParser(prog=prog, description=description,epilog=epilog,formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(prog=prog, description=description,epilog=epilog,formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # log levels
     loglevels = ['debug','info','warn','quiet']
     # subparsers
@@ -177,7 +181,7 @@ def main():
     extract.add_argument('--ignore',dest='ignore',help='flag to ignore crosslink sites outside of genome',action='store_true')
     extract.add_argument('-q','--minAlignmentQuality',metavar = 'min. alignment quality',dest='minAlignmentQuality',help='minimum alignment quality (default: 10)',type=int,default=10)
     extract.add_argument('-m','--minReadLength',metavar='min. read length',dest='minReadLength',help='minimum read length (default: 0)',type=int,default=0)
-    extract.add_argument('-x','--maxReadLength',metavar='max. read length',dest='maxReadLength',help='maximum read length (default: 0)',type=int,default=500)
+    extract.add_argument('-x','--maxReadLength',metavar='max. read length',dest='maxReadLength',help='maximum read length (default: 500)',type=int,default=500)
     extract.add_argument('-l','--maxReadInterval',metavar='max. read interval',dest='maxReadIntervalLength',help='maximum read interval length (default: 10000)',type=int,default=10000)
     extract.add_argument('--primary',dest='primary',help='flag to use only primary positions of multimapping reads',action='store_true')
     extract.add_argument('-c','--cores',dest='cores',metavar='cpus',help='Number of cores to use for alignment parsing (default: 5)',default=5,type=int)
