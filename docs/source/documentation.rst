@@ -105,7 +105,7 @@ Extraction
 
   **Arguments**
 
-  * ``-i/--input`` Input .bam file
+  * ``-i/--input`` Input .bam file. Input bam file must be co-ordinate sorted and indexed
   * ``-e/--mate`` for paired end sequencing, select the read/mate to extract the crosslink sites from, accepted choices: ``1, 2``
 
     * ``1`` use the first mate in pair
@@ -119,12 +119,14 @@ Extraction
     * ``e`` end site 
   
   * ``-g/--offset`` Number of nucleotides to offset for crosslink sites (default: 0)
+  * ``--ignore`` Use this flag to ignore crosslink sites outside of genome annotations
   * ``-q/--minAlignmentQuality`` Minimum alignment quality (default: 10)
   * ``-m/--minReadLength`` Minimum read length (default: 0)
-  * ``-x/--maxReadLength`` Maximum read length (default: 0)
+  * ``-x/--maxReadLength`` Maximum read length (default: 500)
   * ``-l/--maxReadInterval`` Maximum read interval length (default: 10000)
   * ``--primary`` Use this flag consider only primary alignments of multimapped reads
-  * ``--ignore`` Use this flag to ignore crosslink sites outside of genome annotations
+  * ``-c/--cores`` Number of cores to use for alignment parsing (default: 5)
+  * ``-t/--tmp`` Path to create and store temp files (default behavior: use parent folder from "--output" parameter)
   * ``-o/--output`` Output file name. If the file name is given with .gz suffix, it is gzipped. If no file name is given, output is print to console
   
   **Usage**

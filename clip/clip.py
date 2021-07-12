@@ -133,7 +133,7 @@ def main():
 
     '''.format(prog)
     epilog = "For command line options of each argument, use: {} <positional argument> -h".format(prog)
-    parser = argparse.ArgumentParser(prog=prog, description=description,epilog=epilog,formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(prog=prog, description=description,epilog=epilog,formatter_class=argparse.RawDescriptionHelpFormatter)
     # log levels
     loglevels = ['debug','info','warn','quiet']
     # subparsers
@@ -172,7 +172,7 @@ def main():
     echoices = ['s','i','d','m','e']
     mates = [1,2]
     extract = subps.add_parser('extract',description=ehelp,formatter_class=argparse.RawTextHelpFormatter) #,help='extract crosslinks'
-    extract.add_argument('-i','--input', metavar='input file',dest='input',help='input file (.bam)',required=True)
+    extract.add_argument('-i','--input', metavar='input file',dest='input',help='input file (.bam, MUST be co-ordinate sorted and indexed)',required=True)
     extract.add_argument('-o','--output', metavar = 'output file',dest='output',help='output file (.bed, default: print to console)',default=None,type=str)
     extract.add_argument('-e','--mate', dest='mate',help='for paired end sequencing, select the read/mate to extract the crosslink sites from.\n Must be one of: {}'.format(', '.join([str(i) for i in mates])),type=int,choices=mates,required=True) # make it required ?
     extract.add_argument('-s','--site',dest='choice',
