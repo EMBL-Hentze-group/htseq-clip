@@ -6,6 +6,7 @@ import re
 import sys
 import tempfile
 from functools import partial
+from itertools import chain
 from os import sched_getaffinity
 from pathlib import Path
 from shutil import copyfileobj, rmtree
@@ -300,42 +301,45 @@ def _middle_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max_l
         offset: number of basepairs to use as offset
     '''
     fwriter, encoder = _get_writer_encoder(is_gzip)
+    match_set = set([0,4,5]) # CIGAR match, soft clip, hard clip
     with pysam.AlignmentFile(bam,mode='rb') as bh, fwriter(outf) as oh:
         for aln in bh.fetch(chrom,multiple_iterators=True):
             if _discard_read(aln, qual = qual, min_len = min_len, max_len = max_len, max_interval_length = max_interval_length, primary = primary, mate = mate):
                 continue
-            alignedTup = aln.get_aligned_pairs()
-            alnCigars = set(map(lambda x: x[0], aln.cigartuples))
-            if aln.is_reverse:
-                # if aln.reference_length%2==1:
-                #     # adjust for reverse strand and odd read length
-                #     mid-=1
-                mid = int(decimal.Decimal(aln.query_length/2).quantize(decimal.Decimal(1),rounding=decimal.ROUND_HALF_DOWN))
-                _,end = alignedTup[-mid]
-                if end is None:
-                    logging.warning('Skipping {}, middle is an inserted position'.format(aln.query_name))
-                    continue
-                if aln.query_length%2==1:
-                    end-=1
-                begin = end -1
-                strand = '-'
-            else:
-                mid = int(decimal.Decimal(aln.query_length/2).quantize(decimal.Decimal(1),rounding=decimal.ROUND_HALF_UP))
-                if 3 not in alnCigars:
-                    _,end = alignedTup[mid]
+            aln_cigars = set(map(lambda x: x[0], aln.cigartuples))
+            mid = int(decimal.Decimal(aln.query_length/2).quantize(decimal.Decimal(1),rounding=decimal.ROUND_HALF_UP))
+            # reads with only matches, soft/hard clips
+            if len(aln_cigars-match_set) == 0: 
+                if aln.is_reverse:
+                    end = aln.reference_end - mid
+                    strand = '-'
                 else:
+                    end = aln.reference_start + mid+1 # since start is 0 based
+                    strand = '+'
+            elif (3 in aln_cigars) or (2 in aln_cigars): # reference skip, deletion events
+                aln_dict = dict(aln.get_aligned_pairs())
+                if aln.is_reverse:
+                    mid = aln.query_length - mid
+                    last_tup = aln.cigartuples[-1]
+                    if last_tup[0] == 4: # if the last op in a -ve string is soft clipping, adjust it
+                        mid -= last_tup[1]
+                    end = aln_dict[mid]
+                    strand = '-'
+                else:
+                    first_tup = aln.cigartuples[0]
+                    if first_tup[0] == 4:# if the first tuple in cigar is soft clipping, adjust it
+                        mid += first_tup[1]
                     try:
-                        end = dict(alignedTup)[mid]
+                        end = aln_dict[mid+1] # numbering for tuples starts at zero
                     except KeyError:
                         end = None
-                if end is None:
-                    logging.warning('Skipping {}, middle is an inserted position'.format(aln.query_name))
-                    continue
-                end+=1
-                begin = end -1
-                strand = '+'
-            if begin <0:
+                    strand = '+'
+            else:
                 continue
+            if end is None:
+                logging.warning('Skipping {}, middle of the read is an inserted position'.format(aln.query_name))
+                continue
+            begin = end -1
             try:
                 yb  = aln.get_tag('YB')
             except KeyError:
@@ -462,10 +466,12 @@ def _deletion_sites(bam, chrom, outf, is_gzip = False, qual=10, min_len = 5, max
                 yb  = aln.get_tag('YB')
             except KeyError:
                 yb = 1
-            positions = np.array(aln.get_aligned_pairs())
-            delpositions= np.where(positions[:,0]==None)[0]
-            for dels in np.split(delpositions, np.where(np.diff(delpositions) != 1)[0]+1):
+            cigars = list(chain(*[ [op]*c for op,c in aln.cigartuples ]))
+            pos = map(lambda x: x[-1], aln.get_aligned_pairs())
+            cigar_pos = np.array(list(zip(cigars,pos)))
+            delpos = np.where(cigar_pos[:,0]==2)[0]
+            for dels in np.split(delpos, np.where(np.diff(delpos) != 1)[0]+1):
                 begin = np.min(dels)-1
                 end = np.max(dels)
-                dat = [chrom, str(positions[begin,1]), str(positions[end,1]), aln.query_name+'|'+ str(aln.query_length),str(yb),strand]
+                dat = [chrom, str(cigar_pos[begin,1]), str(cigar_pos[end,1]), aln.query_name+'|'+ str(aln.query_length),str(yb),strand]
                 oh.write(encoder('\t'.join(dat)+'\n'))
