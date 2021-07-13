@@ -1,7 +1,7 @@
 *~
 *.pyc
 RemoteSystemsTempFiles/
-
+**/_build/*
 build/
 dist/
 images/
