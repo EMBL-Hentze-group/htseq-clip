@@ -14,7 +14,7 @@ data analysis using the companion R/Bioconductor package `DEWSeq`_
 .. _`DEWSeq`: https://bioconductor.org/packages/release/bioc/html/DEWSeq.html
 
 .. figure:: htseq-clip.png
-   :width: 75% 
+   :width: 85% 
    :align: center
 
    htseq-clip data flow diagram

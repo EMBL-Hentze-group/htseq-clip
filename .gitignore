@@ -4,6 +4,8 @@ RemoteSystemsTempFiles/
 
 build/
 dist/
+images/
+examples/
 *.egg-info/
 *.egg
 .eggs/
@@ -11,7 +13,7 @@ dist/
 .DS_Store
 .metadata*
 *.bak
-
+**/UnitTestOutput/
 Genomes/
 archive/
 bam/

@@ -320,11 +320,6 @@ class gffCLIP(object):
                 line = line.strip().split('\t')
                 name = line[3].split('@')
                 featureNumber, _ = name[4].split('/')
-                # this will creaet duplicate windowCount if there are multiple genes annotated to the same chromosomal locations
-                # this needs to be reimplemented
-                # if currentName == None or currentName != name[0]:
-                #     currentName = name[0]
-                #     windowCount = 1
                 try:
                     windowCount = windowidMap[name[0]]
                     windowCount +=1
@@ -343,24 +338,21 @@ class gffCLIP(object):
                 #else split the current feature up by the given options
                 # @TODO: add gene name, window id, UID to last
                 
-                if pos2 >= end:
-                    UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
+                UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
+                while pos2 < end:
+                    seq = (line[0], str(pos1), str(pos2), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
+                    self.fOutput.write("\t".join(seq) + "\n")
+                    pos1 +=  self.windowStep
+                    pos2 +=  self.windowStep
+                    windowCount+=1
+                flen = end - start +1
+                if (pos2 >= end) and (flen < self.windowSize) :
                     seq = (line[0], str(start), str(end), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
                     self.fOutput.write("\t".join(seq) + "\n")
                     windowCount+=1
-                else:
-                    while pos2 < end:
-                        UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
-                        seq = (line[0], str(pos1), str(pos2), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
-                        self.fOutput.write("\t".join(seq) + "\n")
-                        pos1 = pos1 + self.windowStep
-                        pos2 = pos2 + self.windowStep
-                        windowCount+=1
-                        if pos2 > end:
-                            pos2 = end
-                            UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
-                            seq = (line[0], str(pos1), str(pos2), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
-                            self.fOutput.write("\t".join(seq) + "\n")
-                            windowCount+=1
+                elif (pos2 >= end):
+                    seq = (line[0], str(pos1), str(end), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
+                    self.fOutput.write("\t".join(seq) + "\n")
+                    windowCount+=1
                 windowidMap[name[0]] = windowCount
         self.fOutput.close()
