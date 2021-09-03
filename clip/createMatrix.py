@@ -103,7 +103,7 @@ class MatrixConverter:
         Argument:
          fn: file name as string
         '''
-        if fn.lower().endswith((".gz",".gzip")):
+        if fn.name.lower().endswith((".gz",".gzip")):
             self._decoder = self._byteToStr
             return gzip.open(fn)
         else:
