@@ -3,11 +3,12 @@ import logging
 import os
 import re
 import sys
+from pathlib import Path
 
 from .output import Output
 
 __author__ = 'Tom'
-class MatrixConverter(object):
+class MatrixConverter:
 
     """
     Class to convert count files into count matrixes.
@@ -36,8 +37,6 @@ class MatrixConverter(object):
         # dict to store all samples
         self.allSamples = set()
         
-        # sample names are stored here for consistent output
-        self.samplenamesList = None
 
         # decoder for bytes in gzip
         self._decoder = None
@@ -57,31 +56,32 @@ class MatrixConverter(object):
     filter filenames in directory according to prefix and postfix
     """
     def _dir_filter(self, dirname, prefix = "", postfix = ""):   
-        return [filename for filename in os.listdir(dirname) if self._file_filter(filename, prefix, postfix)]
+        return [filename for filename in Path(dirname).glob("*") if self._file_filter(filename.name, prefix, postfix)]
     
-    """
-    read in all samples
-    values will be stored in 
-    """
-    def read_samples(self):
+    def read_samples(self, colNr=3):
+        """
+        read in all samples
+        values will be stored in 
+        colNr: zero based column index
+        """
     	# for each file name
+        self.countDict = {}
         for file in self.inputFilenames:
-            samplename = file.split(".")[0]
+            samplename = file.stem.split('.')[0]
             self.allSamples.add(samplename)
             logging.info('Reading file {}'.format(file))
             # @TODO:  use logging module for all messages
             # open file and read in the content and store the results 
-            with self._file_reader(os.path.join(self.inputDir, file)) as f:
+            with self._file_reader(file) as f:
                 for linecount, line in enumerate(f):
                     if(linecount == 0):
                         continue
                     line = self._decoder(line)
                     linesplit = line.strip().split("\t")
                     try:
-                        self.countDict[ linesplit[0] ][ samplename ] = linesplit[3]
+                        self.countDict[ linesplit[0] ][ samplename ] = linesplit[colNr]
                     except KeyError:
-                        self.countDict[ linesplit[0] ] = { samplename : linesplit[3] }
-        self._init_samplenames_list()
+                        self.countDict[ linesplit[0] ] = { samplename : linesplit[colNr] }
 
     def _toStr(self,line):
         '''
@@ -109,20 +109,13 @@ class MatrixConverter(object):
         else:
             self._decoder = self._toStr
             return open(fn)
-
-    """
-    Helper function
-    getter for sample names
-    """
-    def _init_samplenames_list(self):
-        self.samplenamesList = sorted(self.allSamples)
     
     """
     Helper function
     getter for header
     """
     def _get_header(self):
-        return("\t".join(["unique_id"] + self.samplenamesList))
+        return("\t".join(["unique_id"] + sorted(self.allSamples)))
     
     """
     write matrix to output file
@@ -134,7 +127,7 @@ class MatrixConverter(object):
         for uid, sample_count_dict in self.countDict.items():
             outList = [uid]
             # write column
-            for sample_name in self.samplenamesList:
+            for sample_name in sorted(self.allSamples):
                 try:
                     outList.append(sample_count_dict[sample_name])  
                 except KeyError:
