@@ -29,7 +29,7 @@ def _annotation(args):
     Parse annotations from given GFF file
     @TODO use logging module
     '''
-    logging.info('Paring annotations') 
+    logging.info('Parsing annotations') 
     logging.info('GFF file {}, output file {}'.format(args.gff,args.output))
     gffc = gffCLIP(args)
     try:

@@ -53,7 +53,7 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
     ],
-	install_requires=['HTSeq', 'pysam'],
+	install_requires=['HTSeq==0.13.5', 'pysam'],
     packages=['clip','tests'],
     test_suite = 'tests',
 	entry_points = {
