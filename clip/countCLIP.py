@@ -77,8 +77,8 @@ class countCLIP:
         self.output = Output(options.output)
         # log temp. directory info
         self._log_tmp_info()
-        # suitable parser for file type
-        self.fo = self._annotationParser()
+        # suitable parser and mode for file type
+        self.fo, self.fmode = self._annotationParser()
         # sanity checker
         self._annotationSanityCheck()
     
@@ -112,12 +112,17 @@ class countCLIP:
         helper function
         return appropriate parser
         '''
-        if self.annotation.lower().endswith((".gz",".gzip")):
-            self._decoder = self._byteToStr
-            return gzip.open
-        else:
-            self._decoder = self._toStr
-            return open
+        # if self.annotation.lower().endswith((".gz",".gzip")):
+        #     self._decoder = self._byteToStr
+        #     return gzip.open
+        # else:
+        #     self._decoder = self._toStr
+        #     return open
+        with open(self.annotation,'rb') as _rb:
+            if _rb.read(2) == b'\x1f\x8b':
+                return (gzip.open, 'rt')
+            else:
+                return (open, 'r')
         
     def _annotationSanityCheck(self):
         '''
@@ -127,9 +132,9 @@ class countCLIP:
         nameCountSet = set()
         i = 0
         with TempBed(self.annotation, self.tmpdir) as tann:
-            with self.fo(tann) as _ah:
+            with self.fo(tann, mode = self.fmode) as _ah:
                 for line in _ah:
-                    line = self._decoder(line)
+                    # line = self._decoder(line)
                     if line.startswith( "track" ):
                         continue
                     afields = line.strip("\n").split("\t")
@@ -217,17 +222,18 @@ class countCLIP:
         '''
         # data structures to hold sites of interest (crosslink sites, deletion sites, insertion sites)
         sitesga = GenomicArray(chroms="auto", stranded=strandedCounting, typecode='i', storage='step')
-        
-        if self.sites.lower().endswith((".gz",".gzip")):
-            sfo = gzip.open
-            decoder = self._byteToStr
-        else:
-            sfo = open
-            decoder = self._toStr
+        # decide file handler
+        with open(self.sites,'rb') as _rb:
+            if _rb.read(2) == b'\x1f\x8b':
+                sfo = gzip.open
+                fmode = 'rt'
+            else:
+                sfo = open
+                fmode = 'r'
         with TempBed(self.sites, self.tmpdir) as tb:
-            with sfo(tb) as _sh:
+            with sfo(tb, mode = fmode) as _sh:
                 for line in _sh:
-                    line = decoder(line)
+                    # line = decoder(line)
                     if line.startswith("track"):
                         continue
                     sFields = line.strip('\n').split("\t")
@@ -260,10 +266,10 @@ class countCLIP:
         # the maximum counts, the height would be 3.
         # this is a workaround to annotation file crashing on snakemake runs
         with TempBed(self.annotation, self.tmpdir) as ta:
-            with self.fo(ta) as _ah: # annotation handler
+            with self.fo(ta, mode = self.fmode) as _ah: # annotation handler
                 # these lines are a work around to odd splitting behavior
                 for line in _ah:
-                    line = self._decoder(line)
+                    # line = self._decoder(line)
                     if line.startswith( "track" ):
                         continue
                     bfields = line.strip('\n').split("\t")
