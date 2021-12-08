@@ -26,25 +26,27 @@ class TempBed:
     def __enter__(self):
         self.tmpBed = tempfile.mkstemp(dir = self.tmpdir)[1]
         copyfile(self.bedfile,self.tmpBed)
+        logging.debug("Original file: {}, copied to {}".format(self.bedfile, self.tmpBed))
         return self.tmpBed
     
     def __exit__(self,exec_type,exec_val,exec_tback):
         os.remove(self.tmpBed)
 
-# class OrigBed:
-#     '''
-#     Return original file name to parse instead of using TempBed
-#     patch for issues when system default '/tmp' is full or when 
-#     system resources are limited for single run cases
-#     '''
-#     def __init__(self, bedfile, tmpdir = None):
-#         self.bedfile = bedfile
+class OrigBed:
+    '''
+    Return original file name to parse instead of using TempBed
+    patch for issues when system default '/tmp' is full or when 
+    system resources are limited for single run cases
+    '''
+    def __init__(self, bedfile, tmpdir = None):
+        self.bedfile = bedfile
     
-#     def __enter__(self):
-#         return self.bedfile
+    def __enter__(self):
+        logging.debug("Original file: {}".format(self.bedfile))
+        return self.bedfile
     
-#     def __exit__(self, exec_type, exec_val, exec_tback):
-#         pass
+    def __exit__(self, exec_type, exec_val, exec_tback):
+        pass
 
 class countCLIP:
     # indices
@@ -69,55 +71,42 @@ class countCLIP:
     def __init__(self, options):
         self.annotation = options.annotation
         self.tmpdir = options.tmp
+        self.cpTmp = options.cpTmp
         self._nameColCount = 0
         self._isWindowed  = None
         self._decoder = None
         if hasattr(options,'input'):
             self.sites = options.input
         self.output = Output(options.output)
-        # log temp. directory info
-        self._log_tmp_info()
+        # file copier to use
+        self.fcopy = self._copy_to_temp()
         # suitable parser and mode for file type
         self.fo, self.fmode = self._annotationParser()
         # sanity checker
         self._annotationSanityCheck()
     
-    def _log_tmp_info(self):
+    def _copy_to_temp(self):
         '''
         helper function
-        log temp info
+        should the files be copied to tmp folder ?
+        and log temp info
         moved here to keep __init__ relatively clean
         '''
-        if self.tmpdir is None:
-            logging.info("Using system default {} as temp. directory".format(tempfile.gettempdir()))
+        if self.cpTmp:
+            if self.tmpdir is None:
+                logging.info("Using system default {} as temp. directory".format(tempfile.gettempdir()))
+            else:
+                logging.info("Using {} as temp. directory".format(self.tmpdir))
+            return TempBed
         else:
-            logging.info("Using {} as temp. directory".format(self.tmpdir))
-
-    def _toStr(self,line):
-        '''
-        helper function
-        given a string return it as it is
-        '''
-        return line
-    
-    def _byteToStr(self,line):
-        '''
-        helper function
-        given bytes decode to string
-        '''
-        return line.decode('utf-8')
+            logging.debug("Do not copy files to temp. folder")
+            return OrigBed
 
     def _annotationParser(self):
         '''
         helper function
         return appropriate parser
         '''
-        # if self.annotation.lower().endswith((".gz",".gzip")):
-        #     self._decoder = self._byteToStr
-        #     return gzip.open
-        # else:
-        #     self._decoder = self._toStr
-        #     return open
         with open(self.annotation,'rb') as _rb:
             if _rb.read(2) == b'\x1f\x8b':
                 return (gzip.open, 'rt')
@@ -131,7 +120,7 @@ class countCLIP:
         '''
         nameCountSet = set()
         i = 0
-        with TempBed(self.annotation, self.tmpdir) as tann:
+        with self.fcopy(self.annotation, self.tmpdir) as tann:
             with self.fo(tann, mode = self.fmode) as _ah:
                 for line in _ah:
                     # line = self._decoder(line)
@@ -230,7 +219,7 @@ class countCLIP:
             else:
                 sfo = open
                 fmode = 'r'
-        with TempBed(self.sites, self.tmpdir) as tb:
+        with self.fcopy(self.sites, self.tmpdir) as tb:
             with sfo(tb, mode = fmode) as _sh:
                 for line in _sh:
                     # line = decoder(line)
@@ -265,7 +254,7 @@ class countCLIP:
         # length of positions occupied would be 2 + 2, therefore 4. 
         # the maximum counts, the height would be 3.
         # this is a workaround to annotation file crashing on snakemake runs
-        with TempBed(self.annotation, self.tmpdir) as ta:
+        with self.fcopy(self.annotation, self.tmpdir) as ta:
             with self.fo(ta, mode = self.fmode) as _ah: # annotation handler
                 # these lines are a work around to odd splitting behavior
                 for line in _ah:

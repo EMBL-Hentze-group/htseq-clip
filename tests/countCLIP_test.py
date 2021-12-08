@@ -22,7 +22,7 @@ class TestcountCLIP(unittest.TestCase):
         unit test for subparser command mapToId
         '''
         outFile = os.path.join(self.outDir,'test_annotation.txt')
-        options = Namespace(annotation='tests/testcountCLIP/W50S20.bed',output=outFile, tmp = None)
+        options = Namespace(annotation='tests/testcountCLIP/W50S20.bed',output=outFile, tmp = None, cpTmp = False)
         countC = countCLIP(options)
         countC.annotationToIDs()
         annSet, expSet = set(),set()
@@ -39,7 +39,7 @@ class TestcountCLIP(unittest.TestCase):
         unit test for subparser command mapToId
         '''
         outFile = os.path.join(self.outDir,'test_annotation.txt.gz')
-        options = Namespace(annotation='tests/testcountCLIP/W50S20.bed.gz',output=outFile,tmp = None)
+        options = Namespace(annotation='tests/testcountCLIP/W50S20.bed.gz',output=outFile,tmp = None, cpTmp = False)
         countC = countCLIP(options)
         countC.annotationToIDs()
         annSet, expSet = set(),set()
@@ -57,7 +57,7 @@ class TestcountCLIP(unittest.TestCase):
         '''
         outFile = os.path.join(self.outDir,'test_slidingWindows_count.txt.gz')
         options = Namespace(annotation='tests/testcountCLIP/W50S20.bed',output=outFile,
-            input='tests/testcountCLIP/end_sites.bed.gz', tmp = None)
+            input='tests/testcountCLIP/end_sites.bed.gz', tmp = None, cpTmp = False)
         countSW = countCLIP(options)
         countSW.count()
         countSet, defaultSet = set(),set()
