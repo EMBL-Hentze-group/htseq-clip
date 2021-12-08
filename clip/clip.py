@@ -5,6 +5,7 @@ import re
 import sys
 import traceback
 from datetime import datetime
+from pathlib import Path
 
 from .bamCLIP import bamCLIP
 from .countCLIP import countCLIP
@@ -95,6 +96,13 @@ def _count(args):
     '''
     logging.info('Count crosslink sites')
     logging.info('Annotation file {} crosslink sites file {} output file {}'.format(args.annotation,args.input,args.output))
+    # sanity check temp dir exists
+    if args.tmp is not None:
+        tmpAbs = Path(args.tmp).absolute()
+        if not tmpAbs.exists():
+            raise RuntimeError("Folder {} given under '--tmp' parameter does not exists!".format(str(tmpAbs)))
+        # not all necessary but for completeness
+        args.tmp = str(tmpAbs)
     countC = countCLIP(args)
     stranded = True
     if args.unstranded:
@@ -196,6 +204,7 @@ def main():
     count.add_argument('-i','--input',metavar='input bed',dest='input',help='extracted crosslink, insertion or deletion sites (.bed[.gz]), see "{} extract -h"'.format(prog),required=True)
     count.add_argument('-o','--output',metavar = 'output file',dest='output',help='output count file (.txt[.gz], default: print to console)',default=None,type=str)
     count.add_argument('-a','--ann',metavar = 'annotation',dest='annotation',help='flattened annotation file (.bed[.gz]), see "{0} annotation -h" OR sliding window annotation file (.bed[.gz]), see "{0} createSlidingWindows -h"'.format(prog),required=True)
+    count.add_argument('-t','--tmp',metavar = 'temp. directory',dest='tmp',help='temp. directory path to store intermediate files (default: None, use system tmp directory)',default=None,type=str)
     count.add_argument('--unstranded',dest='unstranded', help='crosslink site counting is strand specific by default. Use this flag for non strand specific crosslink site counting',action='store_true')
     count.add_argument('-v','--verbose',metavar='Verbose level',dest='log',help='Allowed choices: '+', '.join(loglevels)+' (default: info)',choices=loglevels,default='info')
     

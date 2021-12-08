@@ -13,24 +13,40 @@ from HTSeq import BED_Reader, GenomicArray, GenomicFeature, GenomicInterval
 
 from .output import Output
 
-class TempBed(object):
+class TempBed:
     '''
     Temp file object for annotaiton files
     This is a workaround to weird issues with reading gziped bed file
     with workflows using slurm/snakemake
     '''
-    def __init__(self,bedfile):
+    def __init__(self,bedfile, tmpdir = None):
         self.bedfile = bedfile
+        self.tmpdir = tmpdir
     
     def __enter__(self):
-        self.tmpBed = tempfile.mkstemp()[1]
+        self.tmpBed = tempfile.mkstemp(dir = self.tmpdir)[1]
         copyfile(self.bedfile,self.tmpBed)
         return self.tmpBed
     
     def __exit__(self,exec_type,exec_val,exec_tback):
         os.remove(self.tmpBed)
 
-class countCLIP(object):
+# class OrigBed:
+#     '''
+#     Return original file name to parse instead of using TempBed
+#     patch for issues when system default '/tmp' is full or when 
+#     system resources are limited for single run cases
+#     '''
+#     def __init__(self, bedfile, tmpdir = None):
+#         self.bedfile = bedfile
+    
+#     def __enter__(self):
+#         return self.bedfile
+    
+#     def __exit__(self, exec_type, exec_val, exec_tback):
+#         pass
+
+class countCLIP:
     # indices
     __indexGeneID__ = 0 
     __indexGeneSymbol__ = 1
@@ -52,17 +68,31 @@ class countCLIP(object):
 
     def __init__(self, options):
         self.annotation = options.annotation
+        self.tmpdir = options.tmp
         self._nameColCount = 0
         self._isWindowed  = None
         self._decoder = None
         if hasattr(options,'input'):
             self.sites = options.input
         self.output = Output(options.output)
-        
+        # log temp. directory info
+        self._log_tmp_info()
+        # suitable parser for file type
         self.fo = self._annotationParser()
-
+        # sanity checker
         self._annotationSanityCheck()
     
+    def _log_tmp_info(self):
+        '''
+        helper function
+        log temp info
+        moved here to keep __init__ relatively clean
+        '''
+        if self.tmpdir is None:
+            logging.info("Using system default {} as temp. directory".format(tempfile.gettempdir()))
+        else:
+            logging.info("Using {} as temp. directory".format(self.tmpdir))
+
     def _toStr(self,line):
         '''
         helper function
@@ -78,6 +108,10 @@ class countCLIP(object):
         return line.decode('utf-8')
 
     def _annotationParser(self):
+        '''
+        helper function
+        return appropriate parser
+        '''
         if self.annotation.lower().endswith((".gz",".gzip")):
             self._decoder = self._byteToStr
             return gzip.open
@@ -92,7 +126,7 @@ class countCLIP(object):
         '''
         nameCountSet = set()
         i = 0
-        with TempBed(self.annotation) as tann:
+        with TempBed(self.annotation, self.tmpdir) as tann:
             with self.fo(tann) as _ah:
                 for line in _ah:
                     line = self._decoder(line)
@@ -111,11 +145,11 @@ class countCLIP(object):
         if len(nameCountSet)!=1:
             raise ValueError("The 'name' column in {} is incorrectly formatted. The number of 'name' entries must be equal in all rows of the file".format(self.annotation))
         if nameCountSet[0]== self.__numberColumnsAnnotationWithWindows__:
-            logging.debug("{} format: sliding window annotation file")
+            logging.debug("{} format: sliding window annotation file".format(self.annotation))
             self._isWindowed = True
             self._nameColCount = self.__numberColumnsAnnotationWithWindows__
         elif nameCountSet[0]== (self.__numberColumnsAnnotationWithWindows__-1):
-            logging.debug("{} format: gene feature annotation file")
+            logging.debug("{} format: gene feature annotation file".format(self.annotation))
             self._isWindowed = False
             self._nameColCount = self.__numberColumnsAnnotationWithWindows__-1
         else:
@@ -190,7 +224,7 @@ class countCLIP(object):
         else:
             sfo = open
             decoder = self._toStr
-        with TempBed(self.sites) as tb:
+        with TempBed(self.sites, self.tmpdir) as tb:
             with sfo(tb) as _sh:
                 for line in _sh:
                     line = decoder(line)
@@ -225,7 +259,7 @@ class countCLIP(object):
         # length of positions occupied would be 2 + 2, therefore 4. 
         # the maximum counts, the height would be 3.
         # this is a workaround to annotation file crashing on snakemake runs
-        with TempBed(self.annotation) as ta:
+        with TempBed(self.annotation, self.tmpdir) as ta:
             with self.fo(ta) as _ah: # annotation handler
                 # these lines are a work around to odd splitting behavior
                 for line in _ah:
