@@ -334,8 +334,8 @@ class gffCLIP(object):
                 #if length shorter than given windowsize then the whole feature is one window
                 #else split the current feature up by the given options
                 # @TODO: add gene name, window id, UID to last
-                UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
                 while pos2 < end:
+                    UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
                     seq = (line[0], str(pos1), str(pos2), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
                     self.fOutput.write("\t".join(seq) + "\n")
                     pos1 +=  self.windowStep
@@ -343,10 +343,12 @@ class gffCLIP(object):
                     windowCount+=1
                 flen = end - start +1
                 if (pos2 >= end) and (flen < self.windowSize) :
+                    UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
                     seq = (line[0], str(start), str(end), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
                     self.fOutput.write("\t".join(seq) + "\n")
                     windowCount+=1
                 elif (pos2 >= end):
+                    UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
                     seq = (line[0], str(pos1), str(end), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
                     self.fOutput.write("\t".join(seq) + "\n")
                     windowCount+=1
