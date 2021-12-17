@@ -57,6 +57,7 @@ def _createSlidingWindows(args):
 def _mapToId(args):
     logging.info('Creating mapping file from annotations')
     logging.info('Input file {} output file {}'.format(args.annotation,args.output))
+    # additional params
     mapC = countCLIP(args)
     mapC.annotationToIDs()
 

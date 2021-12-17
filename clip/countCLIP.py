@@ -71,13 +71,20 @@ class countCLIP:
 
     def __init__(self, options):
         self.annotation = options.annotation
-        self.tmpdir = options.tmp
-        self.cpTmp = options.cpTmp
         self._nameColCount = 0
         self._isWindowed  = None
         self._decoder = None
         if hasattr(options,'input'):
             self.sites = options.input
+        # set cpTmp and tmpdir 
+        if hasattr(options,'cpTmp'):
+            self.cpTmp = options.cpTmp
+        else:
+            self.cpTmp = False
+        if hasattr(options, 'tmp'):
+            self.tmpdir = options.tmp
+        else:
+            self.tmpdir = None
         self.output = Output(options.output)
         # file copier to use
         self.fcopy = self._copy_to_temp()
