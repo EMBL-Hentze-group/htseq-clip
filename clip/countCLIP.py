@@ -18,6 +18,7 @@ class TempBed:
     Temp file object for annotaiton files
     This is a workaround to weird issues with reading gziped bed file
     with workflows using slurm/snakemake
+    TODO:  add file handler, remove repetition
     '''
     def __init__(self,bedfile, tmpdir = None):
         self.bedfile = bedfile

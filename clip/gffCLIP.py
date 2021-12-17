@@ -321,23 +321,19 @@ class gffCLIP(object):
                 name = line[3].split('@')
                 featureNumber, _ = name[4].split('/')
                 try:
-                    windowCount = windowidMap[name[0]]
-                    windowCount +=1
+                    windowidMap[name[0]]+=1
                 except KeyError:
                     windowidMap[name[0]] = 1
-                    windowCount = 1
+                
                 strand = line[5]
-
                 start = int(line[1])
                 end = int(line[2])
-
                 pos1 = start
                 pos2 = start + self.windowSize
-
+                windowCount = windowidMap[name[0]]
                 #if length shorter than given windowsize then the whole feature is one window
                 #else split the current feature up by the given options
                 # @TODO: add gene name, window id, UID to last
-                
                 UID = "{0}:{1}{2:0>4}W{3:0>5}".format(name[0],name[3],featureNumber,windowCount)
                 while pos2 < end:
                     seq = (line[0], str(pos1), str(pos2), "@".join(name[:5]+[UID,str(windowCount)]), line[4], strand)
