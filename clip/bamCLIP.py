@@ -7,7 +7,7 @@ import sys
 import tempfile
 from functools import partial
 from itertools import chain
-from os import sched_getaffinity
+from os import cpu_count
 from pathlib import Path
 from shutil import copyfileobj, rmtree
 
@@ -109,7 +109,7 @@ class bamCLIP:
         Helper function
         set number of cores
         '''
-        allcores = len(sched_getaffinity(0))
+        allcores = cpu_count()
         if self.cores > allcores:
             setcores =  max(allcores-1,1)
             logging.warning('Give number of cores {} > number of cores detected {}. Setting cores to {}'.format(self.cores,allcores,setcores))
