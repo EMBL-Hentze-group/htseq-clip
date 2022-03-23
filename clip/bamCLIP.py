@@ -110,7 +110,7 @@ class bamCLIP:
         set number of cores
         '''
         allcores = cpu_count()
-        if self.cores > allcores:
+        if (self.cores > allcores) and (allcores>1):
             setcores =  max(allcores-1,1)
             logging.warning('Give number of cores {} > number of cores detected {}. Setting cores to {}'.format(self.cores,allcores,setcores))
             self.cores = setcores
