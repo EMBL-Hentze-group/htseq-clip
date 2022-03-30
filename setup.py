@@ -35,7 +35,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='htseq-clip',
-    version='2.12.0b0',
+    version='2.13.0b0',
     description='htseq-clip: a toolset for the analysis of eCLIP/iCLIP datasets',
 	long_description=long_description,
     long_description_content_type='text/markdown',
