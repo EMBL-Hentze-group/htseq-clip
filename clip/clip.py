@@ -111,10 +111,17 @@ def _count(args):
     countC.count(stranded)
 
 def _countMatrix(args):
-    logging.info('Generate matrix from files')
+    logging.info('Generate count matrix from  input files')
     logging.info('Input folder {}, output file {}'.format(args.input,args.output))
     mC = MatrixConverter(args.input,args.prefix,args.postfix,args.output)
     mC.read_samples()
+    mC.write_matrix()
+
+def _maxCountMatrix(args):
+    logging.info('Generate max count matrix from input files')
+    logging.info('Input folder {}, output file {}'.format(args.input,args.output))
+    mC = MatrixConverter(args.input,args.prefix,args.postfix,args.output)
+    mC.read_samples(colNr=5)
     mC.write_matrix()
 
 logger = logging.getLogger()
@@ -138,7 +145,8 @@ def main():
         count                   count sites in annotation
     
     [Helpers]
-        createMatrix            create R friendly matrix from count function output files
+        createMatrix            create R friendly matrix from "count" function output files
+        createMaxCountMatrix    create R friendly matrix from `crosslink_count_position_max` column in  "count" function output files
 
     '''.format(prog)
     epilog = "For command line options of each argument, use: {} <positional argument> -h".format(prog)
@@ -223,7 +231,15 @@ def main():
     createMatrix.add_argument('-e','--postfix', dest='postfix', metavar = 'file name postfix', help='Use files only with this given file name postfix (default: None). WARNING! either "--prefix" or "--postfix" argument must be given!', default="", type=str)
     createMatrix.add_argument('-o','--output',metavar = 'output file',dest='output',help='output junction file (.txt[.gz], default: print to console)',default=None,type=str)
     createMatrix.add_argument('-v','--verbose',metavar='Verbose level',dest='log',help='Allowed choices: '+', '.join(loglevels)+' (default: info)',choices=loglevels,default='info')
-
+    
+    # createMaxCountMatrix
+    maxcounthelp = 'createMaxCountMatrix: e R friendly matrix from `crosslink_count_position_max` column in  "count" function output files'
+    createMaxCountMatrix = subps.add_parser('createMaxCountMatrix',description=maxcounthelp,formatter_class = argparse.RawTextHelpFormatter)
+    createMaxCountMatrix.add_argument('-i','--inputFolder', dest='input', metavar = 'input folder', help='Folder name with output files from count function, see "{} count -h ", supports .gz (gzipped files)'.format(prog), required = True)
+    createMaxCountMatrix.add_argument('-b','--prefix', dest='prefix', metavar = 'file name prefix', help='Use files only with this given file name prefix (default: None)', default="", type=str)
+    createMaxCountMatrix.add_argument('-e','--postfix', dest='postfix', metavar = 'file name postfix', help='Use files only with this given file name postfix (default: None). WARNING! either "--prefix" or "--postfix" argument must be given!', default="", type=str)
+    createMaxCountMatrix.add_argument('-o','--output',metavar = 'output file',dest='output',help='output junction file (.txt[.gz], default: print to console)',default=None,type=str)
+    createMaxCountMatrix.add_argument('-v','--verbose',metavar='Verbose level',dest='log',help='Allowed choices: '+', '.join(loglevels)+' (default: info)',choices=loglevels,default='info')
     # Now read in arguments and process
     try:
         args = parser.parse_args()
@@ -264,6 +280,12 @@ def main():
                 createMatrix.print_help()
                 raise argparse.ArgumentTypeError('Input values for both arguments "--prefix" and "--postfix" cannot be empty! Either one of the values MUST be given')
             _countMatrix(args)
+        elif args.subparser == 'createMaxCountMatrix':
+            # collect output files from count function and generate an R friendly matrix
+            if args.prefix == '' and args.postfix == '':
+                createMatrix.print_help()
+                raise argparse.ArgumentTypeError('Input values for both arguments "--prefix" and "--postfix" cannot be empty! Either one of the values MUST be given')
+            _maxCountMatrix(args)
         logging.info('run completed at {}'.format(datetime.now().strftime('%Y-%m-%d %H:%M')))
     except KeyboardInterrupt:
         sys.stderr.write('Keyboard interrupt... good bye\n')
