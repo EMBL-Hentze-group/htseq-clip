@@ -7,6 +7,7 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 
+from clip import __version__
 from .bamCLIP import bamCLIP
 from .countCLIP import countCLIP
 from .createMatrix import MatrixConverter
@@ -147,8 +148,9 @@ def main():
     [Helpers]
         createMatrix            create R friendly matrix from "count" function output files
         createMaxCountMatrix    create R friendly matrix from `crosslink_count_position_max` column in  "count" function output files
-
-    '''.format(prog)
+    
+    version: {1}
+    '''.format(prog, __version__)
     epilog = "For command line options of each argument, use: {} <positional argument> -h".format(prog)
     parser = argparse.ArgumentParser(prog=prog, description=description,epilog=epilog,formatter_class=argparse.RawDescriptionHelpFormatter)
     # log levels
