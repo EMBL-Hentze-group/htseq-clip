@@ -190,3 +190,28 @@ Helper functions
   .. code-block:: sh    
     
     $ htseq-clip createMatrix -h
+
+.. _createMaxCountMatrix:
+
+:c1:`createMaxCountMatrix`
+-------------------
+    
+  Create `R`_ friendly output matrix file from  ``crosslink_count_position_max``  column in count_ function output files.
+  This file can be used to filter down the output file from ``createMatrix`` function during downstream statistical analysis.
+
+  .. _`R`: https://www.r-project.org/
+
+  **Arguments**
+
+  * ``-i/--inputFolder`` Folder name with output files from count function, see count_
+  * ``-b/--prefix`` Use files only with this given file name prefix (default: None)
+  * ``-e/--postfix`` Use files only with this given file name postfix (default: None)
+  * ``-o/--output`` Output file name. If the file name is given with .gz suffix, it is gzipped. If no file name is given, output is print to console
+
+  .. Warning:: either ``--prefix`` or ``--postfix`` argument must be given
+
+  **Usage**
+
+  .. code-block:: sh    
+    
+    $ htseq-clip createMatrix -h

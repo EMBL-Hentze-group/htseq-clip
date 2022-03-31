@@ -235,7 +235,7 @@ def main():
     createMatrix.add_argument('-v','--verbose',metavar='Verbose level',dest='log',help='Allowed choices: '+', '.join(loglevels)+' (default: info)',choices=loglevels,default='info')
     
     # createMaxCountMatrix
-    maxcounthelp = 'createMaxCountMatrix: e R friendly matrix from `crosslink_count_position_max` column in  "count" function output files'
+    maxcounthelp = 'createMaxCountMatrix: create R friendly matrix from `crosslink_count_position_max` column in  "count" function output files'
     createMaxCountMatrix = subps.add_parser('createMaxCountMatrix',description=maxcounthelp,formatter_class = argparse.RawTextHelpFormatter)
     createMaxCountMatrix.add_argument('-i','--inputFolder', dest='input', metavar = 'input folder', help='Folder name with output files from count function, see "{} count -h ", supports .gz (gzipped files)'.format(prog), required = True)
     createMaxCountMatrix.add_argument('-b','--prefix', dest='prefix', metavar = 'file name prefix', help='Use files only with this given file name prefix (default: None)', default="", type=str)
