@@ -1,16 +1,6 @@
 stages:
   - test
 
-test36:
-  image: python:3.6
-  stage: test
-  script:
-    - pip install -r requirements.txt
-    - pip install HTSeq
-    - pip install .
-    - pip install nose2
-    - nose2 -v
-
 
 test37:
   image: python:3.7
@@ -34,6 +24,16 @@ test38:
 
 test39:
   image: python:3.9
+  stage: test
+  script:
+    - pip install -r requirements.txt
+    - pip install HTSeq
+    - pip install .
+    - pip install nose2
+    - nose2 -v
+
+test310:
+  image: python:3.10
   stage: test
   script:
     - pip install -r requirements.txt
