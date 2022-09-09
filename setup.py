@@ -4,8 +4,8 @@ import os
 from codecs import open
 from setuptools import setup, find_packages
 
-if sys.version_info < (3, 5):
-    print ("At least Python 3.5 is required. Please install Python 3.5.")
+if sys.version_info<(3, 7):
+    sys.stderr.write("At least Python 3.7 is required. Please install Python 3.7\n")
     exit(1)
 
 try:
@@ -53,8 +53,8 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
     ],
-	install_requires=['HTSeq==0.13.5', 'pysam'],
-    packages=['clip','tests'],
+	install_requires=['HTSeq', 'pysam'],
+    packages=['clip'],
     test_suite = 'tests',
 	entry_points = {
         'console_scripts': ['htseq-clip=clip.command_line:main'],
