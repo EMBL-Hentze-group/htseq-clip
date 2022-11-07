@@ -82,6 +82,58 @@ order is given below
     * - ENSG00000175756.13:exon0002
       - unique id, merging gene id feature and feature number
 
+``score`` column in the BED file is re-purposed to indicate a ``flag`` which can be used as a measure of trust worthiness/
+as a filter option for further analysis.
+
+Flag can have the following different values:
+
+.. _FlagTable:
+
+.. list-table::
+    :widths: 3,10,5
+    :header-rows: 1
+
+    * - Flag
+      - description
+      - | trust
+        | worthiness
+    * - 3
+      - only one variant of start/end positions
+      - high
+    * - 2
+      - same start position but different end positions
+      - medium
+    * - 1
+      - different start positions but same end position
+      - medium
+    * - 0
+      - different start and end positions
+      - low
+    
+
+
+An exon from a  gene can belong to multiple isoforms and therefore can have different start/end positions. ``htseq-clip`` combines
+all the position informations for each exon to one and takes the lowest/highest value as start/end position. As it is shown in the cartoon below,
+the first exon belongs to 3 different isoforms, so the Flag is ``0`` (trust worthiness: low) as the stand and end positions varies. The second exon belongs
+to two different isoforms, but there is only one unique start and end postion, hence the Flag is ``3`` (trust worthiness: high)
+
+.. figure:: flags.png
+   :width: 35% 
+   :align: center
+
+   Cartoon showing how flag generation process
+
+The corresponding intron Flag is calculated as follows: 
+if the left exon Flag is 0 and the right exon Flag is 3 the intron Flag is 1 :
+because for the start position(s) can exist different variants, but for the end position(s) there exist only one variant. The intron flag is calculated 
+depending on the 2 exon flags where the intron is between. Given below is a table to lookup which variations of exon flags yield to the corresponding intron flag.
+
+.. figure:: lookup.png
+   :width: 30% 
+   :align: center
+
+   Intron Flag lookup table
+
 :c1:`createSlidingWindows`
 
 :ref:`createSlidingWindows function <createSlidingWindows>` takes as input a flattened annotation BED file

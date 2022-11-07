@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>overview</title>
+    <meta charset="utf-8" />
+    <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+    <section id="overview">
+        <h1>overview</h1>
+    <style> .c1 {color:#3282b8; font-weight:bold} </style>
+        <p><strong>htseq-clip</strong></p>
+        <p>htseq-clip is a toolset designed for the processing and analysis of eCLIP/iCLIP dataset. This package is designed primarily to do the following operations:</p>
+        <section id="ref-prepare-annotation-annotationoverview">
+            <h2><a id="problematic-1" class="problematic" href="#system-message-1">:ref:`Prepare annotation &lt;AnnotationOverview&gt;`</a></h2>
+            <div>
+                <h1>System Message: WARNING/2 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 17)</h1>
+                <p>Title underline too short.</p>
+                <pre>:ref:`Prepare annotation &lt;AnnotationOverview&gt;`
+***************************************</pre>
+            </div>
+            <div id="system-message-1">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 16) <a href="#problematic-1">problematic-1</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <p>A suite of functions to process and flatten genome annotation file.</p>
+            <p><span class="c1">annotation</span></p>
+            <p><a id="problematic-2" class="problematic" href="#system-message-2">:ref:`annotation function &lt;annotation&gt;`</a> takes as input a GFF formatted genome annotation file and converts the annotations from GFF format to bed format. For an example, this function converts the following GFF annotation</p>
+            <div id="system-message-2">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 23) <a href="#problematic-2">problematic-2</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <table id="gfftable">
+                <tbody>
+                    <tr>
+                        <td>chr1</td>
+                        <td>HAVANA</td>
+                        <td>exon</td>
+                        <td>1373730</td>
+                        <td>1373902</td>
+                        <td>.</td>
+                        <td>-</td>
+                        <td>.</td>
+                        <td>ID=exon:ENST00000338338.9:4;Parent=ENST00000338338.9;gene_id=ENSG00000175756.13;transcript_id=ENST00000338338.9;gene_type=protein_coding;gene_name=AURKAIP1;transcript_type=protein_coding;transcript_name=AURKAIP1-202;exon_number=4;exon_id=ENSE00001611509.1;level=2;protein_id=ENSP00000340656.5;transcript_support_level=1;tag=basic,appris_principal_1,CCDS;ccdsid=CCDS25.1;havana_gene=OTTHUMG00000001413.3;havana_transcript=OTTHUMT00000004082.2</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>and converts this entry into the following BED6 format</p>
+            <table id="bedtable">
+                <thead>
+                    <tr>
+                        <th>chromosome</th>
+                        <th>start</th>
+                        <th>end</th>
+                        <th>name</th>
+                        <th>score</th>
+                        <th>strand</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>chr1</td>
+                        <td>13737329</td>
+                        <td>1373902</td>
+                        <td>ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/<a href="mailto:2@ENSG00000175756.13">2@ENSG00000175756.13</a>:exon0002</td>
+                        <td>0</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div>
+                <h1>System Message: WARNING/2 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 60)</h1>
+                <p>Explicit markup ends without a blank line; unexpected unindent.</p>
+            </div>
+            <p>Various attributes in the name column in this BED entry is seperated by <code>@</code> and the order is given below</p>
+            <table id="attibtable" class="colwidths-given">
+                <thead>
+                    <tr>
+                        <th>atrribute</th>
+                        <th>attribute description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ENSG00000175756.13</td>
+                        <td>gene id</td>
+                    </tr>
+                    <tr>
+                        <td>AURKAIP1</td>
+                        <td>gene name</td>
+                    </tr>
+                    <tr>
+                        <td>protein_coding</td>
+                        <td>gene type</td>
+                    </tr>
+                    <tr>
+                        <td>exon</td>
+                        <td>gene feature (exon, intron, CDS,...)</td>
+                    </tr>
+                    <tr>
+                        <td>2/4</td>
+                        <td>2nd exon out of a total of 2 exons of this gene</td>
+                    </tr>
+                    <tr>
+                        <td>ENSG00000175756.13:exon0002</td>
+                        <td>unique id, merging gene id feature and feature number</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><code>score</code> column in the BED file is re-purposed to indicate a <code>flag</code> which can be used as a measure of trust worthiness/ as a filter option for further analysis.</p>
+            <p>Flag can have the following different values:</p>
+            <table id="flagtable" class="colwidths-given">
+                <thead>
+                    <tr>
+                        <th>Flag</th>
+                        <th>description</th>
+                        <th>
+                            <pre class="line_block">trust
+worthiness</pre>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>3</td>
+                        <td>only one variant of start/end positions</td>
+                        <td>high</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>same start position but different end positions</td>
+                        <td>medium</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>different start positions but same end position</td>
+                        <td>medium</td>
+                    </tr>
+                    <tr>
+                        <td>0</td>
+                        <td>different start and end positions</td>
+                        <td>low</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>An exon from a gene can belong to multiple isoforms and therefore can have different start/end positions. <code>htseq-clip</code> combines all the position informations for each exon to one and takes the lowest/highest value as start/end position. As it is shown in the cartoon below, the first exon belongs to 3 different isoforms, so the Flag is <code>0</code> (trust worthiness: low) as the stand and end positions varies. The second exon belongs to two different isoforms, but there is only one unique start and end postion, hence the Flag is <code>3</code> (trust worthiness: high)</p>
+            <figure align="center">
+                <img width="35%" src="flags.png" alt="" />
+                <figcaption>Cartoon showing how flag generation process</figcaption>
+            </figure>
+            <p>The corresponding intron Flag is calculated as follows: if the left exon Flag is 0 and the right exon Flag is 3 the intron Flag is 1 : because for the start position(s) can exist different variants, but for the end position(s) there exist only one variant. The intron flag is calculated depending on the 2 exon flags where the intron is between. Given below is a table to lookup which variations of exon flags yield to the corresponding intron flag.</p>
+            <figure align="center">
+                <img width="30%" src="lookup.png" alt="" />
+                <figcaption>Intron Flag lookup table</figcaption>
+            </figure>
+            <p><span class="c1">createSlidingWindows</span></p>
+            <p><a id="problematic-3" class="problematic" href="#system-message-3">:ref:`createSlidingWindows function &lt;createSlidingWindows&gt;`</a> takes as input a flattened annotation BED file created by the annotation function and splits each individual BED entries into overlapping windows. <code>--windowSize</code> parameter controls the size of each window and <code>--windowStep</code> controls the overlap of each neighboring windows from the same feature</p>
+            <div id="system-message-3">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 139) <a href="#problematic-3">problematic-3</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <p>Continuing with the example entry above, the first 5 sliding windows generated from the <a id="problematic-4" class="problematic" href="#system-message-4">:ref:`BED6 flattened entry &lt;BEDTable&gt;`</a> are given below:</p>
+            <div id="system-message-4">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 144) <a href="#problematic-4">problematic-4</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <table id="swtable">
+                <thead>
+                    <tr>
+                        <th>chromosome</th>
+                        <th>start</th>
+                        <th>end</th>
+                        <th>name</th>
+                        <th>score</th>
+                        <th>strand</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>chr1</td>
+                        <td>1373729</td>
+                        <td>1373779</td>
+                        <td>ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/<a href="mailto:2@ENSG00000175756.13">2@ENSG00000175756.13</a>:exon0002W00001@1</td>
+                        <td>0</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>chr1</td>
+                        <td>1373749</td>
+                        <td>1373799</td>
+                        <td>ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/<a href="mailto:2@ENSG00000175756.13">2@ENSG00000175756.13</a>:exon0002W00002@2</td>
+                        <td>0</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>chr1</td>
+                        <td>1373769</td>
+                        <td>1373819</td>
+                        <td>ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/<a href="mailto:2@ENSG00000175756.13">2@ENSG00000175756.13</a>:exon0002W00003@3</td>
+                        <td>0</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>chr1</td>
+                        <td>1373789</td>
+                        <td>1373839</td>
+                        <td>ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/<a href="mailto:2@ENSG00000175756.13">2@ENSG00000175756.13</a>:exon0002W00004@4</td>
+                        <td>0</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>chr1</td>
+                        <td>1373809</td>
+                        <td>1373859</td>
+                        <td>ENSG00000175756.13@AURKAIP1@protein_coding@exon@2/<a href="mailto:2@ENSG00000175756.13">2@ENSG00000175756.13</a>:exon0002W00005@5</td>
+                        <td>0</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Each sliding window listed here is 50bp long, as default value for <code>--windowSize</code> argument is <code>50</code> and the difference between start positions of each is 20bp, as the default value for <code>--windowStep</code> argument is <code>20</code></p>
+            <p>Following the convention in <a id="problematic-5" class="problematic" href="#system-message-5">:ref:`flattened annotation &lt;BEDTable&gt;`</a> the attributes in sliding windows name column are also seperated by <code>@</code> and the first 5 attributes in the name column here are exactly the same as that of <a id="problematic-6" class="problematic" href="#system-message-6">:ref:`flattened annotation name column &lt;AttibTable&gt;`</a> An example is given below</p>
+            <div id="system-message-5">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 192) <a href="#problematic-5">problematic-5</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <div id="system-message-6">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 192) <a href="#problematic-6">problematic-6</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <table id="swattibtable">
+                <thead>
+                    <tr>
+                        <th>atrribute</th>
+                        <th>attribute description</th>
+                        <th>
+                            <p>Found in <a id="problematic-7" class="problematic" href="#system-message-7">:ref:`flattend name attribute &lt;AttibTable&gt;`</a></p>
+                            <div id="system-message-7">
+                                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 203) <a href="#problematic-7">problematic-7</a></h1>
+                                <p>Unknown interpreted text role "ref".</p>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>ENSG00000175756.13</td>
+                        <td>gene id</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>AURKAIP1</td>
+                        <td>gene name</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>protein_coding</td>
+                        <td>gene type</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>exon</td>
+                        <td>gene feature (exon, intron, CDS,...)</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>2/2</td>
+                        <td>2nd exon out of a total of 2 exons of this gene</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>ENSG00000175756.13:exon0002W00001</td>
+                        <td>unique id, merging gene id feature, feature number and window number (W : window)</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>1st window of this feature</td>
+                        <td>No</td>
+                    </tr>
+                </tbody>
+            </table>
+            <aside class="note">There will be zero overlap between neighboring windows from two separate gene features</aside>
+        </section>
+        <section id="ref-extract-crosslink-sites-extractionoverview">
+            <h2><a id="problematic-8" class="problematic" href="#system-message-8">:ref:`Extract crosslink sites &lt;ExtractionOverview&gt;`</a></h2>
+            <div>
+                <h1>System Message: WARNING/2 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 229)</h1>
+                <p>Title underline too short.</p>
+                <pre>:ref:`Extract crosslink sites &lt;ExtractionOverview&gt;`
+**************************************</pre>
+            </div>
+            <div id="system-message-8">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 228) <a href="#problematic-8">problematic-8</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <p>Extract and process crosslink sites from alignment file.</p>
+            <p><span class="c1">extract</span></p>
+            <p><a id="problematic-9" class="problematic" href="#system-message-9">:ref:`extract function &lt;extract&gt;`</a> takes as input an alignment file (.bam) and extracts and writes either start, insertion, deletion, middle or end site into a BED6 formatted file. The argument <code>--site</code> determines crosslink site choice.</p>
+            <div id="system-message-9">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 234) <a href="#problematic-9">problematic-9</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <p>Given below is an example paired end sequence and start, middle and end positions extracted from the second mate of this fragment</p>
+            <table id="aligntable1">
+                <tbody>
+                    <tr>
+                        <td>TTATTACAGC:K00180:131:H7J3YBBXX:3:2123:15057:19918</td>
+                        <td>99</td>
+                        <td>chr1</td>
+                        <td>1373726</td>
+                        <td>255</td>
+                        <td>33M</td>
+                        <td>=</td>
+                        <td>1373729</td>
+                        <td>41</td>
+                        <td>TTTTAAAGGCTGAGTCCTCTGAGAATTTATTAC</td>
+                        <td>JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ</td>
+                        <td>NH:i:1</td>
+                        <td>HI:i:1</td>
+                        <td>AS:i:60</td>
+                        <td>nM:i:5</td>
+                        <td>NM:i:4</td>
+                        <td>MD:Z:0C0A0G0G29</td>
+                        <td>jM:B:c,-1</td>
+                        <td>jI:B:i,-1</td>
+                        <td>RG:Z:foo</td>
+                    </tr>
+                    <tr>
+                        <td>TTATTACAGC:K00180:131:H7J3YBBXX:3:2123:15057:19918</td>
+                        <td>147</td>
+                        <td>chr1</td>
+                        <td>1373729</td>
+                        <td>255</td>
+                        <td>38M</td>
+                        <td>=</td>
+                        <td>1373726</td>
+                        <td>-41</td>
+                        <td>TAAAGGCTGAGTCCTCTGAGAATTTATTACTACGGATC</td>
+                        <td>JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ</td>
+                        <td>NH:i:1</td>
+                        <td>HI:i:1</td>
+                        <td>AS:i:60</td>
+                        <td>nM:i:5</td>
+                        <td>NM:i:1</td>
+                        <td>MD:Z:0G37</td>
+                        <td>jM:B:c,-1</td>
+                        <td>jI:B:i,-1</td>
+                        <td>RG:Z:foo</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>start site</strong></p>
+            <table id="starttable">
+                <tbody>
+                    <tr>
+                        <td>chromosome</td>
+                        <td>start</td>
+                        <td>end</td>
+                        <td>name</td>
+                        <td>score</td>
+                        <td>strand</td>
+                    </tr>
+                    <tr>
+                        <td>chr1</td>
+                        <td>1373765</td>
+                        <td>1373766</td>
+                        <td>TTATTACAGC:K00180:131:H7J3YBBXX:3:2123:15057:19918|38</td>
+                        <td>1</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>middle site</strong></p>
+            <table id="middletable">
+                <tbody>
+                    <tr>
+                        <td>chromosome</td>
+                        <td>start</td>
+                        <td>end</td>
+                        <td>name</td>
+                        <td>score</td>
+                        <td>strand</td>
+                    </tr>
+                    <tr>
+                        <td>chr1</td>
+                        <td>1373746</td>
+                        <td>1373747</td>
+                        <td>TTATTACAGC:K00180:131:H7J3YBBXX:3:2123:15057:19918|38</td>
+                        <td>1</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><strong>end site</strong></p>
+            <table id="endtable">
+                <tbody>
+                    <tr>
+                        <td>chromosome</td>
+                        <td>start</td>
+                        <td>end</td>
+                        <td>name</td>
+                        <td>score</td>
+                        <td>strand</td>
+                    </tr>
+                    <tr>
+                        <td>chr1</td>
+                        <td>1373727</td>
+                        <td>1373728</td>
+                        <td>TTATTACAGC:K00180:131:H7J3YBBXX:3:2123:15057:19918|38</td>
+                        <td>1</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+            <aside class="note">In a paired end alignment file, argument <code>--mate</code> is used to choose the read/mate from which crosslink sites are extracted. The sequencing protocol used to generate the file determines whether the crosslink site is located on the first mate or the second mate. Please consult your sequencing protocol to decide which mate to use.</aside>
+        </section>
+        <section id="ref-count-crosslink-sites-countoverview">
+            <h2><a id="problematic-10" class="problematic" href="#system-message-10">:ref:`Count crosslink sites &lt;CountOverview&gt;`</a></h2>
+            <div>
+                <h1>System Message: WARNING/2 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 346)</h1>
+                <p>Title underline too short.</p>
+                <pre>:ref:`Count crosslink sites &lt;CountOverview&gt;`
+****************************</pre>
+            </div>
+            <div id="system-message-10">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 345) <a href="#problematic-10">problematic-10</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <p>Calculate the number of extracted crosslink sites per given gene annotation feature.</p>
+            <p><span class="c1">count</span></p>
+            <p><a id="problematic-11" class="problematic" href="#system-message-11">:ref:`count function &lt;count&gt;`</a> takes as input either a flattened annotation file generated by annotation function or a sliding windows file generated by createSlidingWindows function and a crosslink sites file generated by extract function and for each entry/window in the annotation/sliding windows file count the number of crosslink sites in the region.</p>
+            <div id="system-message-11">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 351) <a href="#problematic-11">problematic-11</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <p>Given below is an example output entries from count function for sliding windows in <a id="problematic-12" class="problematic" href="#system-message-12">:ref:`createSlidingWindows example &lt;SWTable&gt;`</a>.</p>
+            <div id="system-message-12">
+                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 355) <a href="#problematic-12">problematic-12</a></h1>
+                <p>Unknown interpreted text role "ref".</p>
+            </div>
+            <table id="counttable">
+                <tbody>
+                    <tr>
+                        <td>unique_id</td>
+                        <td>window_number</td>
+                        <td>window_length</td>
+                        <td>crosslink_count_total</td>
+                        <td>crosslink_count_position_nr</td>
+                        <td>crosslink_count_position_max</td>
+                        <td>crosslink_density</td>
+                    </tr>
+                    <tr>
+                        <td>ENSG00000175756.13:exon0002W00001</td>
+                        <td>1</td>
+                        <td>50</td>
+                        <td>4</td>
+                        <td>3</td>
+                        <td>2</td>
+                        <td>0.06</td>
+                    </tr>
+                    <tr>
+                        <td>ENSG00000175756.13:exon0002W00002</td>
+                        <td>2</td>
+                        <td>50</td>
+                        <td>17</td>
+                        <td>12</td>
+                        <td>3</td>
+                        <td>0.24</td>
+                    </tr>
+                    <tr>
+                        <td>ENSG00000175756.13:exon0002W00003</td>
+                        <td>3</td>
+                        <td>50</td>
+                        <td>159</td>
+                        <td>25</td>
+                        <td>76</td>
+                        <td>0.5</td>
+                    </tr>
+                    <tr>
+                        <td>ENSG00000175756.13:exon0002W00004</td>
+                        <td>4</td>
+                        <td>50</td>
+                        <td>207</td>
+                        <td>26</td>
+                        <td>76</td>
+                        <td>0.52</td>
+                    </tr>
+                    <tr>
+                        <td>ENSG00000175756.13:exon0002W00005</td>
+                        <td>5</td>
+                        <td>50</td>
+                        <td>183</td>
+                        <td>21</td>
+                        <td>76</td>
+                        <td>0.42</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Here is a brief explanation of the columns in the table above</p>
+            <table id="countattribtable">
+                <tbody>
+                    <tr>
+                        <td>column heading</td>
+                        <td>description</td>
+                    </tr>
+                    <tr>
+                        <td>unique_id</td>
+                        <td>
+                            <p>unique id of the entry, as described in <a id="problematic-13" class="problematic" href="#system-message-13">:ref:`sliding window attribute table &lt;SWAttibTable&gt;`</a></p>
+                            <div id="system-message-13">
+                                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 413) <a href="#problematic-13">problematic-13</a></h1>
+                                <p>Unknown interpreted text role "ref".</p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>window_number</td>
+                        <td>
+                            <p>window number, as described in <a id="problematic-14" class="problematic" href="#system-message-14">:ref:`sliding window attribute table &lt;SWAttibTable&gt;`</a></p>
+                            <div id="system-message-14">
+                                <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 415) <a href="#problematic-14">problematic-14</a></h1>
+                                <p>Unknown interpreted text role "ref".</p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>window_length</td>
+                        <td>total length of this window (in bp)</td>
+                    </tr>
+                    <tr>
+                        <td>crosslink_count_total</td>
+                        <td>total number of crosslink sites</td>
+                    </tr>
+                    <tr>
+                        <td>crosslink_count_position_nr</td>
+                        <td>number of positions with crosslink sites in this window</td>
+                    </tr>
+                    <tr>
+                        <td>crosslink_count_position_max</td>
+                        <td>maximum number of crosslink sites found at a single position</td>
+                    </tr>
+                    <tr>
+                        <td>crosslink_density</td>
+                        <td>calculated as:
+                            <span class="math">\(\frac{crosslink\_count\_position\_nr}{window\_length}\)</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <aside class="note">
+                <p>Please refer to <a id="problematic-15" class="problematic" href="#system-message-15">:ref:`createMatrix function &lt;createMatrix&gt;`</a> for merging count tables from multiple samples.</p>
+                <div id="system-message-15">
+                    <h1>System Message: ERROR/3 (/home/sahadeva/Sudeep/workspace/htseq-clip_modified/docs/source/overview.rst line 427) <a href="#problematic-15">problematic-15</a></h1>
+                    <p>Unknown interpreted text role "ref".</p>
+                </div>
+            </aside>
+        </section>
+        <section id="further-analysis">
+            <h2>Further analysis</h2>
+            <p>Further analysis and processing of crosslink windows is done using R/Bioconductor package <a href="https://bioconductor.org/packages/release/bioc/html/DEWSeq.html">DEWSeq</a>. Please refer to the user manual of this package for requirements, installation and help.</p>
+        </section>
+    </section>
+</body>
+</html>
