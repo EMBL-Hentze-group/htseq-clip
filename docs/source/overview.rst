@@ -118,7 +118,7 @@ the first exon belongs to 3 different isoforms, so the Flag is ``0`` (trust wort
 to two different isoforms, but there is only one unique start and end postion, hence the Flag is ``3`` (trust worthiness: high)
 
 .. figure:: flags.png
-   :width: 35% 
+   :width: 75% 
    :align: center
 
    Cartoon showing how flag generation process
@@ -129,7 +129,7 @@ because for the start position(s) can exist different variants, but for the end 
 depending on the 2 exon flags where the intron is between. Given below is a table to lookup which variations of exon flags yield to the corresponding intron flag.
 
 .. figure:: lookup.png
-   :width: 30% 
+   :width: 75% 
    :align: center
 
    Intron Flag lookup table

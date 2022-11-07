@@ -13,7 +13,10 @@ Documentation: https://htseq-clip.readthedocs.io/en/latest/index.html
 
 BugReports: https://github.com/EMBL-Hentze-group/htseq-clip/issues
 
-installation: `pip install htseq-clip`
+### Installation
+
+`pip install htseq-clip`
+
 
 Copyright (c) 2020 Sudeep Sahadevan, Marko Fritz, Nadia Ashraf and Thomas Schwarzl*
 
