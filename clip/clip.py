@@ -12,6 +12,7 @@ from .bamCLIP import bamCLIP
 from .countCLIP import countCLIP
 from .createMatrix import MatrixConverter
 from .gffCLIP import FeatureOrderException, gffCLIP
+from .trimAnnotation import Trimmer
 
 
 '''
@@ -124,6 +125,10 @@ def _maxCountMatrix(args):
     mC = MatrixConverter(args.input,args.prefix,args.postfix,args.output)
     mC.read_samples(colNr=5)
     mC.write_matrix()
+
+def _trimAnnotation(args):
+    logging.info("Trimming down annotation")
+    logging.info()
 
 logger = logging.getLogger()
 
@@ -242,6 +247,15 @@ def main():
     createMaxCountMatrix.add_argument('-e','--postfix', dest='postfix', metavar = 'file name postfix', help='Use files only with this given file name postfix (default: None). WARNING! either "--prefix" or "--postfix" argument must be given!', default="", type=str)
     createMaxCountMatrix.add_argument('-o','--output',metavar = 'output file',dest='output',help='output junction file (.txt[.gz], default: print to console)',default=None,type=str)
     createMaxCountMatrix.add_argument('-v','--verbose',metavar='Verbose level',dest='log',help='Allowed choices: '+', '.join(loglevels)+' (default: info)',choices=loglevels,default='info')
+
+    # trimAnnotation
+    trimAnnhelp = "trimAnnotation: trim down large annotation file based on output from 'createMatrix' "
+    trimAnnotation = subps.add_parser('trimAnnotation', description=trimAnnhelp,formatter_class = argparse.RawTextHelpFormatter)
+    trimAnnotation.add_argument('-i', '--matrix', dest = 'matrix', metavar = 'crosslink matrix', help = "Crosslink count matrix, output from the function 'createMatrix'", required=True)
+    trimAnnotation.add_argument('-a', '--annotation', dest = 'annotation', metavar = 'annotation', help = "Annotation file, output from the function 'mapToId'", required=True)
+    trimAnnotation.add_argument('-o','--output',metavar = 'output file',dest='output',help='output trimmed annotations to file (.txt[.gz], default: print to console)',default=None,type=str)
+    trimAnnotation.add_argument('-v','--verbose',metavar='Verbose level',dest='log',help='Allowed choices: '+', '.join(loglevels)+' (default: info)',choices=loglevels,default='info')
+
     # Now read in arguments and process
     try:
         args = parser.parse_args()
