@@ -27,6 +27,16 @@ Date: October 2015
 --------------------------------------------------
 '''
 
+
+class bcolors:
+    '''
+    source: https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+    '''
+    HEADER = '\033[32;4m'
+    GRAY = '\033[90m'
+    GREEN = '\033[32m'
+    ENDC = '\033[0m'
+
 def _annotation(args):
     '''
     Parse annotations from given GFF file
@@ -135,31 +145,34 @@ logger = logging.getLogger()
 
 def main():
     prog = 'htseq-clip'
-    description = '''
-    {0}:  A flexible toolset for the analysis of iCLIP and eCLIP sequencing data
+    description = f'''
+    {bcolors.HEADER}{prog}{bcolors.ENDC}  A flexible toolset for the analysis of iCLIP and eCLIP sequencing data
 
     The function (as a positional argument) should be one of:
 
-    [Annotation]
+    {bcolors.GREEN}Annotation{bcolors.ENDC}
         annotation              flattens a gff formatted annotation file
         createSlidingWindows    creates sliding windows based on given annotation file
         mapToId                 map entries in "name" column to unique ids and write in tab separated format
     
-    [Extraction]
+    {bcolors.GREEN}Extraction{bcolors.ENDC}
         extract                 extracts crosslink sites, insertions or deletions
     
-    [Counting]
+    {bcolors.GREEN}Counting{bcolors.ENDC}
         count                   count sites in annotation
     
-    [Helpers]
+    {bcolors.GREEN}Helpers{bcolors.ENDC}
         createMatrix            create R friendly matrix from "count" function output files
         createMaxCountMatrix    create R friendly matrix from `crosslink_count_position_max` column in  "count" function output files
-        trimAnnotation          trim annotations from `mapToId` function based on unique ids in output matrix from `createMatrix` function
+        trimAnnotation          trim annotations from "mapToId" function based on unique ids in output matrix from "createMatrix" function
     
-    version: {1}
-    '''.format(prog, __version__)
+    {bcolors.GRAY}version:{bcolors.ENDC} {__version__}
+    {bcolors.GRAY}Issues/Bug reports:{bcolors.ENDC} https://github.com/EMBL-Hentze-group/htseq-clip/issues
+    '''
     epilog = "For command line options of each argument, use: {} <positional argument> -h".format(prog)
     parser = argparse.ArgumentParser(prog=prog, description=description,epilog=epilog,formatter_class=argparse.RawDescriptionHelpFormatter)
+    # version
+    parser.add_argument('-v','--version', action='version', version=f"{prog} {__version__}")
     # log levels
     loglevels = ['debug','info','warn','quiet']
     # subparsers
