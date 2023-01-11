@@ -37,12 +37,11 @@ class Trimmer:
                 logging.debug('{} is plain text'.format(fn))
                 return open, 'r'
     
-    def trim_annotation(self):
+    def trim_annotation(self, header = True):
         '''
         trim annotation data based on read count matrix
         '''
         reader, mode = self._get_reader_mode(self.inputAnn)
-        header = True
         # parse matrix
         self._read_matrix()
         # write trimmed annotation
@@ -51,6 +50,7 @@ class Trimmer:
                 if header:
                     header = False
                     self.outputAnn.write(l)
+                    continue
                 ldat = l.split('\t')
                 if ldat[0] in self._uniq_ids:
                     self.outputAnn.write(l)

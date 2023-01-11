@@ -127,8 +127,9 @@ def _maxCountMatrix(args):
     mC.write_matrix()
 
 def _trimAnnotation(args):
-    logging.info("Trimming down annotation")
-    logging.info()
+    logging.info(f"Trimming down annotations in {args.annotation}")
+    trimmer = Trimmer(inputMatrix = args.matrix, inputAnn = args.annotation, outputAnn = args.output)
+    trimmer.trim_annotation(header = not args.noheader)
 
 logger = logging.getLogger()
 
@@ -153,6 +154,7 @@ def main():
     [Helpers]
         createMatrix            create R friendly matrix from "count" function output files
         createMaxCountMatrix    create R friendly matrix from `crosslink_count_position_max` column in  "count" function output files
+        trimAnnotation          trim annotations from `mapToId` function based on unique ids in output matrix from `createMatrix` function
     
     version: {1}
     '''.format(prog, __version__)
@@ -254,6 +256,8 @@ def main():
     trimAnnotation.add_argument('-i', '--matrix', dest = 'matrix', metavar = 'crosslink matrix', help = "Crosslink count matrix, output from the function 'createMatrix'", required=True)
     trimAnnotation.add_argument('-a', '--annotation', dest = 'annotation', metavar = 'annotation', help = "Annotation file, output from the function 'mapToId'", required=True)
     trimAnnotation.add_argument('-o','--output',metavar = 'output file',dest='output',help='output trimmed annotations to file (.txt[.gz], default: print to console)',default=None,type=str)
+    header_help = "First row in the annotation file is assumed to be header by default. Use this flag if the first row in annotation file is not a header"
+    trimAnnotation.add_argument('--no_header',dest='noheader', help=header_help,action='store_true')
     trimAnnotation.add_argument('-v','--verbose',metavar='Verbose level',dest='log',help='Allowed choices: '+', '.join(loglevels)+' (default: info)',choices=loglevels,default='info')
 
     # Now read in arguments and process
@@ -302,6 +306,10 @@ def main():
                 createMatrix.print_help()
                 raise argparse.ArgumentTypeError('Input values for both arguments "--prefix" and "--postfix" cannot be empty! Either one of the values MUST be given')
             _maxCountMatrix(args)
+        elif args.subparser == 'trimAnnotation':
+            _trimAnnotation(args)
+        else:
+            raise NotImplementedError(f"Function {args.subparser} not implemented!")
         logging.info('run completed at {}'.format(datetime.now().strftime('%Y-%m-%d %H:%M')))
     except KeyboardInterrupt:
         sys.stderr.write('Keyboard interrupt... good bye\n')

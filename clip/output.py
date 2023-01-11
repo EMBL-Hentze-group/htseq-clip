@@ -2,8 +2,10 @@
 Class for output file management
 """
 import gzip
-import os
+import logging
 import sys
+from pathlib import Path
+
 
 class Output:
     # constructor 
@@ -14,6 +16,8 @@ class Output:
             self.fileOut = sys.stdout
         # if file name is given, file is opened 
         else:
+            if Path(fileName).exists():
+                logging.warning(f"Re-writing file {fileName}")
             if fileName.lower().endswith((".gz","gzip")):
                 self.fileOut = gzip.open(fileName, 'w')
                 self._writer = self._returnByte
