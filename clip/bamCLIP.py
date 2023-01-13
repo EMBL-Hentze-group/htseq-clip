@@ -5,6 +5,7 @@ import multiprocessing as mp
 import re
 import sys
 import tempfile
+import unicodedata
 from functools import partial
 from itertools import chain
 from os import cpu_count
@@ -127,7 +128,7 @@ class bamCLIP:
         ext = '.bed.gz' if self.gz else '.bed'
         tmpDict = {}
         for chrom in self.chromes:
-            tmpDict[chrom] = str(self.tmp/'{}_{}{}{}'.format(chrom,site,next(tempfile._get_candidate_names()),ext))
+            tmpDict[chrom] = self.tmp/f"{slugify(chrom)}_{site}_{next(tempfile._get_candidate_names())}{ext}"
         return tmpDict
     
     def _write_output(self,tmp_dict):
@@ -196,6 +197,23 @@ class bamCLIP:
         Extract crosslink sites from deletion points of the read
         '''
         self._extract_crosslink(call_fn = _deletion_sites, site = 'deletion', offset = 0)
+
+def slugify(value, allow_unicode=False):
+    """
+    Taken from https://github.com/django/django/blob/master/django/utils/text.py
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces or repeated
+    dashes to single dashes. Remove characters that aren't alphanumerics,
+    underscores, or hyphens. Convert to lowercase. Also strip leading and
+    trailing whitespace, dashes, and underscores.
+    stack overflow source: https://stackoverflow.com/questions/295135/turn-a-string-into-a-valid-filename
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value.lower())
+    return re.sub(r'[-\s]+', '-', value).strip('-_')
 
 def _discard_read(aln,qual = 10, min_len = 5, max_len = 100, max_interval_length = 10000, primary = False, mate = 2):
     '''
