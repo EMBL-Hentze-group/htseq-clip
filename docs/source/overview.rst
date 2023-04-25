@@ -114,14 +114,14 @@ Flag can have the following different values:
 
 An exon from a  gene can belong to multiple isoforms and therefore can have different start/end positions. ``htseq-clip`` combines
 all the position informations for each exon to one and takes the lowest/highest value as start/end position. As it is shown in the cartoon below,
-the first exon belongs to 3 different isoforms, so the Flag is ``0`` (trust worthiness: low) as the stand and end positions varies. The second exon belongs
-to two different isoforms, but there is only one unique start and end postion, hence the Flag is ``3`` (trust worthiness: high)
+the first exon belongs to 3 different isoforms, so the Flag is `0`` (**trust worthiness: low**) as the start and end positions varies. The second exon belongs
+to two different isoforms, but there is only one unique start and one unique end postion, hence the Flag is ``3`` (**trust worthiness: high**)
 
 .. figure:: flags.png
    :width: 75% 
    :align: center
 
-   Cartoon showing how flag generation process
+   Cartoon showing flag generation process
 
 The corresponding intron Flag is calculated as follows: 
 if the left exon Flag is 0 and the right exon Flag is 3 the intron Flag is 1 :
