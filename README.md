@@ -13,6 +13,9 @@ Documentation: https://htseq-clip.readthedocs.io/en/latest/index.html
 
 BugReports: https://github.com/EMBL-Hentze-group/htseq-clip/issues
 
+## :warning: This project is no longer actively maintained
+We recommend using [Shoji](https://github.com/EMBL-Hentze-group/Shoji), an updated version of htseq-clip for CLIP data post-processing
+
 ### Installation
 
 `pip install htseq-clip`
